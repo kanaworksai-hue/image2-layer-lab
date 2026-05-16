@@ -7,6 +7,7 @@ Image2 Layer Lab is a local browser tool for peeling people, objects, text, and 
 Live static demo: https://kanaworksai-hue.github.io/image2-layer-lab/
 
 The static demo supports local selection, peeling, quick fill, PNG export, and PSD export directly in the browser. GPT fill requires running the Node server locally with your own OpenAI API key.
+It also includes a solid background remover for white, black, green, and custom-color backgrounds, with transparent PNG export in auto, original, 16:9, 9:16, 1:1, 2:3, 3:2, 4:5, and 5:4 ratios.
 
 ## Languages
 
@@ -24,6 +25,7 @@ Use the language selector in the left panel to switch versions.
 - Undo / redo for selection and layer operations
 - Peel selected content into transparent layers
 - Local quick background fill
+- Solid-color background removal with transparent PNG export and common output ratios
 - Optional GPT Image mask fill through the OpenAI Image API
 - Layer visibility, ordering, single-layer PNG export
 - PSD export with peeled layers, filled background, and hidden original reference
