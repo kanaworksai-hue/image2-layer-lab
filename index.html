@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image2 Layer Lab</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="control-panel" aria-label="图层剥离控制台">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow" data-i18n="eyebrow">Progressive Layer Lab</p>
+            <h1>Image2 Layer Lab</h1>
+          </div>
+          <span id="keyStatus" class="status-pill">检查中</span>
+        </div>
+
+        <div class="language-row" aria-label="Language">
+          <label class="field compact-field" for="languageSelect">
+            <span data-i18n="language">语言</span>
+            <select id="languageSelect">
+              <option value="zh">中文</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select>
+          </label>
+        </div>
+
+        <a class="promo-card" href="https://x.com/kanaworks_ai" target="_blank" rel="noreferrer">
+          <img src="/assets/kanaworks-logo.png" alt="KanaWorks AI logo">
+          <span>
+            <strong>KanaWorks_AI</strong>
+            <small data-i18n="promo">Want more? Follow me</small>
+          </span>
+        </a>
+
+        <label class="upload-box" for="sourceImage">
+          <span data-i18n="sourceImage">原图</span>
+          <strong data-i18n="chooseImage">选择或拖入图片</strong>
+          <small data-i18n="imageHint">PNG / JPG / WebP，建议先用 1K 到 2K 尺寸做分层</small>
+          <input id="sourceImage" type="file" accept="image/png,image/jpeg,image/webp">
+        </label>
+
+        <div class="settings-grid">
+          <label class="field" for="layerName">
+            <span data-i18n="layerName">图层名</span>
+            <input id="layerName" type="text" value="剥离图层 1" maxlength="80">
+          </label>
+
+          <label class="field" for="layerCategory">
+            <span data-i18n="semanticLevel">语义层级</span>
+            <select id="layerCategory">
+              <option value="Distractor" data-i18n="catDistractor">干扰元素</option>
+              <option value="Secondary" data-i18n="catSecondary">次要物品</option>
+              <option value="Primary" data-i18n="catPrimary">人物/主体</option>
+              <option value="Text" data-i18n="catText">文字/标识</option>
+              <option value="Scene" data-i18n="catScene">场景结构</option>
+              <option value="Background" data-i18n="catBackground">背景</option>
+            </select>
+          </label>
+        </div>
+
+        <section class="tool-section" aria-label="选择工具">
+          <div class="section-title" data-i18n="selection">选择</div>
+          <div class="segmented" role="group" aria-label="选择工具">
+            <button class="tool-button active" type="button" data-tool="brush" data-i18n="brush">画笔</button>
+            <button class="tool-button" type="button" data-tool="erase" data-i18n="erase">擦除</button>
+            <button class="tool-button" type="button" data-tool="rect" data-i18n="rect">矩形</button>
+            <button class="tool-button" type="button" data-tool="magic" data-i18n="magic">魔术棒</button>
+          </div>
+
+          <div class="command-grid">
+            <button id="undoSelectionButton" class="secondary-button" type="button" disabled data-i18n="undo">撤销上一步</button>
+            <button id="redoSelectionButton" class="secondary-button" type="button" disabled data-i18n="redo">重做</button>
+            <button id="invertSelectionButton" class="secondary-button" type="button" data-i18n="invert">反选</button>
+            <button id="cleanupSelectionButton" class="secondary-button" type="button" data-i18n="cleanup">填洞/平滑</button>
+          </div>
+
+          <div class="range-pair">
+            <label class="field" for="brushSize">
+              <span data-i18n="brushSize">画笔大小</span>
+              <input id="brushSize" type="range" min="4" max="140" step="1" value="36">
+            </label>
+            <output id="brushSizeValue" class="range-value">36</output>
+          </div>
+
+          <div class="range-pair">
+            <label class="field" for="magicTolerance">
+              <span data-i18n="magicTolerance">魔术棒容差</span>
+              <input id="magicTolerance" type="range" min="4" max="96" step="1" value="28">
+            </label>
+            <output id="magicToleranceValue" class="range-value">28</output>
+          </div>
+
+          <div class="range-pair">
+            <label class="field" for="magicGrow">
+              <span data-i18n="magicGrow">魔术棒扩边</span>
+              <input id="magicGrow" type="range" min="0" max="8" step="1" value="2">
+            </label>
+            <output id="magicGrowValue" class="range-value">2</output>
+          </div>
+        </section>
+
+        <section class="tool-section" aria-label="剥离与补洞">
+          <div class="section-title" data-i18n="peel">剥离</div>
+          <div class="command-grid">
+            <button id="peelQuickButton" class="primary-button" type="button" data-i18n="peelQuick">剥离 + 快速补洞</button>
+            <button id="peelAiButton" class="primary-button alt" type="button" data-i18n="peelAi">剥离 + GPT补洞</button>
+            <button id="peelOnlyButton" class="secondary-button" type="button" data-i18n="peelOnly">仅剥离成图层</button>
+            <button id="healButton" class="secondary-button" type="button" data-i18n="quickHeal">快速补当前选择</button>
+          </div>
+        </section>
+
+        <label class="field" for="inpaintPrompt">
+          <span data-i18n="inpaintPrompt">GPT补洞提示词</span>
+          <textarea id="inpaintPrompt" rows="5">Remove only the selected masked element and its associated shadows or reflections. Reconstruct the covered area seamlessly by continuing the original lines, textures, lighting, and perspective. Keep every unmasked part of the image unchanged and do not add new objects.</textarea>
+        </label>
+
+        <div class="settings-grid">
+          <label class="field" for="imageModel">
+            <span data-i18n="imageModel">图像模型</span>
+            <select id="imageModel">
+              <option value="gpt-image-2" selected>gpt-image-2</option>
+              <option value="chatgpt-image-latest">chatgpt-image-latest</option>
+              <option value="gpt-image-1.5">gpt-image-1.5</option>
+              <option value="gpt-image-1">gpt-image-1</option>
+            </select>
+          </label>
+
+          <label class="field" for="imageQuality">
+            <span data-i18n="quality">质量</span>
+            <select id="imageQuality">
+              <option value="auto">auto</option>
+              <option value="low">low</option>
+              <option value="medium" selected>medium</option>
+              <option value="high">high</option>
+            </select>
+          </label>
+        </div>
+
+        <section class="tool-section" aria-label="导出">
+          <div class="section-title" data-i18n="export">导出</div>
+          <div class="command-grid">
+            <button id="exportPsdButton" class="primary-button" type="button" data-i18n="exportPsd">导出 PSD</button>
+            <button id="exportPngButton" class="secondary-button" type="button" data-i18n="exportPng">导出合成 PNG</button>
+            <button id="clearMaskButton" class="secondary-button" type="button" data-i18n="clearSelection">清空选择</button>
+            <button id="resetButton" class="secondary-button danger" type="button" data-i18n="resetCanvas">重置画布</button>
+          </div>
+        </section>
+
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+      </aside>
+
+      <section class="workbench" aria-label="分层工作台">
+        <div class="canvas-panel">
+          <div class="canvas-toolbar">
+            <div>
+              <strong id="imageTitle" data-i18n="waitingImage">等待图片</strong>
+              <span id="canvasMeta" data-i18n="notLoaded">未加载</span>
+            </div>
+            <span id="selectionStats">选择 0 px</span>
+          </div>
+
+          <div id="canvasStage" class="canvas-stage">
+            <div id="dropHint" class="drop-hint">
+              <strong data-i18n="dropStart">拖入图片开始</strong>
+              <span data-i18n="dropHint">用选择工具圈出人物、物品、文字或场景区域</span>
+            </div>
+            <canvas id="backgroundCanvas" class="image-canvas"></canvas>
+            <canvas id="selectionCanvas" class="selection-canvas"></canvas>
+          </div>
+        </div>
+
+        <aside class="layer-panel" aria-label="PSD 图层">
+          <div class="layer-header">
+            <div>
+              <p class="eyebrow">PSD Layers</p>
+              <h2 data-i18n="layers">图层</h2>
+            </div>
+            <span id="layerCount">0</span>
+          </div>
+
+          <div id="layerList" class="layer-list"></div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="/vendor/ag-psd-bundle.js"></script>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
