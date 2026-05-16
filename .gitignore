@@ -1,0 +1,6 @@
+.env
+node_modules
+.DS_Store
+generated
+.image2-spend.json
+.image2-spend.json.tmp
