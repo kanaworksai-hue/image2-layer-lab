@@ -541,8 +541,8 @@ function validateFillBackgroundPayload(fields, files) {
 
 function buildMaskInpaintPrompt(userPrompt) {
   return [
-    "Use the provided alpha mask as the area to edit. Change only the masked region.",
-    "Preserve all unmasked pixels, camera perspective, lighting, color, texture, and composition as closely as possible.",
+    "Use the provided alpha mask exactly: fully transparent pixels are the only area to edit.",
+    "Keep every opaque/unmasked pixel unchanged, including camera perspective, lighting, color, texture, and composition.",
     "For object removal, fill the removed area naturally so the final image looks like the element was never there.",
     "",
     userPrompt
@@ -892,7 +892,7 @@ function buildOpenAIFillRequest(value) {
   form.append("quality", value.quality);
   form.append("size", "auto");
   form.append("output_format", "png");
-  form.append("background", "auto");
+  form.append("background", "opaque");
   form.append("moderation", "auto");
   form.append(
     "image[]",
