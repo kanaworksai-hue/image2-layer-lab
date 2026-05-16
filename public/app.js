@@ -28,7 +28,11 @@ const elements = {
   bgToleranceValue: document.querySelector("#bgToleranceValue"),
   bgFeather: document.querySelector("#bgFeather"),
   bgFeatherValue: document.querySelector("#bgFeatherValue"),
+  bgPreviewCanvas: document.querySelector("#bgPreviewCanvas"),
+  bgPreviewEmpty: document.querySelector("#bgPreviewEmpty"),
   removeSolidBgButton: document.querySelector("#removeSolidBgButton"),
+  applySolidBgButton: document.querySelector("#applySolidBgButton"),
+  resetSolidBgButton: document.querySelector("#resetSolidBgButton"),
   downloadTransparentButton: document.querySelector("#downloadTransparentButton"),
   imageModel: document.querySelector("#imageModel"),
   imageQuality: document.querySelector("#imageQuality"),
@@ -108,7 +112,11 @@ const I18N = {
     outputPadding: "留白",
     bgTolerance: "颜色容差",
     edgeFeather: "边缘柔化",
-    removeSolidBg: "移除纯色背景",
+    bgPreview: "移除预览",
+    bgPreviewEmpty: "调好颜色和容差后点预览，这里会显示透明背景效果。",
+    removeSolidBg: "预览移除背景",
+    applyPreview: "应用预览",
+    retrySolidBg: "重新来做",
     downloadTransparent: "下载透明 PNG",
     inpaintPrompt: "GPT补洞提示词",
     imageModel: "图像模型",
@@ -138,6 +146,10 @@ const I18N = {
     moveDown: "下移",
     delete: "删除",
     bgRemoved: "已移除 {count} px 背景。",
+    bgPreviewReady: "预览已生成，移除 {count} px 背景。满意后可下载或应用。",
+    bgPreviewApplied: "已应用预览，移除 {count} px 背景。",
+    bgPreviewCleared: "已恢复到上传原图，可以重新调整后预览。",
+    bgPreviewMissing: "请先生成背景移除预览。",
     transparentDownloaded: "透明 PNG 已下载。"
   },
   en: {
@@ -192,7 +204,11 @@ const I18N = {
     outputPadding: "Padding",
     bgTolerance: "Color tolerance",
     edgeFeather: "Edge feather",
-    removeSolidBg: "Remove solid bg",
+    bgPreview: "Removal preview",
+    bgPreviewEmpty: "Tune the color and tolerance, then preview the transparent-background result here.",
+    removeSolidBg: "Preview removal",
+    applyPreview: "Apply preview",
+    retrySolidBg: "Start over",
     downloadTransparent: "Download transparent PNG",
     inpaintPrompt: "GPT fill prompt",
     imageModel: "Image model",
@@ -222,6 +238,10 @@ const I18N = {
     moveDown: "Down",
     delete: "Delete",
     bgRemoved: "Removed {count} px of background.",
+    bgPreviewReady: "Preview ready. Removed {count} px of background. Download or apply it when it looks right.",
+    bgPreviewApplied: "Preview applied. Removed {count} px of background.",
+    bgPreviewCleared: "Restored the uploaded image. Adjust settings and preview again.",
+    bgPreviewMissing: "Generate a background removal preview first.",
     transparentDownloaded: "Transparent PNG downloaded."
   },
   ja: {
@@ -276,7 +296,11 @@ const I18N = {
     outputPadding: "余白",
     bgTolerance: "色の許容差",
     edgeFeather: "エッジぼかし",
-    removeSolidBg: "単色背景を削除",
+    bgPreview: "削除プレビュー",
+    bgPreviewEmpty: "色と許容差を調整してプレビューすると、透明背景の結果がここに表示されます。",
+    removeSolidBg: "削除をプレビュー",
+    applyPreview: "プレビューを適用",
+    retrySolidBg: "やり直す",
     downloadTransparent: "透明PNGを保存",
     inpaintPrompt: "GPT補完プロンプト",
     imageModel: "画像モデル",
@@ -306,6 +330,10 @@ const I18N = {
     moveDown: "下へ",
     delete: "削除",
     bgRemoved: "{count} px の背景を削除しました。",
+    bgPreviewReady: "プレビューを生成しました。{count} px の背景を削除します。問題なければ保存または適用してください。",
+    bgPreviewApplied: "プレビューを適用しました。{count} px の背景を削除しました。",
+    bgPreviewCleared: "アップロード時の画像に戻しました。調整して再プレビューできます。",
+    bgPreviewMissing: "先に背景削除プレビューを生成してください。",
     transparentDownloaded: "透明PNGを書き出しました。"
   }
 };
@@ -325,6 +353,7 @@ const state = {
   history: [],
   redo: [],
   apiAvailable: false,
+  backgroundPreview: null,
   transparentCanvas: null
 };
 
@@ -346,6 +375,7 @@ syncBackgroundColorControls();
 syncWorkspaceView();
 syncToolButtons();
 syncSelectionModeButtons();
+renderBackgroundPreview();
 applyLanguage(getInitialLanguage());
 setMessage(t("readImage"));
 
@@ -415,17 +445,31 @@ elements.selectionModeButtons.forEach((button) => {
 elements.brushSize.addEventListener("input", syncRangeLabels);
 elements.magicTolerance.addEventListener("input", syncRangeLabels);
 elements.magicGrow.addEventListener("input", syncRangeLabels);
-elements.bgTolerance.addEventListener("input", syncRangeLabels);
-elements.bgFeather.addEventListener("input", syncRangeLabels);
-elements.bgPreset.addEventListener("change", syncBackgroundColorControls);
+elements.bgTolerance.addEventListener("input", () => {
+  syncRangeLabels();
+  invalidateBackgroundPreview();
+});
+elements.bgFeather.addEventListener("input", () => {
+  syncRangeLabels();
+  invalidateBackgroundPreview();
+});
+elements.bgPreset.addEventListener("change", () => {
+  syncBackgroundColorControls();
+  invalidateBackgroundPreview();
+});
 elements.bgCustomColor.addEventListener("input", () => {
   elements.bgPreset.value = "custom";
+  invalidateBackgroundPreview();
 });
+elements.bgOutputRatio.addEventListener("change", renderBackgroundPreview);
+elements.bgPadding.addEventListener("change", renderBackgroundPreview);
 elements.undoSelectionButton.addEventListener("click", undoStep);
 elements.redoSelectionButton.addEventListener("click", redoStep);
 elements.invertSelectionButton.addEventListener("click", invertSelection);
 elements.cleanupSelectionButton.addEventListener("click", cleanupSelection);
 elements.removeSolidBgButton.addEventListener("click", removeSolidBackground);
+elements.applySolidBgButton.addEventListener("click", applySolidBackgroundPreview);
+elements.resetSolidBgButton.addEventListener("click", resetSolidBackgroundWorkflow);
 elements.downloadTransparentButton.addEventListener("click", downloadTransparentPng);
 elements.peelQuickButton.addEventListener("click", () => void peelAndQuickHeal());
 elements.peelAiButton.addEventListener("click", () => void peelAndAiHeal());
@@ -614,6 +658,7 @@ async function loadSourceImage(file) {
     state.layers = [];
     state.history = [];
     state.redo = [];
+    state.backgroundPreview = null;
     state.transparentCanvas = null;
     state.imageLoaded = true;
     state.imageName = file.name.replace(/\.[^.]+$/, "") || "image";
@@ -621,6 +666,7 @@ async function loadSourceImage(file) {
     elements.canvasMeta.textContent = `${width} x ${height}`;
     updateCanvasVisibility();
     elements.layerName.value = "剥离图层 1";
+    renderBackgroundPreview();
     renderLayers();
     syncHistoryButtons();
     setMessage("图片已加载。", false, true);
@@ -1154,7 +1200,9 @@ function peelSelection({ clearAfter, recordHistory = false }) {
     createdAt: new Date().toISOString()
   };
 
+  state.backgroundPreview = null;
   state.transparentCanvas = null;
+  renderBackgroundPreview();
   state.layers.unshift(layer);
   elements.layerName.value = nextLayerName();
   renderLayers();
@@ -1202,7 +1250,9 @@ function quickHealSelection({ clearAfter, recordHistory = false }) {
   fillCtx.drawImage(maskCanvas, 0, 0);
   fillCtx.globalCompositeOperation = "source-over";
 
+  state.backgroundPreview = null;
   state.transparentCanvas = null;
+  renderBackgroundPreview();
   backgroundCtx.drawImage(fillCanvas, 0, 0);
 
   if (clearAfter) {
@@ -1318,7 +1368,9 @@ async function aiHealSelection({ clearAfter, recordHistory = false }) {
     }
 
     const image = await loadImage(`data:image/png;base64,${data.image.b64}`);
+    state.backgroundPreview = null;
     state.transparentCanvas = null;
+    renderBackgroundPreview();
     backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
     backgroundCtx.drawImage(image, 0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
 
@@ -1380,7 +1432,9 @@ function resetCanvas() {
   backgroundCtx.drawImage(state.originalCanvas, 0, 0);
   clearSelection({ recordHistory: false });
   state.layers = [];
+  state.backgroundPreview = null;
   state.transparentCanvas = null;
+  renderBackgroundPreview();
   renderLayers();
   elements.layerName.value = "剥离图层 1";
   setMessage("画布已重置到原图。");
@@ -1392,22 +1446,61 @@ function removeSolidBackground() {
     return;
   }
 
-  const snapshot = captureSnapshot("移除纯色背景");
-  const source = renderCompositeCanvas();
+  const source = cloneCanvas(state.originalCanvas);
   const result = createSolidBackgroundRemovedCanvas(source);
   if (!result.removedPixels) {
     setMessage("没有检测到匹配的连通纯色背景，请调高颜色容差或选择自定义颜色。", true);
     return;
   }
 
-  pushSnapshot(snapshot);
-  backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
-  backgroundCtx.drawImage(result.canvas, 0, 0);
-  state.layers = [];
+  state.backgroundPreview = {
+    canvas: cloneCanvas(result.canvas),
+    removedPixels: result.removedPixels
+  };
   state.transparentCanvas = cloneCanvas(result.canvas);
+  renderBackgroundPreview();
+  setMessage(t("bgPreviewReady", { count: formatPixels(result.removedPixels) }), false, true);
+}
+
+function applySolidBackgroundPreview() {
+  if (!state.imageLoaded) {
+    setMessage("请先加载图片。", true);
+    return;
+  }
+
+  if (!state.backgroundPreview) {
+    setMessage(t("bgPreviewMissing"), true);
+    return;
+  }
+
+  pushHistory("应用背景移除预览");
+  backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
+  backgroundCtx.drawImage(state.backgroundPreview.canvas, 0, 0);
+  state.layers = [];
+  state.transparentCanvas = cloneCanvas(state.backgroundPreview.canvas);
+  const removedPixels = state.backgroundPreview.removedPixels;
+  state.backgroundPreview = null;
   clearSelection({ recordHistory: false });
+  renderBackgroundPreview();
   renderLayers();
-  setMessage(t("bgRemoved", { count: formatPixels(result.removedPixels) }), false, true);
+  setMessage(t("bgPreviewApplied", { count: formatPixels(removedPixels) }), false, true);
+}
+
+function resetSolidBackgroundWorkflow() {
+  if (!state.imageLoaded) {
+    setMessage("请先加载图片。", true);
+    return;
+  }
+
+  backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
+  backgroundCtx.drawImage(state.originalCanvas, 0, 0);
+  clearSelection({ recordHistory: false });
+  state.layers = [];
+  state.backgroundPreview = null;
+  state.transparentCanvas = null;
+  renderBackgroundPreview();
+  renderLayers();
+  setMessage(t("bgPreviewCleared"), false, true);
 }
 
 function downloadTransparentPng() {
@@ -1416,7 +1509,12 @@ function downloadTransparentPng() {
     return;
   }
 
-  const source = state.transparentCanvas || renderCompositeCanvas();
+  const source = state.backgroundPreview?.canvas || state.transparentCanvas;
+  if (!source) {
+    setMessage(t("bgPreviewMissing"), true);
+    return;
+  }
+
   const output = buildRatioOutputCanvas(source, elements.bgOutputRatio.value, Number(elements.bgPadding.value || 0.06));
   output.toBlob((blob) => {
     if (!blob) {
@@ -1489,6 +1587,40 @@ function syncBackgroundColorControls() {
   if (presetColors[preset]) {
     elements.bgCustomColor.value = presetColors[preset];
   }
+}
+
+function invalidateBackgroundPreview() {
+  if (!state.backgroundPreview && !state.transparentCanvas) {
+    renderBackgroundPreview();
+    return;
+  }
+
+  state.backgroundPreview = null;
+  state.transparentCanvas = null;
+  renderBackgroundPreview();
+}
+
+function renderBackgroundPreview() {
+  const source = state.backgroundPreview?.canvas || state.transparentCanvas;
+  elements.applySolidBgButton.disabled = !state.backgroundPreview;
+  elements.downloadTransparentButton.disabled = !source;
+
+  if (!source) {
+    elements.bgPreviewCanvas.hidden = true;
+    elements.bgPreviewEmpty.hidden = false;
+    const previewCtx = elements.bgPreviewCanvas.getContext("2d");
+    previewCtx.clearRect(0, 0, elements.bgPreviewCanvas.width, elements.bgPreviewCanvas.height);
+    return;
+  }
+
+  const preview = buildRatioOutputCanvas(source, elements.bgOutputRatio.value, Number(elements.bgPadding.value || 0.06));
+  elements.bgPreviewCanvas.width = preview.width;
+  elements.bgPreviewCanvas.height = preview.height;
+  const previewCtx = elements.bgPreviewCanvas.getContext("2d");
+  previewCtx.clearRect(0, 0, preview.width, preview.height);
+  previewCtx.drawImage(preview, 0, 0);
+  elements.bgPreviewCanvas.hidden = false;
+  elements.bgPreviewEmpty.hidden = true;
 }
 
 function findConnectedSolidBackgroundMask(data, width, height, target, tolerance) {
@@ -1793,7 +1925,9 @@ function renderLayers() {
 
     const toggle = createMiniButton(layer.visible ? t("hide") : t("show"), () => {
       pushHistory(layer.visible ? "隐藏图层" : "显示图层");
+      state.backgroundPreview = null;
       state.transparentCanvas = null;
+      renderBackgroundPreview();
       layer.visible = !layer.visible;
       renderLayers();
     });
@@ -1828,7 +1962,9 @@ function moveLayer(index, direction) {
   }
 
   pushHistory("移动图层");
+  state.backgroundPreview = null;
   state.transparentCanvas = null;
+  renderBackgroundPreview();
   const [layer] = state.layers.splice(index, 1);
   state.layers.splice(nextIndex, 0, layer);
   renderLayers();
@@ -1836,7 +1972,9 @@ function moveLayer(index, direction) {
 
 function removeLayer(id) {
   pushHistory("删除图层");
+  state.backgroundPreview = null;
   state.transparentCanvas = null;
+  renderBackgroundPreview();
   state.layers = state.layers.filter((layer) => layer.id !== id);
   renderLayers();
 }
@@ -1904,6 +2042,12 @@ function captureSnapshot(label) {
     background: cloneCanvas(elements.backgroundCanvas),
     selection: cloneCanvas(elements.selectionCanvas),
     layers: cloneLayers(state.layers),
+    backgroundPreview: state.backgroundPreview
+      ? {
+          canvas: cloneCanvas(state.backgroundPreview.canvas),
+          removedPixels: state.backgroundPreview.removedPixels
+        }
+      : null,
     transparentCanvas: state.transparentCanvas ? cloneCanvas(state.transparentCanvas) : null,
     layerName: elements.layerName.value,
     imageLoaded: state.imageLoaded,
@@ -1931,8 +2075,15 @@ function restoreSnapshot(snapshot) {
   selectionCtx.drawImage(snapshot.selection, 0, 0);
 
   state.layers = cloneLayers(snapshot.layers);
+  state.backgroundPreview = snapshot.backgroundPreview
+    ? {
+        canvas: cloneCanvas(snapshot.backgroundPreview.canvas),
+        removedPixels: snapshot.backgroundPreview.removedPixels
+      }
+    : null;
   state.transparentCanvas = snapshot.transparentCanvas ? cloneCanvas(snapshot.transparentCanvas) : null;
   updateCanvasVisibility();
+  renderBackgroundPreview();
   renderLayers();
   updateSelectionStats();
 }
@@ -2057,6 +2208,8 @@ function setBusy(isBusy) {
     elements.invertSelectionButton,
     elements.cleanupSelectionButton,
     elements.removeSolidBgButton,
+    elements.applySolidBgButton,
+    elements.resetSolidBgButton,
     elements.downloadTransparentButton
   ].forEach((button) => {
     button.disabled = isBusy;
@@ -2064,6 +2217,7 @@ function setBusy(isBusy) {
 
   if (!isBusy) {
     syncHistoryButtons();
+    renderBackgroundPreview();
     elements.peelAiButton.disabled = !state.apiAvailable;
   }
 }

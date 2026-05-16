@@ -26,7 +26,7 @@ Use the language selector in the left panel to switch versions.
 - Undo / redo for selection and layer operations
 - Peel selected content into transparent layers
 - Local quick background fill
-- Solid-color background removal with transparent PNG export and common output ratios
+- Solid-color background removal with non-destructive preview, start-over recovery, transparent PNG export, and common output ratios
 - Optional GPT Image mask fill through the OpenAI Image API
 - Layer visibility, ordering, single-layer PNG export
 - PSD export with peeled layers, filled background, and hidden original reference

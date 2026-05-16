@@ -229,9 +229,19 @@
               <output id="bgFeatherValue" class="range-value">1</output>
             </div>
 
+            <div class="background-preview">
+              <div class="section-title" data-i18n="bgPreview">移除预览</div>
+              <div id="bgPreviewBox" class="preview-box">
+                <span id="bgPreviewEmpty" data-i18n="bgPreviewEmpty">调好颜色和容差后点预览，这里会显示透明背景效果。</span>
+                <canvas id="bgPreviewCanvas" hidden></canvas>
+              </div>
+            </div>
+
             <div class="command-grid">
-              <button id="removeSolidBgButton" class="primary-button" type="button" data-i18n="removeSolidBg">移除纯色背景</button>
-              <button id="downloadTransparentButton" class="secondary-button" type="button" data-i18n="downloadTransparent">下载透明 PNG</button>
+              <button id="removeSolidBgButton" class="primary-button" type="button" data-i18n="removeSolidBg">预览移除背景</button>
+              <button id="applySolidBgButton" class="secondary-button" type="button" disabled data-i18n="applyPreview">应用预览</button>
+              <button id="resetSolidBgButton" class="secondary-button danger" type="button" data-i18n="retrySolidBg">重新来做</button>
+              <button id="downloadTransparentButton" class="secondary-button" type="button" disabled data-i18n="downloadTransparent">下载透明 PNG</button>
             </div>
           </section>
         </div>
