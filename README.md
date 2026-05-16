@@ -21,7 +21,8 @@ Use the language selector in the left panel to switch versions.
 
 ## Features
 
-- Brush, eraser, rectangle, and Photoshop-style magic wand selection
+- Brush, eraser, rectangle, and Photoshop-style magic wand selection with replace/add/subtract modes for mobile use
+- Separate workspaces for layer peeling and solid background removal
 - Undo / redo for selection and layer operations
 - Peel selected content into transparent layers
 - Local quick background fill

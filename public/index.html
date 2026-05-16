@@ -36,6 +36,11 @@
           </span>
         </a>
 
+        <div class="mode-tabs" role="tablist" aria-label="工作区">
+          <button class="active" type="button" data-workspace-view="layers" data-i18n="layerWorkspace">图层剥离</button>
+          <button type="button" data-workspace-view="background" data-i18n="backgroundWorkspace">背景移除</button>
+        </div>
+
         <label class="upload-box" for="sourceImage">
           <span data-i18n="sourceImage">原图</span>
           <strong data-i18n="chooseImage">选择或拖入图片</strong>
@@ -43,6 +48,7 @@
           <input id="sourceImage" type="file" accept="image/png,image/jpeg,image/webp">
         </label>
 
+        <div id="layerControls" class="view-controls" data-workspace-panel="layers">
         <div class="settings-grid">
           <label class="field" for="layerName">
             <span data-i18n="layerName">图层名</span>
@@ -69,6 +75,15 @@
             <button class="tool-button" type="button" data-tool="erase" data-i18n="erase">擦除</button>
             <button class="tool-button" type="button" data-tool="rect" data-i18n="rect">矩形</button>
             <button class="tool-button" type="button" data-tool="magic" data-i18n="magic">魔术棒</button>
+          </div>
+
+          <div id="selectionModeRow" class="mode-row">
+            <span data-i18n="magicSelectionMode">魔术棒模式</span>
+            <div class="segmented compact-segmented" role="group" aria-label="魔术棒模式">
+              <button type="button" data-selection-mode="replace" data-i18n="modeReplace">替换</button>
+              <button class="active" type="button" data-selection-mode="add" data-i18n="modeAdd">加选</button>
+              <button type="button" data-selection-mode="subtract" data-i18n="modeSubtract">减选</button>
+            </div>
           </div>
 
           <div class="command-grid">
@@ -113,74 +128,6 @@
           </div>
         </section>
 
-        <section class="tool-section" aria-label="纯色背景移除">
-          <div class="section-title" data-i18n="solidBgRemove">纯色背景移除</div>
-          <div class="settings-grid">
-            <label class="field" for="bgPreset">
-              <span data-i18n="bgColor">背景颜色</span>
-              <select id="bgPreset">
-                <option value="white" data-i18n="bgWhite">白色</option>
-                <option value="black" data-i18n="bgBlack">黑色</option>
-                <option value="green" data-i18n="bgGreen">绿色</option>
-                <option value="custom" data-i18n="bgCustom">自定义</option>
-              </select>
-            </label>
-
-            <label class="field color-field" for="bgCustomColor">
-              <span data-i18n="customColor">自定义颜色</span>
-              <input id="bgCustomColor" type="color" value="#ffffff">
-            </label>
-          </div>
-
-          <div class="settings-grid">
-            <label class="field" for="bgOutputRatio">
-              <span data-i18n="outputRatio">输出比例</span>
-              <select id="bgOutputRatio">
-                <option value="auto" data-i18n="ratioAuto">自适应</option>
-                <option value="original" data-i18n="ratioOriginal">原图比例</option>
-                <option value="16:9">16:9</option>
-                <option value="9:16">9:16</option>
-                <option value="1:1">1:1</option>
-                <option value="2:3">2:3</option>
-                <option value="3:2">3:2</option>
-                <option value="4:5">4:5</option>
-                <option value="5:4">5:4</option>
-              </select>
-            </label>
-
-            <label class="field" for="bgPadding">
-              <span data-i18n="outputPadding">留白</span>
-              <select id="bgPadding">
-                <option value="0.02">2%</option>
-                <option value="0.06" selected>6%</option>
-                <option value="0.1">10%</option>
-                <option value="0.16">16%</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="range-pair">
-            <label class="field" for="bgTolerance">
-              <span data-i18n="bgTolerance">颜色容差</span>
-              <input id="bgTolerance" type="range" min="0" max="160" step="1" value="36">
-            </label>
-            <output id="bgToleranceValue" class="range-value">36</output>
-          </div>
-
-          <div class="range-pair">
-            <label class="field" for="bgFeather">
-              <span data-i18n="edgeFeather">边缘柔化</span>
-              <input id="bgFeather" type="range" min="0" max="6" step="1" value="1">
-            </label>
-            <output id="bgFeatherValue" class="range-value">1</output>
-          </div>
-
-          <div class="command-grid">
-            <button id="removeSolidBgButton" class="primary-button" type="button" data-i18n="removeSolidBg">移除纯色背景</button>
-            <button id="downloadTransparentButton" class="secondary-button" type="button" data-i18n="downloadTransparent">下载透明 PNG</button>
-          </div>
-        </section>
-
         <label class="field" for="inpaintPrompt">
           <span data-i18n="inpaintPrompt">GPT补洞提示词</span>
           <textarea id="inpaintPrompt" rows="5">Remove only the selected masked element and its associated shadows or reflections. Reconstruct the covered area seamlessly by continuing the original lines, textures, lighting, and perspective. Keep every unmasked part of the image unchanged and do not add new objects.</textarea>
@@ -217,11 +164,82 @@
             <button id="resetButton" class="secondary-button danger" type="button" data-i18n="resetCanvas">重置画布</button>
           </div>
         </section>
+        </div>
+
+        <div id="backgroundControls" class="view-controls" data-workspace-panel="background" hidden>
+          <section class="tool-section" aria-label="纯色背景移除">
+            <div class="section-title" data-i18n="solidBgRemove">纯色背景移除</div>
+            <div class="settings-grid">
+              <label class="field" for="bgPreset">
+                <span data-i18n="bgColor">背景颜色</span>
+                <select id="bgPreset">
+                  <option value="white" data-i18n="bgWhite">白色</option>
+                  <option value="black" data-i18n="bgBlack">黑色</option>
+                  <option value="green" data-i18n="bgGreen">绿色</option>
+                  <option value="custom" data-i18n="bgCustom">自定义</option>
+                </select>
+              </label>
+
+              <label class="field color-field" for="bgCustomColor">
+                <span data-i18n="customColor">自定义颜色</span>
+                <input id="bgCustomColor" type="color" value="#ffffff">
+              </label>
+            </div>
+
+            <div class="settings-grid">
+              <label class="field" for="bgOutputRatio">
+                <span data-i18n="outputRatio">输出比例</span>
+                <select id="bgOutputRatio">
+                  <option value="auto" data-i18n="ratioAuto">自适应</option>
+                  <option value="original" data-i18n="ratioOriginal">原图比例</option>
+                  <option value="16:9">16:9</option>
+                  <option value="9:16">9:16</option>
+                  <option value="1:1">1:1</option>
+                  <option value="2:3">2:3</option>
+                  <option value="3:2">3:2</option>
+                  <option value="4:5">4:5</option>
+                  <option value="5:4">5:4</option>
+                </select>
+              </label>
+
+              <label class="field" for="bgPadding">
+                <span data-i18n="outputPadding">留白</span>
+                <select id="bgPadding">
+                  <option value="0.02">2%</option>
+                  <option value="0.06" selected>6%</option>
+                  <option value="0.1">10%</option>
+                  <option value="0.16">16%</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="range-pair">
+              <label class="field" for="bgTolerance">
+                <span data-i18n="bgTolerance">颜色容差</span>
+                <input id="bgTolerance" type="range" min="0" max="160" step="1" value="36">
+              </label>
+              <output id="bgToleranceValue" class="range-value">36</output>
+            </div>
+
+            <div class="range-pair">
+              <label class="field" for="bgFeather">
+                <span data-i18n="edgeFeather">边缘柔化</span>
+                <input id="bgFeather" type="range" min="0" max="6" step="1" value="1">
+              </label>
+              <output id="bgFeatherValue" class="range-value">1</output>
+            </div>
+
+            <div class="command-grid">
+              <button id="removeSolidBgButton" class="primary-button" type="button" data-i18n="removeSolidBg">移除纯色背景</button>
+              <button id="downloadTransparentButton" class="secondary-button" type="button" data-i18n="downloadTransparent">下载透明 PNG</button>
+            </div>
+          </section>
+        </div>
 
         <p id="message" class="message" role="status" aria-live="polite"></p>
       </aside>
 
-      <section class="workbench" aria-label="分层工作台">
+      <section id="workbench" class="workbench" aria-label="分层工作台">
         <div class="canvas-panel">
           <div class="canvas-toolbar">
             <div>

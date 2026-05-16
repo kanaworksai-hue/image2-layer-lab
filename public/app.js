@@ -1,16 +1,21 @@
 const elements = {
   keyStatus: document.querySelector("#keyStatus"),
   languageSelect: document.querySelector("#languageSelect"),
+  workspaceButtons: document.querySelectorAll("[data-workspace-view]"),
+  workspacePanels: document.querySelectorAll("[data-workspace-panel]"),
   sourceImage: document.querySelector("#sourceImage"),
   uploadBox: document.querySelector(".upload-box"),
   layerName: document.querySelector("#layerName"),
   layerCategory: document.querySelector("#layerCategory"),
+  toolButtons: document.querySelectorAll("[data-tool]"),
   brushSize: document.querySelector("#brushSize"),
   brushSizeValue: document.querySelector("#brushSizeValue"),
   magicTolerance: document.querySelector("#magicTolerance"),
   magicToleranceValue: document.querySelector("#magicToleranceValue"),
   magicGrow: document.querySelector("#magicGrow"),
   magicGrowValue: document.querySelector("#magicGrowValue"),
+  selectionModeRow: document.querySelector("#selectionModeRow"),
+  selectionModeButtons: document.querySelectorAll("[data-selection-mode]"),
   undoSelectionButton: document.querySelector("#undoSelectionButton"),
   redoSelectionButton: document.querySelector("#redoSelectionButton"),
   invertSelectionButton: document.querySelector("#invertSelectionButton"),
@@ -37,6 +42,7 @@ const elements = {
   clearMaskButton: document.querySelector("#clearMaskButton"),
   resetButton: document.querySelector("#resetButton"),
   message: document.querySelector("#message"),
+  workbench: document.querySelector("#workbench"),
   canvasStage: document.querySelector("#canvasStage"),
   dropHint: document.querySelector("#dropHint"),
   backgroundCanvas: document.querySelector("#backgroundCanvas"),
@@ -44,6 +50,7 @@ const elements = {
   imageTitle: document.querySelector("#imageTitle"),
   canvasMeta: document.querySelector("#canvasMeta"),
   selectionStats: document.querySelector("#selectionStats"),
+  layerPanel: document.querySelector(".layer-panel"),
   layerList: document.querySelector("#layerList"),
   layerCount: document.querySelector("#layerCount")
 };
@@ -57,6 +64,8 @@ const I18N = {
     chooseImage: "选择或拖入图片",
     imageHint: "PNG / JPG / WebP，建议先用 1K 到 2K 尺寸做分层",
     promo: "Want more? Follow me",
+    layerWorkspace: "图层剥离",
+    backgroundWorkspace: "背景移除",
     layerName: "图层名",
     semanticLevel: "语义层级",
     catDistractor: "干扰元素",
@@ -77,6 +86,10 @@ const I18N = {
     brushSize: "画笔大小",
     magicTolerance: "魔术棒容差",
     magicGrow: "魔术棒扩边",
+    magicSelectionMode: "魔术棒模式",
+    modeReplace: "替换",
+    modeAdd: "加选",
+    modeSubtract: "减选",
     peel: "剥离",
     peelQuick: "剥离 + 快速补洞",
     peelAi: "剥离 + GPT补洞",
@@ -135,6 +148,8 @@ const I18N = {
     chooseImage: "Choose or drop an image",
     imageHint: "PNG / JPG / WebP. 1K to 2K images are best for layering.",
     promo: "Want more? Follow me",
+    layerWorkspace: "Layer peel",
+    backgroundWorkspace: "Background removal",
     layerName: "Layer name",
     semanticLevel: "Semantic level",
     catDistractor: "Distractor",
@@ -155,6 +170,10 @@ const I18N = {
     brushSize: "Brush size",
     magicTolerance: "Magic tolerance",
     magicGrow: "Magic grow",
+    magicSelectionMode: "Magic wand mode",
+    modeReplace: "Replace",
+    modeAdd: "Add",
+    modeSubtract: "Subtract",
     peel: "Peel",
     peelQuick: "Peel + quick fill",
     peelAi: "Peel + GPT fill",
@@ -213,6 +232,8 @@ const I18N = {
     chooseImage: "画像を選択またはドロップ",
     imageHint: "PNG / JPG / WebP。レイヤー作成には 1K から 2K 推奨。",
     promo: "Want more? Follow me",
+    layerWorkspace: "レイヤー切り出し",
+    backgroundWorkspace: "背景削除",
     layerName: "レイヤー名",
     semanticLevel: "意味レベル",
     catDistractor: "不要要素",
@@ -233,6 +254,10 @@ const I18N = {
     brushSize: "ブラシサイズ",
     magicTolerance: "自動選択の許容差",
     magicGrow: "選択範囲を拡張",
+    magicSelectionMode: "自動選択モード",
+    modeReplace: "置換",
+    modeAdd: "追加",
+    modeSubtract: "削除",
     peel: "切り出し",
     peelQuick: "切り出し + 簡易補完",
     peelAi: "切り出し + GPT補完",
@@ -288,7 +313,9 @@ const I18N = {
 const state = {
   imageLoaded: false,
   imageName: "image",
+  view: "layers",
   tool: "brush",
+  selectionMode: "add",
   isDrawing: false,
   startPoint: null,
   lastPoint: null,
@@ -316,6 +343,9 @@ checkHealth();
 renderLayers();
 syncRangeLabels();
 syncBackgroundColorControls();
+syncWorkspaceView();
+syncToolButtons();
+syncSelectionModeButtons();
 applyLanguage(getInitialLanguage());
 setMessage(t("readImage"));
 
@@ -364,12 +394,21 @@ elements.canvasStage.addEventListener("drop", async (event) => {
   await loadFirstImageFromDrop(event.dataTransfer?.files || []);
 });
 
-document.querySelectorAll("[data-tool]").forEach((button) => {
+elements.workspaceButtons.forEach((button) => {
+  button.addEventListener("click", () => switchWorkspace(button.dataset.workspaceView || "layers"));
+});
+
+elements.toolButtons.forEach((button) => {
   button.addEventListener("click", () => {
     state.tool = button.dataset.tool || "brush";
-    document.querySelectorAll("[data-tool]").forEach((item) => {
-      item.classList.toggle("active", item === button);
-    });
+    syncToolButtons();
+  });
+});
+
+elements.selectionModeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.selectionMode = button.dataset.selectionMode || "add";
+    syncSelectionModeButtons();
   });
 });
 
@@ -468,6 +507,47 @@ function applyLanguage(language) {
   checkHealth();
 }
 
+function switchWorkspace(view) {
+  state.view = view === "background" ? "background" : "layers";
+  syncWorkspaceView();
+}
+
+function syncWorkspaceView() {
+  elements.workspaceButtons.forEach((button) => {
+    const isActive = button.dataset.workspaceView === state.view;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+
+  elements.workspacePanels.forEach((panel) => {
+    panel.hidden = panel.dataset.workspacePanel !== state.view;
+  });
+
+  elements.layerPanel.hidden = state.view === "background";
+  elements.selectionStats.hidden = state.view === "background";
+  elements.workbench.classList.toggle("background-mode", state.view === "background");
+  updateCanvasVisibility();
+}
+
+function syncToolButtons() {
+  elements.toolButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.tool === state.tool);
+  });
+  elements.selectionModeRow.hidden = state.tool !== "magic";
+}
+
+function updateCanvasVisibility() {
+  elements.backgroundCanvas.hidden = !state.imageLoaded;
+  elements.selectionCanvas.hidden = !state.imageLoaded || state.view === "background";
+  elements.dropHint.hidden = state.imageLoaded;
+}
+
+function syncSelectionModeButtons() {
+  elements.selectionModeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.selectionMode === state.selectionMode);
+  });
+}
+
 async function checkHealth() {
   if (isStaticHosted()) {
     state.apiAvailable = false;
@@ -539,9 +619,7 @@ async function loadSourceImage(file) {
     state.imageName = file.name.replace(/\.[^.]+$/, "") || "image";
     elements.imageTitle.textContent = file.name;
     elements.canvasMeta.textContent = `${width} x ${height}`;
-    elements.dropHint.hidden = true;
-    elements.backgroundCanvas.hidden = false;
-    elements.selectionCanvas.hidden = false;
+    updateCanvasVisibility();
     elements.layerName.value = "剥离图层 1";
     renderLayers();
     syncHistoryButtons();
@@ -568,7 +646,7 @@ function onPointerDown(event) {
 
   if (state.tool === "magic") {
     const snapshot = captureSnapshot("魔术棒选择");
-    const mode = event.altKey ? "subtract" : event.shiftKey ? "add" : "replace";
+    const mode = event.altKey ? "subtract" : event.shiftKey ? "add" : state.selectionMode;
     const result = magicSelect(point.x, point.y, { mode });
     if (result.changed) {
       pushSnapshot(snapshot);
@@ -1854,9 +1932,7 @@ function restoreSnapshot(snapshot) {
 
   state.layers = cloneLayers(snapshot.layers);
   state.transparentCanvas = snapshot.transparentCanvas ? cloneCanvas(snapshot.transparentCanvas) : null;
-  elements.dropHint.hidden = state.imageLoaded;
-  elements.backgroundCanvas.hidden = !state.imageLoaded;
-  elements.selectionCanvas.hidden = !state.imageLoaded;
+  updateCanvasVisibility();
   renderLayers();
   updateSelectionStats();
 }
