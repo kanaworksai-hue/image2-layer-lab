@@ -650,6 +650,40 @@ input[type="file"] {
   padding-right: 4px;
 }
 
+.psd-preview {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.psd-preview canvas {
+  width: 100%;
+  aspect-ratio: 16 / 11;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  object-fit: contain;
+}
+
+.psd-preview strong,
+.psd-preview span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.psd-preview strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.psd-preview span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .layer-empty {
   margin: 0;
   color: var(--muted);

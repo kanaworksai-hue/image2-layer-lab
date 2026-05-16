@@ -56,6 +56,9 @@ const elements = {
   canvasMeta: document.querySelector("#canvasMeta"),
   selectionStats: document.querySelector("#selectionStats"),
   layerPanel: document.querySelector(".layer-panel"),
+  psdPreviewCanvas: document.querySelector("#psdPreviewCanvas"),
+  psdLayerSummary: document.querySelector("#psdLayerSummary"),
+  psdLayerDetails: document.querySelector("#psdLayerDetails"),
   layerList: document.querySelector("#layerList"),
   layerCount: document.querySelector("#layerCount")
 };
@@ -132,6 +135,10 @@ const I18N = {
     dropStart: "拖入图片开始",
     dropHint: "用选择工具圈出人物、物品、文字或场景区域",
     layers: "图层",
+    psdPreview: "PSD 预览",
+    psdExportPlan: "将导出 {count} 个 PSD 图层",
+    psdExportEmpty: "包含填充背景和隐藏原图参考层。",
+    psdExportDetails: "顺序：{layers}、填充背景、原图参考（隐藏）。",
     emptyLayer: "剥离后的元素会保留在这里，并在 PSD 中作为独立图层导出。",
     readImage: "读取一张图片后即可开始分层。",
     keyReady: "已配置",
@@ -224,6 +231,10 @@ const I18N = {
     dropStart: "Drop an image to start",
     dropHint: "Select people, objects, text, or scene areas with the tools.",
     layers: "Layers",
+    psdPreview: "PSD preview",
+    psdExportPlan: "Will export {count} PSD layers",
+    psdExportEmpty: "Includes filled background and hidden original reference.",
+    psdExportDetails: "Order: {layers}, filled background, original reference (hidden).",
     emptyLayer: "Peeled elements stay here and export as independent PSD layers.",
     readImage: "Load an image to start layering.",
     keyReady: "Ready",
@@ -316,6 +327,10 @@ const I18N = {
     dropStart: "画像をドロップして開始",
     dropHint: "人物、物、文字、シーン領域をツールで選択します。",
     layers: "レイヤー",
+    psdPreview: "PSDプレビュー",
+    psdExportPlan: "{count} 個の PSD レイヤーを書き出します",
+    psdExportEmpty: "補完背景と非表示の元画像参照レイヤーを含みます。",
+    psdExportDetails: "順序：{layers}、補完背景、元画像参照（非表示）。",
     emptyLayer: "切り出した要素はここに残り、PSD の独立レイヤーとして書き出されます。",
     readImage: "画像を読み込むとレイヤー作成を開始できます。",
     keyReady: "設定済み",
@@ -558,6 +573,7 @@ function applyLanguage(language) {
     elements.canvasMeta.textContent = t("notLoaded");
   }
 
+  updatePsdPreview();
   checkHealth();
 }
 
@@ -680,6 +696,7 @@ async function loadSourceImage(file) {
     elements.layerName.value = "剥离图层 1";
     renderBackgroundPreview();
     renderLayers();
+    updatePsdPreview();
     syncHistoryButtons();
     setMessage("图片已加载。", false, true);
   } catch (error) {
@@ -1398,6 +1415,7 @@ function quickHealSelection({ clearAfter, recordHistory = false }) {
   state.transparentCanvas = null;
   renderBackgroundPreview();
   backgroundCtx.drawImage(fillCanvas, 0, 0);
+  updatePsdPreview();
 
   if (clearAfter) {
     clearSelection({ recordHistory: false });
@@ -1493,8 +1511,10 @@ async function aiHealSelection({ clearAfter, recordHistory = false }) {
   setMessage("正在调用 GPT 图像编辑补洞，复杂图片可能需要一两分钟。");
 
   try {
-    const imageBlob = await canvasToBlob(elements.backgroundCanvas);
-    const maskBlob = await canvasToBlob(createBinaryMaskCanvas());
+    const baseCanvas = cloneCanvas(elements.backgroundCanvas);
+    const maskCanvas = createBinaryMaskCanvas();
+    const imageBlob = await canvasToBlob(baseCanvas);
+    const maskBlob = await canvasToBlob(maskCanvas);
     const formData = new FormData();
     formData.append("image", imageBlob, "source.png");
     formData.append("mask", maskBlob, "mask.png");
@@ -1512,18 +1532,20 @@ async function aiHealSelection({ clearAfter, recordHistory = false }) {
     }
 
     const image = await loadImage(`data:image/png;base64,${data.image.b64}`);
+    const mergedCanvas = mergeMaskedAiResult(baseCanvas, image, maskCanvas);
     state.backgroundPreview = null;
     state.transparentCanvas = null;
     renderBackgroundPreview();
     backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
-    backgroundCtx.drawImage(image, 0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
+    backgroundCtx.drawImage(mergedCanvas, 0, 0);
+    updatePsdPreview();
 
     if (clearAfter) {
       clearSelection({ recordHistory: false });
     }
 
     const requestId = data.requestId ? ` Request ID: ${data.requestId}` : "";
-    setMessage(`GPT补洞完成。${requestId}`, false, true);
+    setMessage(`GPT补洞完成，未选中区域已保留原图。${requestId}`, false, true);
     return true;
   } catch (error) {
     setMessage(error.message || "GPT补洞失败。", true);
@@ -1555,6 +1577,22 @@ function createBinaryMaskCanvas() {
 
   maskCtx.putImageData(output, 0, 0);
   return maskCanvas;
+}
+
+function mergeMaskedAiResult(baseCanvas, generatedImage, maskCanvas) {
+  const width = baseCanvas.width;
+  const height = baseCanvas.height;
+  const result = cloneCanvas(baseCanvas);
+  const patchCanvas = document.createElement("canvas");
+  patchCanvas.width = width;
+  patchCanvas.height = height;
+  const patchCtx = patchCanvas.getContext("2d");
+  patchCtx.drawImage(generatedImage, 0, 0, width, height);
+  patchCtx.globalCompositeOperation = "destination-in";
+  patchCtx.drawImage(maskCanvas, 0, 0, width, height);
+  patchCtx.globalCompositeOperation = "source-over";
+  result.getContext("2d").drawImage(patchCanvas, 0, 0);
+  return result;
 }
 
 function clearSelection({ recordHistory = false } = {}) {
@@ -2035,6 +2073,7 @@ function renderCompositeCanvas() {
 function renderLayers() {
   elements.layerList.replaceChildren();
   elements.layerCount.textContent = String(state.layers.length);
+  updatePsdPreview();
 
   if (state.layers.length === 0) {
     const empty = document.createElement("p");
@@ -2099,6 +2138,47 @@ function createMiniButton(label, onClick, modifier = "") {
   button.textContent = label;
   button.addEventListener("click", onClick);
   return button;
+}
+
+function updatePsdPreview() {
+  const canvas = elements.psdPreviewCanvas;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawCheckerboard(ctx, canvas.width, canvas.height, 10);
+
+  const exportedLayerCount = state.layers.length + 2;
+  elements.psdLayerSummary.textContent = t("psdExportPlan", { count: exportedLayerCount });
+  elements.psdLayerDetails.textContent = state.layers.length
+    ? t("psdExportDetails", { layers: formatPsdLayerNames() })
+    : t("psdExportEmpty");
+
+  if (!state.imageLoaded) {
+    return;
+  }
+
+  drawCanvasContained(ctx, renderCompositeCanvas(), canvas.width, canvas.height);
+}
+
+function formatPsdLayerNames() {
+  const names = state.layers.map((layer) => layer.name);
+  const visibleNames = names.slice(0, 4);
+  const remaining = names.length - visibleNames.length;
+  return remaining > 0 ? `${visibleNames.join(" / ")} / +${remaining}` : visibleNames.join(" / ");
+}
+
+function drawCheckerboard(ctx, width, height, size) {
+  ctx.save();
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "#edf0f4";
+  for (let y = 0; y < height; y += size) {
+    for (let x = 0; x < width; x += size) {
+      if (((x / size) + (y / size)) % 2 === 0) {
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+  }
+  ctx.restore();
 }
 
 function moveLayer(index, direction) {
