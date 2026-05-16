@@ -70,10 +70,12 @@
 
         <section class="tool-section" aria-label="选择工具">
           <div class="section-title" data-i18n="selection">选择</div>
-          <div class="segmented" role="group" aria-label="选择工具">
+          <div class="segmented tool-segmented" role="group" aria-label="选择工具">
             <button class="tool-button active" type="button" data-tool="brush" data-i18n="brush">画笔</button>
             <button class="tool-button" type="button" data-tool="erase" data-i18n="erase">擦除</button>
             <button class="tool-button" type="button" data-tool="rect" data-i18n="rect">矩形</button>
+            <button class="tool-button" type="button" data-tool="circle" data-i18n="circle">圆形</button>
+            <button class="tool-button" type="button" data-tool="roundRect" data-i18n="roundRect">倒角矩形</button>
             <button class="tool-button" type="button" data-tool="magic" data-i18n="magic">魔术棒</button>
           </div>
 
@@ -115,6 +117,14 @@
               <input id="magicGrow" type="range" min="0" max="8" step="1" value="2">
             </label>
             <output id="magicGrowValue" class="range-value">2</output>
+          </div>
+
+          <div id="roundRadiusRow" class="range-pair">
+            <label class="field" for="roundRadius">
+              <span data-i18n="roundRadius">倒角半径</span>
+              <input id="roundRadius" type="range" min="0" max="220" step="1" value="36">
+            </label>
+            <output id="roundRadiusValue" class="range-value">36</output>
           </div>
         </section>
 
@@ -247,6 +257,15 @@
         </div>
 
         <p id="message" class="message" role="status" aria-live="polite"></p>
+        <div id="aiProgress" class="ai-progress" hidden>
+          <div class="progress-meta">
+            <span id="aiProgressLabel" data-i18n="aiProgressPreparing">准备 GPT 补洞...</span>
+            <output id="aiProgressValue">0%</output>
+          </div>
+          <div class="progress-track">
+            <span id="aiProgressBar"></span>
+          </div>
+        </div>
       </aside>
 
       <section id="workbench" class="workbench" aria-label="分层工作台">

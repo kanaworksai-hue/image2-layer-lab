@@ -10,6 +10,9 @@ const elements = {
   toolButtons: document.querySelectorAll("[data-tool]"),
   brushSize: document.querySelector("#brushSize"),
   brushSizeValue: document.querySelector("#brushSizeValue"),
+  roundRadius: document.querySelector("#roundRadius"),
+  roundRadiusValue: document.querySelector("#roundRadiusValue"),
+  roundRadiusRow: document.querySelector("#roundRadiusRow"),
   magicTolerance: document.querySelector("#magicTolerance"),
   magicToleranceValue: document.querySelector("#magicToleranceValue"),
   magicGrow: document.querySelector("#magicGrow"),
@@ -46,6 +49,10 @@ const elements = {
   clearMaskButton: document.querySelector("#clearMaskButton"),
   resetButton: document.querySelector("#resetButton"),
   message: document.querySelector("#message"),
+  aiProgress: document.querySelector("#aiProgress"),
+  aiProgressLabel: document.querySelector("#aiProgressLabel"),
+  aiProgressValue: document.querySelector("#aiProgressValue"),
+  aiProgressBar: document.querySelector("#aiProgressBar"),
   workbench: document.querySelector("#workbench"),
   canvasStage: document.querySelector("#canvasStage"),
   dropHint: document.querySelector("#dropHint"),
@@ -86,12 +93,15 @@ const I18N = {
     brush: "画笔",
     erase: "擦除",
     rect: "矩形",
+    circle: "圆形",
+    roundRect: "倒角矩形",
     magic: "魔术棒",
     undo: "撤销上一步",
     redo: "重做",
     invert: "反选",
     cleanup: "填洞/平滑",
     brushSize: "画笔大小",
+    roundRadius: "倒角半径",
     magicTolerance: "魔术棒容差",
     magicGrow: "魔术棒扩边",
     magicSelectionMode: "魔术棒模式",
@@ -158,7 +168,12 @@ const I18N = {
     bgPreviewApplied: "已应用预览，移除 {count} px 背景。",
     bgPreviewCleared: "已恢复到上传原图，可以重新调整后预览。",
     bgPreviewMissing: "请先生成背景移除预览。",
-    transparentDownloaded: "透明 PNG 已下载。"
+    transparentDownloaded: "透明 PNG 已下载。",
+    aiProgressPreparing: "准备 GPT 补洞...",
+    aiProgressUploading: "上传图片和蒙版...",
+    aiProgressWaiting: "等待 GPT 生成补洞...",
+    aiProgressMerging: "只合并选中区域...",
+    aiProgressDone: "GPT 补洞完成"
   },
   en: {
     htmlLang: "en",
@@ -182,12 +197,15 @@ const I18N = {
     brush: "Brush",
     erase: "Erase",
     rect: "Rectangle",
+    circle: "Circle",
+    roundRect: "Rounded rect",
     magic: "Magic wand",
     undo: "Undo",
     redo: "Redo",
     invert: "Invert",
     cleanup: "Fill holes / smooth",
     brushSize: "Brush size",
+    roundRadius: "Corner radius",
     magicTolerance: "Magic tolerance",
     magicGrow: "Magic grow",
     magicSelectionMode: "Magic wand mode",
@@ -254,7 +272,12 @@ const I18N = {
     bgPreviewApplied: "Preview applied. Removed {count} px of background.",
     bgPreviewCleared: "Restored the uploaded image. Adjust settings and preview again.",
     bgPreviewMissing: "Generate a background removal preview first.",
-    transparentDownloaded: "Transparent PNG downloaded."
+    transparentDownloaded: "Transparent PNG downloaded.",
+    aiProgressPreparing: "Preparing GPT fill...",
+    aiProgressUploading: "Uploading image and mask...",
+    aiProgressWaiting: "Waiting for GPT fill...",
+    aiProgressMerging: "Merging only the selected area...",
+    aiProgressDone: "GPT fill complete"
   },
   ja: {
     htmlLang: "ja",
@@ -278,12 +301,15 @@ const I18N = {
     brush: "ブラシ",
     erase: "消しゴム",
     rect: "矩形",
+    circle: "円形",
+    roundRect: "角丸矩形",
     magic: "自動選択",
     undo: "元に戻す",
     redo: "やり直す",
     invert: "反転",
     cleanup: "穴埋め / 平滑化",
     brushSize: "ブラシサイズ",
+    roundRadius: "角丸半径",
     magicTolerance: "自動選択の許容差",
     magicGrow: "選択範囲を拡張",
     magicSelectionMode: "自動選択モード",
@@ -350,7 +376,12 @@ const I18N = {
     bgPreviewApplied: "プレビューを適用しました。{count} px の背景を削除しました。",
     bgPreviewCleared: "アップロード時の画像に戻しました。調整して再プレビューできます。",
     bgPreviewMissing: "先に背景削除プレビューを生成してください。",
-    transparentDownloaded: "透明PNGを書き出しました。"
+    transparentDownloaded: "透明PNGを書き出しました。",
+    aiProgressPreparing: "GPT補完を準備中...",
+    aiProgressUploading: "画像とマスクをアップロード中...",
+    aiProgressWaiting: "GPT補完の生成待ち...",
+    aiProgressMerging: "選択範囲だけを合成中...",
+    aiProgressDone: "GPT補完が完了しました"
   }
 };
 
@@ -468,6 +499,7 @@ elements.brushSize.addEventListener("input", () => {
   syncRangeLabels();
   renderOverlay();
 });
+elements.roundRadius.addEventListener("input", syncRangeLabels);
 elements.magicTolerance.addEventListener("input", syncRangeLabels);
 elements.magicGrow.addEventListener("input", syncRangeLabels);
 elements.bgTolerance.addEventListener("input", () => {
@@ -604,6 +636,7 @@ function syncToolButtons() {
     button.classList.toggle("active", button.dataset.tool === state.tool);
   });
   elements.selectionModeRow.hidden = state.tool !== "magic";
+  elements.roundRadiusRow.hidden = state.tool !== "roundRect";
 }
 
 function updateCanvasVisibility() {
@@ -742,14 +775,14 @@ function onPointerDown(event) {
   state.lastPoint = point;
   elements.selectionCanvas.setPointerCapture(event.pointerId);
 
-  if (state.tool === "rect") {
+  if (isShapeTool(state.tool)) {
     state.selectionSnapshot = selectionCtx.getImageData(
       0,
       0,
       elements.selectionCanvas.width,
       elements.selectionCanvas.height
     );
-    drawRectSelection(point);
+    drawShapeSelection(point);
     return;
   }
 
@@ -777,8 +810,8 @@ function onPointerMove(event) {
     return;
   }
 
-  if (state.tool === "rect") {
-    drawRectSelection(point);
+  if (isShapeTool(state.tool)) {
+    drawShapeSelection(point);
     return;
   }
 
@@ -830,7 +863,11 @@ function drawBrush(from, to) {
   renderOverlay();
 }
 
-function drawRectSelection(currentPoint) {
+function isShapeTool(tool) {
+  return tool === "rect" || tool === "circle" || tool === "roundRect";
+}
+
+function drawShapeSelection(currentPoint) {
   if (!state.selectionSnapshot || !state.startPoint) {
     return;
   }
@@ -843,10 +880,43 @@ function drawRectSelection(currentPoint) {
   selectionCtx.putImageData(state.selectionSnapshot, 0, 0);
   selectionCtx.save();
   selectionCtx.fillStyle = MASK_COLOR;
-  selectionCtx.fillRect(left, top, width, height);
+  if (state.tool === "circle") {
+    selectionCtx.beginPath();
+    selectionCtx.ellipse(
+      left + width / 2,
+      top + height / 2,
+      width / 2,
+      height / 2,
+      0,
+      0,
+      Math.PI * 2
+    );
+    selectionCtx.fill();
+  } else if (state.tool === "roundRect") {
+    const radius = Math.min(Number(elements.roundRadius.value || 0), width / 2, height / 2);
+    roundedRectPath(selectionCtx, left, top, width, height, radius);
+    selectionCtx.fill();
+  } else {
+    selectionCtx.fillRect(left, top, width, height);
+  }
   selectionCtx.restore();
   state.edgeDirty = true;
   renderOverlay();
+}
+
+function roundedRectPath(ctx, x, y, width, height, radius) {
+  const r = clamp(radius, 0, Math.min(width, height) / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
 
 function clearOverlay() {
@@ -970,11 +1040,11 @@ function magicSelect(x, y, { mode = "replace" } = {}) {
     source[seedIndex + 2],
     source[seedIndex + 3]
   ];
+  const targetProfile = colorProfile(target[0], target[1], target[2]);
   const tolerance = Number(elements.magicTolerance.value || 28);
   const grow = Number(elements.magicGrow.value || 0);
-  const seedLimit = tolerance * 1.28 + 6;
-  const localLimit = tolerance * 1.9 + 10;
-  const edgeLimit = tolerance * 2.1 + 30;
+  const localLimit = tolerance * 1.48 + 8;
+  const edgeLimit = tolerance * 1.72 + 18;
   const seedTransparent = target[3] < 96;
   const visited = new Uint8Array(width * height);
   const queue = new Int32Array(width * height);
@@ -991,13 +1061,12 @@ function magicSelect(x, y, { mode = "replace" } = {}) {
     const py = Math.floor(index / width);
     const colorIndex = index * 4;
     const alpha = source[colorIndex + 3];
-    const distance = colorDistance(source, colorIndex, target);
 
     if (seedTransparent) {
       if (alpha >= 96) {
         continue;
       }
-    } else if (alpha < 32 || distance > seedLimit) {
+    } else if (alpha < 32 || !isMagicColorMatch(source, colorIndex, target, targetProfile, tolerance)) {
       continue;
     }
 
@@ -1080,6 +1149,66 @@ function colorDistance(data, index, target) {
     0.16 * chromaA * chromaA +
     0.16 * chromaB * chromaB
   );
+}
+
+function colorProfile(r, g, b) {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const chroma = max - min;
+  const saturation = max === 0 ? 0 : chroma / max;
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  let hue = 0;
+
+  if (chroma > 0) {
+    if (max === r) {
+      hue = ((g - b) / chroma) % 6;
+    } else if (max === g) {
+      hue = (b - r) / chroma + 2;
+    } else {
+      hue = (r - g) / chroma + 4;
+    }
+    hue *= 60;
+    if (hue < 0) {
+      hue += 360;
+    }
+  }
+
+  return { hue, luminance, saturation };
+}
+
+function hueDistance(a, b) {
+  const delta = Math.abs(a - b) % 360;
+  return Math.min(delta, 360 - delta);
+}
+
+function isMagicColorMatch(data, index, target, targetProfile, tolerance) {
+  const distance = colorDistance(data, index, target);
+  const profile = colorProfile(data[index], data[index + 1], data[index + 2]);
+  const luminanceDiff = Math.abs(profile.luminance - targetProfile.luminance);
+  const distanceLimit = tolerance * 1.12 + 18;
+  const luminanceLimit = tolerance * 1.08 + 14;
+
+  if (distance > distanceLimit || luminanceDiff > luminanceLimit) {
+    return false;
+  }
+
+  const targetIsNeutral = targetProfile.saturation < 0.12;
+  const pixelIsNeutral = profile.saturation < 0.13;
+
+  if (targetIsNeutral) {
+    return pixelIsNeutral || (profile.saturation < 0.2 && distance < tolerance * 0.72 + 12);
+  }
+
+  if (pixelIsNeutral) {
+    return false;
+  }
+
+  const hueLimit = Math.max(9, 34 - tolerance * 0.16);
+  if (hueDistance(profile.hue, targetProfile.hue) > hueLimit) {
+    return false;
+  }
+
+  return Math.abs(profile.saturation - targetProfile.saturation) <= 0.34;
 }
 
 function simpleColorDistance(data, a, b) {
@@ -1509,12 +1638,14 @@ async function aiHealSelection({ clearAfter, recordHistory = false }) {
 
   setBusy(true);
   setMessage("正在调用 GPT 图像编辑补洞，复杂图片可能需要一两分钟。");
+  setAiProgress(8, "aiProgressPreparing");
 
   try {
     const baseCanvas = cloneCanvas(elements.backgroundCanvas);
-    const maskCanvas = createBinaryMaskCanvas();
+    const selectedMaskCanvas = createBinaryMaskCanvas();
+    const openAiMaskCanvas = createOpenAiEditMaskCanvas();
     const imageBlob = await canvasToBlob(baseCanvas);
-    const maskBlob = await canvasToBlob(maskCanvas);
+    const maskBlob = await canvasToBlob(openAiMaskCanvas);
     const formData = new FormData();
     formData.append("image", imageBlob, "source.png");
     formData.append("mask", maskBlob, "mask.png");
@@ -1522,17 +1653,22 @@ async function aiHealSelection({ clearAfter, recordHistory = false }) {
     formData.append("model", elements.imageModel.value);
     formData.append("quality", elements.imageQuality.value);
 
+    setAiProgress(32, "aiProgressUploading");
+    await nextPaint();
+    setAiProgress(52, "aiProgressWaiting", true);
     const response = await fetch("/api/fill-background", {
       method: "POST",
       body: formData
     });
+    setAiProgress(72, "aiProgressWaiting");
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.error || "GPT补洞失败。");
     }
 
     const image = await loadImage(`data:image/png;base64,${data.image.b64}`);
-    const mergedCanvas = mergeMaskedAiResult(baseCanvas, image, maskCanvas);
+    setAiProgress(88, "aiProgressMerging");
+    const mergedCanvas = mergeMaskedAiResult(baseCanvas, image, selectedMaskCanvas);
     state.backgroundPreview = null;
     state.transparentCanvas = null;
     renderBackgroundPreview();
@@ -1545,6 +1681,7 @@ async function aiHealSelection({ clearAfter, recordHistory = false }) {
     }
 
     const requestId = data.requestId ? ` Request ID: ${data.requestId}` : "";
+    setAiProgress(100, "aiProgressDone");
     setMessage(`GPT补洞完成，未选中区域已保留原图。${requestId}`, false, true);
     return true;
   } catch (error) {
@@ -1552,6 +1689,9 @@ async function aiHealSelection({ clearAfter, recordHistory = false }) {
     return false;
   } finally {
     setBusy(false);
+    window.setTimeout(() => {
+      hideAiProgress();
+    }, 850);
   }
 }
 
@@ -1573,6 +1713,28 @@ function createBinaryMaskCanvas() {
     output.data[index + 1] = 255;
     output.data[index + 2] = 255;
     output.data[index + 3] = 255;
+  }
+
+  maskCtx.putImageData(output, 0, 0);
+  return maskCanvas;
+}
+
+function createOpenAiEditMaskCanvas() {
+  const width = elements.selectionCanvas.width;
+  const height = elements.selectionCanvas.height;
+  const source = selectionCtx.getImageData(0, 0, width, height);
+  const maskCanvas = document.createElement("canvas");
+  maskCanvas.width = width;
+  maskCanvas.height = height;
+  const maskCtx = maskCanvas.getContext("2d");
+  const output = maskCtx.createImageData(width, height);
+
+  for (let index = 0; index < source.data.length; index += 4) {
+    const selected = source.data[index + 3] > MASK_THRESHOLD;
+    output.data[index] = 255;
+    output.data[index + 1] = 255;
+    output.data[index + 2] = 255;
+    output.data[index + 3] = selected ? 0 : 255;
   }
 
   maskCtx.putImageData(output, 0, 0);
@@ -2458,8 +2620,25 @@ function setMessage(text, isError = false, isGood = false) {
   elements.message.classList.toggle("good", Boolean(isGood) && !isError);
 }
 
+function setAiProgress(percent, labelKey, indeterminate = false) {
+  const value = clamp(Math.round(percent), 0, 100);
+  elements.aiProgress.hidden = false;
+  elements.aiProgress.classList.toggle("indeterminate", Boolean(indeterminate));
+  elements.aiProgressLabel.textContent = t(labelKey);
+  elements.aiProgressValue.textContent = `${value}%`;
+  elements.aiProgressBar.style.width = `${value}%`;
+}
+
+function hideAiProgress() {
+  elements.aiProgress.hidden = true;
+  elements.aiProgress.classList.remove("indeterminate");
+  elements.aiProgressBar.style.width = "0%";
+  elements.aiProgressValue.textContent = "0%";
+}
+
 function syncRangeLabels() {
   elements.brushSizeValue.textContent = elements.brushSize.value;
+  elements.roundRadiusValue.textContent = elements.roundRadius.value;
   elements.magicToleranceValue.textContent = elements.magicTolerance.value;
   elements.magicGrowValue.textContent = elements.magicGrow.value;
   elements.bgToleranceValue.textContent = elements.bgTolerance.value;
@@ -2471,6 +2650,8 @@ function toolLabel(tool) {
     brush: t("brush"),
     erase: t("erase"),
     rect: t("rect"),
+    circle: t("circle"),
+    roundRect: t("roundRect"),
     magic: t("magic")
   };
   return labels[tool] || "选区";
@@ -2494,6 +2675,12 @@ function loadImage(url) {
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error("图片无法读取。"));
     image.src = url;
+  });
+}
+
+function nextPaint() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => resolve());
   });
 }
 

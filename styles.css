@@ -380,6 +380,10 @@ input[type="file"] {
   background: var(--accent);
 }
 
+.tool-segmented {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .mode-row {
   display: grid;
   gap: 8px;
@@ -439,6 +443,68 @@ input[type="file"] {
 
 .secondary-button.danger {
   color: var(--rose);
+}
+
+.ai-progress {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(23, 107, 135, 0.22);
+  border-radius: 8px;
+  background: rgba(220, 239, 245, 0.58);
+}
+
+.ai-progress[hidden] {
+  display: none;
+}
+
+.progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.progress-meta output {
+  min-width: 42px;
+  text-align: right;
+}
+
+.progress-track {
+  overflow: hidden;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(23, 107, 135, 0.16);
+}
+
+.progress-track span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #7b5db1);
+  transition: width 220ms ease;
+}
+
+.ai-progress.indeterminate .progress-track span {
+  animation: progressPulse 1.1s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
 }
 
 .range-pair {
