@@ -15,6 +15,16 @@ const elements = {
   redoSelectionButton: document.querySelector("#redoSelectionButton"),
   invertSelectionButton: document.querySelector("#invertSelectionButton"),
   cleanupSelectionButton: document.querySelector("#cleanupSelectionButton"),
+  bgPreset: document.querySelector("#bgPreset"),
+  bgCustomColor: document.querySelector("#bgCustomColor"),
+  bgOutputRatio: document.querySelector("#bgOutputRatio"),
+  bgPadding: document.querySelector("#bgPadding"),
+  bgTolerance: document.querySelector("#bgTolerance"),
+  bgToleranceValue: document.querySelector("#bgToleranceValue"),
+  bgFeather: document.querySelector("#bgFeather"),
+  bgFeatherValue: document.querySelector("#bgFeatherValue"),
+  removeSolidBgButton: document.querySelector("#removeSolidBgButton"),
+  downloadTransparentButton: document.querySelector("#downloadTransparentButton"),
   imageModel: document.querySelector("#imageModel"),
   imageQuality: document.querySelector("#imageQuality"),
   inpaintPrompt: document.querySelector("#inpaintPrompt"),
@@ -72,6 +82,21 @@ const I18N = {
     peelAi: "剥离 + GPT补洞",
     peelOnly: "仅剥离成图层",
     quickHeal: "快速补当前选择",
+    solidBgRemove: "纯色背景移除",
+    bgColor: "背景颜色",
+    bgWhite: "白色",
+    bgBlack: "黑色",
+    bgGreen: "绿色",
+    bgCustom: "自定义",
+    customColor: "自定义颜色",
+    outputRatio: "输出比例",
+    ratioAuto: "自适应",
+    ratioOriginal: "原图比例",
+    outputPadding: "留白",
+    bgTolerance: "颜色容差",
+    edgeFeather: "边缘柔化",
+    removeSolidBg: "移除纯色背景",
+    downloadTransparent: "下载透明 PNG",
     inpaintPrompt: "GPT补洞提示词",
     imageModel: "图像模型",
     quality: "质量",
@@ -98,7 +123,9 @@ const I18N = {
     hide: "隐藏",
     moveUp: "上移",
     moveDown: "下移",
-    delete: "删除"
+    delete: "删除",
+    bgRemoved: "已移除 {count} px 背景。",
+    transparentDownloaded: "透明 PNG 已下载。"
   },
   en: {
     htmlLang: "en",
@@ -133,6 +160,21 @@ const I18N = {
     peelAi: "Peel + GPT fill",
     peelOnly: "Peel to layer only",
     quickHeal: "Quick fill selection",
+    solidBgRemove: "Solid background removal",
+    bgColor: "Background color",
+    bgWhite: "White",
+    bgBlack: "Black",
+    bgGreen: "Green",
+    bgCustom: "Custom",
+    customColor: "Custom color",
+    outputRatio: "Output ratio",
+    ratioAuto: "Auto fit",
+    ratioOriginal: "Original ratio",
+    outputPadding: "Padding",
+    bgTolerance: "Color tolerance",
+    edgeFeather: "Edge feather",
+    removeSolidBg: "Remove solid bg",
+    downloadTransparent: "Download transparent PNG",
     inpaintPrompt: "GPT fill prompt",
     imageModel: "Image model",
     quality: "Quality",
@@ -159,7 +201,9 @@ const I18N = {
     hide: "Hide",
     moveUp: "Up",
     moveDown: "Down",
-    delete: "Delete"
+    delete: "Delete",
+    bgRemoved: "Removed {count} px of background.",
+    transparentDownloaded: "Transparent PNG downloaded."
   },
   ja: {
     htmlLang: "ja",
@@ -194,6 +238,21 @@ const I18N = {
     peelAi: "切り出し + GPT補完",
     peelOnly: "レイヤー化のみ",
     quickHeal: "選択範囲を簡易補完",
+    solidBgRemove: "単色背景削除",
+    bgColor: "背景色",
+    bgWhite: "白",
+    bgBlack: "黒",
+    bgGreen: "緑",
+    bgCustom: "カスタム",
+    customColor: "カスタム色",
+    outputRatio: "出力比率",
+    ratioAuto: "自動",
+    ratioOriginal: "元画像比率",
+    outputPadding: "余白",
+    bgTolerance: "色の許容差",
+    edgeFeather: "エッジぼかし",
+    removeSolidBg: "単色背景を削除",
+    downloadTransparent: "透明PNGを保存",
     inpaintPrompt: "GPT補完プロンプト",
     imageModel: "画像モデル",
     quality: "品質",
@@ -220,7 +279,9 @@ const I18N = {
     hide: "非表示",
     moveUp: "上へ",
     moveDown: "下へ",
-    delete: "削除"
+    delete: "削除",
+    bgRemoved: "{count} px の背景を削除しました。",
+    transparentDownloaded: "透明PNGを書き出しました。"
   }
 };
 
@@ -236,7 +297,8 @@ const state = {
   layers: [],
   history: [],
   redo: [],
-  apiAvailable: false
+  apiAvailable: false,
+  transparentCanvas: null
 };
 
 const MASK_COLOR = "rgba(23, 107, 135, 0.46)";
@@ -253,6 +315,7 @@ elements.selectionCanvas.hidden = true;
 checkHealth();
 renderLayers();
 syncRangeLabels();
+syncBackgroundColorControls();
 applyLanguage(getInitialLanguage());
 setMessage(t("readImage"));
 
@@ -313,10 +376,18 @@ document.querySelectorAll("[data-tool]").forEach((button) => {
 elements.brushSize.addEventListener("input", syncRangeLabels);
 elements.magicTolerance.addEventListener("input", syncRangeLabels);
 elements.magicGrow.addEventListener("input", syncRangeLabels);
+elements.bgTolerance.addEventListener("input", syncRangeLabels);
+elements.bgFeather.addEventListener("input", syncRangeLabels);
+elements.bgPreset.addEventListener("change", syncBackgroundColorControls);
+elements.bgCustomColor.addEventListener("input", () => {
+  elements.bgPreset.value = "custom";
+});
 elements.undoSelectionButton.addEventListener("click", undoStep);
 elements.redoSelectionButton.addEventListener("click", redoStep);
 elements.invertSelectionButton.addEventListener("click", invertSelection);
 elements.cleanupSelectionButton.addEventListener("click", cleanupSelection);
+elements.removeSolidBgButton.addEventListener("click", removeSolidBackground);
+elements.downloadTransparentButton.addEventListener("click", downloadTransparentPng);
 elements.peelQuickButton.addEventListener("click", () => void peelAndQuickHeal());
 elements.peelAiButton.addEventListener("click", () => void peelAndAiHeal());
 elements.peelOnlyButton.addEventListener("click", () => peelSelection({ clearAfter: false, recordHistory: true }));
@@ -332,6 +403,10 @@ elements.selectionCanvas.addEventListener("pointerup", onPointerUp);
 elements.selectionCanvas.addEventListener("pointercancel", onPointerUp);
 elements.selectionCanvas.addEventListener("pointerleave", onPointerUp);
 
+["touchstart", "touchmove", "touchend", "gesturestart"].forEach((eventName) => {
+  elements.selectionCanvas.addEventListener(eventName, preventCanvasGesture, { passive: false });
+});
+
 window.addEventListener("keydown", (event) => {
   const isUndoKey = event.key.toLowerCase() === "z" && (event.metaKey || event.ctrlKey);
   if (!isUndoKey) {
@@ -344,6 +419,10 @@ window.addEventListener("keydown", (event) => {
   } else {
     undoStep();
   }
+});
+
+window.addEventListener("pagehide", () => {
+  state.isDrawing = false;
 });
 
 function getInitialLanguage() {
@@ -455,6 +534,7 @@ async function loadSourceImage(file) {
     state.layers = [];
     state.history = [];
     state.redo = [];
+    state.transparentCanvas = null;
     state.imageLoaded = true;
     state.imageName = file.name.replace(/\.[^.]+$/, "") || "image";
     elements.imageTitle.textContent = file.name;
@@ -519,11 +599,20 @@ function onPointerDown(event) {
   drawBrush(point, point);
 }
 
+function preventCanvasGesture(event) {
+  if (!state.imageLoaded) {
+    return;
+  }
+
+  event.preventDefault();
+}
+
 function onPointerMove(event) {
   if (!state.isDrawing || !state.imageLoaded) {
     return;
   }
 
+  event.preventDefault();
   const point = getCanvasPoint(event);
   if (state.tool === "rect") {
     drawRectSelection(point);
@@ -539,6 +628,7 @@ function onPointerUp(event) {
     return;
   }
 
+  event.preventDefault();
   if (elements.selectionCanvas.hasPointerCapture(event.pointerId)) {
     elements.selectionCanvas.releasePointerCapture(event.pointerId);
   }
@@ -986,6 +1076,7 @@ function peelSelection({ clearAfter, recordHistory = false }) {
     createdAt: new Date().toISOString()
   };
 
+  state.transparentCanvas = null;
   state.layers.unshift(layer);
   elements.layerName.value = nextLayerName();
   renderLayers();
@@ -1033,6 +1124,7 @@ function quickHealSelection({ clearAfter, recordHistory = false }) {
   fillCtx.drawImage(maskCanvas, 0, 0);
   fillCtx.globalCompositeOperation = "source-over";
 
+  state.transparentCanvas = null;
   backgroundCtx.drawImage(fillCanvas, 0, 0);
 
   if (clearAfter) {
@@ -1148,6 +1240,7 @@ async function aiHealSelection({ clearAfter, recordHistory = false }) {
     }
 
     const image = await loadImage(`data:image/png;base64,${data.image.b64}`);
+    state.transparentCanvas = null;
     backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
     backgroundCtx.drawImage(image, 0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
 
@@ -1209,9 +1302,294 @@ function resetCanvas() {
   backgroundCtx.drawImage(state.originalCanvas, 0, 0);
   clearSelection({ recordHistory: false });
   state.layers = [];
+  state.transparentCanvas = null;
   renderLayers();
   elements.layerName.value = "剥离图层 1";
   setMessage("画布已重置到原图。");
+}
+
+function removeSolidBackground() {
+  if (!state.imageLoaded) {
+    setMessage("请先加载图片。", true);
+    return;
+  }
+
+  const snapshot = captureSnapshot("移除纯色背景");
+  const source = renderCompositeCanvas();
+  const result = createSolidBackgroundRemovedCanvas(source);
+  if (!result.removedPixels) {
+    setMessage("没有检测到匹配的连通纯色背景，请调高颜色容差或选择自定义颜色。", true);
+    return;
+  }
+
+  pushSnapshot(snapshot);
+  backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
+  backgroundCtx.drawImage(result.canvas, 0, 0);
+  state.layers = [];
+  state.transparentCanvas = cloneCanvas(result.canvas);
+  clearSelection({ recordHistory: false });
+  renderLayers();
+  setMessage(t("bgRemoved", { count: formatPixels(result.removedPixels) }), false, true);
+}
+
+function downloadTransparentPng() {
+  if (!state.imageLoaded) {
+    setMessage("请先加载图片。", true);
+    return;
+  }
+
+  const source = state.transparentCanvas || renderCompositeCanvas();
+  const output = buildRatioOutputCanvas(source, elements.bgOutputRatio.value, Number(elements.bgPadding.value || 0.06));
+  output.toBlob((blob) => {
+    if (!blob) {
+      setMessage("透明 PNG 下载失败。", true);
+      return;
+    }
+    downloadBlob(blob, `${safeBaseName(state.imageName)}-transparent-${safeRatioName(elements.bgOutputRatio.value)}.png`);
+    setMessage(t("transparentDownloaded"), false, true);
+  }, "image/png");
+}
+
+function createSolidBackgroundRemovedCanvas(sourceCanvas) {
+  const width = sourceCanvas.width;
+  const height = sourceCanvas.height;
+  const ctx = sourceCanvas.getContext("2d", { willReadFrequently: true });
+  const image = ctx.getImageData(0, 0, width, height);
+  const target = selectedBackgroundColor();
+  const tolerance = Number(elements.bgTolerance.value || 36);
+  const feather = Number(elements.bgFeather.value || 1);
+  const mask = findConnectedSolidBackgroundMask(image.data, width, height, target, tolerance);
+  softenBackgroundMask(mask, image.data, width, height, target, tolerance, feather);
+
+  let removedPixels = 0;
+  for (let index = 0; index < mask.length; index += 1) {
+    const alpha = mask[index];
+    if (alpha <= 0) {
+      continue;
+    }
+
+    const pixel = index * 4;
+    const nextAlpha = Math.max(0, image.data[pixel + 3] - alpha);
+    image.data[pixel + 3] = nextAlpha;
+    if (nextAlpha === 0) {
+      image.data[pixel] = 0;
+      image.data[pixel + 1] = 0;
+      image.data[pixel + 2] = 0;
+      removedPixels += 1;
+    }
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext("2d").putImageData(image, 0, 0);
+  return { canvas, removedPixels };
+}
+
+function selectedBackgroundColor() {
+  const preset = elements.bgPreset.value;
+  if (preset === "black") {
+    return [0, 0, 0];
+  }
+  if (preset === "green") {
+    return [0, 255, 0];
+  }
+  if (preset === "custom") {
+    return hexToRgb(elements.bgCustomColor.value);
+  }
+  return [255, 255, 255];
+}
+
+function syncBackgroundColorControls() {
+  const preset = elements.bgPreset.value;
+  const presetColors = {
+    white: "#ffffff",
+    black: "#000000",
+    green: "#00ff00"
+  };
+
+  if (presetColors[preset]) {
+    elements.bgCustomColor.value = presetColors[preset];
+  }
+}
+
+function findConnectedSolidBackgroundMask(data, width, height, target, tolerance) {
+  const total = width * height;
+  const visited = new Uint8Array(total);
+  const mask = new Uint8ClampedArray(total);
+  const queue = new Int32Array(total);
+  let head = 0;
+  let tail = 0;
+
+  for (let x = 0; x < width; x += 1) {
+    enqueue(x);
+    enqueue((height - 1) * width + x);
+  }
+  for (let y = 0; y < height; y += 1) {
+    enqueue(y * width);
+    enqueue(y * width + width - 1);
+  }
+
+  while (head < tail) {
+    const index = queue[head++];
+    mask[index] = 255;
+    const x = index % width;
+    const y = Math.floor(index / width);
+    enqueueNeighbor(x - 1, y);
+    enqueueNeighbor(x + 1, y);
+    enqueueNeighbor(x, y - 1);
+    enqueueNeighbor(x, y + 1);
+  }
+
+  return mask;
+
+  function enqueue(index) {
+    if (index < 0 || index >= total || visited[index]) {
+      return;
+    }
+    visited[index] = 1;
+    if (isBackgroundLike(data, index * 4, target, tolerance)) {
+      queue[tail++] = index;
+    }
+  }
+
+  function enqueueNeighbor(x, y) {
+    if (x < 0 || y < 0 || x >= width || y >= height) {
+      return;
+    }
+    enqueue(y * width + x);
+  }
+}
+
+function softenBackgroundMask(mask, data, width, height, target, tolerance, feather) {
+  if (feather <= 0) {
+    return;
+  }
+
+  for (let pass = 0; pass < feather; pass += 1) {
+    const next = new Uint8ClampedArray(mask);
+    for (let y = 1; y < height - 1; y += 1) {
+      for (let x = 1; x < width - 1; x += 1) {
+        const index = y * width + x;
+        if (mask[index] === 255) {
+          continue;
+        }
+
+        const pixel = index * 4;
+        const close = isBackgroundLike(data, pixel, target, tolerance + 36 + feather * 8);
+        if (!close) {
+          continue;
+        }
+
+        const neighborAlpha = Math.max(
+          mask[index - 1],
+          mask[index + 1],
+          mask[index - width],
+          mask[index + width]
+        );
+        if (neighborAlpha > 0) {
+          next[index] = Math.max(next[index], Math.round(neighborAlpha * 0.45));
+        }
+      }
+    }
+    mask.set(next);
+  }
+}
+
+function isBackgroundLike(data, pixel, target, tolerance) {
+  const alpha = data[pixel + 3];
+  if (alpha === 0) {
+    return true;
+  }
+
+  const dr = data[pixel] - target[0];
+  const dg = data[pixel + 1] - target[1];
+  const db = data[pixel + 2] - target[2];
+  const luminance = Math.abs(0.2126 * dr + 0.7152 * dg + 0.0722 * db);
+  const distance = Math.sqrt(dr * dr + dg * dg + db * db);
+  return distance <= tolerance * 1.75 + 8 && luminance <= tolerance * 1.9 + 12;
+}
+
+function buildRatioOutputCanvas(sourceCanvas, ratioValue, padding) {
+  const bounds = findAlphaBounds(sourceCanvas);
+  if (!bounds) {
+    return cloneCanvas(sourceCanvas);
+  }
+
+  const sourceRatio = sourceCanvas.width / sourceCanvas.height;
+  const contentWidth = bounds.right - bounds.left + 1;
+  const contentHeight = bounds.bottom - bounds.top + 1;
+  const contentRatio = contentWidth / contentHeight;
+  const targetRatio = ratioValue === "original"
+    ? sourceRatio
+    : ratioValue === "auto"
+      ? contentRatio
+      : parseRatio(ratioValue) || contentRatio;
+  const contentScale = 1 + Math.max(0, padding) * 2;
+  let outputWidth = Math.ceil(contentWidth * contentScale);
+  let outputHeight = Math.ceil(outputWidth / targetRatio);
+
+  if (outputHeight < contentHeight * contentScale) {
+    outputHeight = Math.ceil(contentHeight * contentScale);
+    outputWidth = Math.ceil(outputHeight * targetRatio);
+  }
+
+  outputWidth = Math.max(1, outputWidth);
+  outputHeight = Math.max(1, outputHeight);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
+  const ctx = canvas.getContext("2d");
+  const dx = Math.round((outputWidth - contentWidth) / 2);
+  const dy = Math.round((outputHeight - contentHeight) / 2);
+  ctx.drawImage(
+    sourceCanvas,
+    bounds.left,
+    bounds.top,
+    contentWidth,
+    contentHeight,
+    dx,
+    dy,
+    contentWidth,
+    contentHeight
+  );
+  return canvas;
+}
+
+function findAlphaBounds(canvas) {
+  const width = canvas.width;
+  const height = canvas.height;
+  const data = canvas.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, width, height).data;
+  let left = width;
+  let top = height;
+  let right = -1;
+  let bottom = -1;
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const alpha = data[(y * width + x) * 4 + 3];
+      if (alpha <= 8) {
+        continue;
+      }
+      left = Math.min(left, x);
+      top = Math.min(top, y);
+      right = Math.max(right, x);
+      bottom = Math.max(bottom, y);
+    }
+  }
+
+  return right >= left && bottom >= top ? { left, top, right, bottom } : null;
+}
+
+function parseRatio(value) {
+  const match = String(value || "").match(/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/);
+  if (!match) {
+    return null;
+  }
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  return width > 0 && height > 0 ? width / height : null;
 }
 
 function exportCompositePng() {
@@ -1337,6 +1715,7 @@ function renderLayers() {
 
     const toggle = createMiniButton(layer.visible ? t("hide") : t("show"), () => {
       pushHistory(layer.visible ? "隐藏图层" : "显示图层");
+      state.transparentCanvas = null;
       layer.visible = !layer.visible;
       renderLayers();
     });
@@ -1371,6 +1750,7 @@ function moveLayer(index, direction) {
   }
 
   pushHistory("移动图层");
+  state.transparentCanvas = null;
   const [layer] = state.layers.splice(index, 1);
   state.layers.splice(nextIndex, 0, layer);
   renderLayers();
@@ -1378,6 +1758,7 @@ function moveLayer(index, direction) {
 
 function removeLayer(id) {
   pushHistory("删除图层");
+  state.transparentCanvas = null;
   state.layers = state.layers.filter((layer) => layer.id !== id);
   renderLayers();
 }
@@ -1445,6 +1826,7 @@ function captureSnapshot(label) {
     background: cloneCanvas(elements.backgroundCanvas),
     selection: cloneCanvas(elements.selectionCanvas),
     layers: cloneLayers(state.layers),
+    transparentCanvas: state.transparentCanvas ? cloneCanvas(state.transparentCanvas) : null,
     layerName: elements.layerName.value,
     imageLoaded: state.imageLoaded,
     imageName: state.imageName,
@@ -1471,6 +1853,7 @@ function restoreSnapshot(snapshot) {
   selectionCtx.drawImage(snapshot.selection, 0, 0);
 
   state.layers = cloneLayers(snapshot.layers);
+  state.transparentCanvas = snapshot.transparentCanvas ? cloneCanvas(snapshot.transparentCanvas) : null;
   elements.dropHint.hidden = state.imageLoaded;
   elements.backgroundCanvas.hidden = !state.imageLoaded;
   elements.selectionCanvas.hidden = !state.imageLoaded;
@@ -1596,7 +1979,9 @@ function setBusy(isBusy) {
     elements.clearMaskButton,
     elements.resetButton,
     elements.invertSelectionButton,
-    elements.cleanupSelectionButton
+    elements.cleanupSelectionButton,
+    elements.removeSolidBgButton,
+    elements.downloadTransparentButton
   ].forEach((button) => {
     button.disabled = isBusy;
   });
@@ -1617,6 +2002,8 @@ function syncRangeLabels() {
   elements.brushSizeValue.textContent = elements.brushSize.value;
   elements.magicToleranceValue.textContent = elements.magicTolerance.value;
   elements.magicGrowValue.textContent = elements.magicGrow.value;
+  elements.bgToleranceValue.textContent = elements.bgTolerance.value;
+  elements.bgFeatherValue.textContent = elements.bgFeather.value;
 }
 
 function toolLabel(tool) {
@@ -1696,6 +2083,30 @@ function safeBaseName(value) {
     .replace(/[^\p{L}\p{N}._-]+/gu, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80) || "image";
+}
+
+function safeRatioName(value) {
+  return String(value || "auto")
+    .replace(/:/g, "x")
+    .replace(/[^a-z0-9._-]+/gi, "-")
+    .replace(/^-+|-+$/g, "") || "auto";
+}
+
+function hexToRgb(hex) {
+  const normalized = String(hex || "#ffffff").trim();
+  const match = normalized.match(/^#?([a-f0-9]{6}|[a-f0-9]{3})$/i);
+  if (!match) {
+    return [255, 255, 255];
+  }
+
+  const value = match[1].length === 3
+    ? match[1].split("").map((char) => `${char}${char}`).join("")
+    : match[1];
+  return [
+    parseInt(value.slice(0, 2), 16),
+    parseInt(value.slice(2, 4), 16),
+    parseInt(value.slice(4, 6), 16)
+  ];
 }
 
 function formatPixels(value) {

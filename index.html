@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
     <title>Image2 Layer Lab</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
@@ -110,6 +110,74 @@
             <button id="peelAiButton" class="primary-button alt" type="button" data-i18n="peelAi">剥离 + GPT补洞</button>
             <button id="peelOnlyButton" class="secondary-button" type="button" data-i18n="peelOnly">仅剥离成图层</button>
             <button id="healButton" class="secondary-button" type="button" data-i18n="quickHeal">快速补当前选择</button>
+          </div>
+        </section>
+
+        <section class="tool-section" aria-label="纯色背景移除">
+          <div class="section-title" data-i18n="solidBgRemove">纯色背景移除</div>
+          <div class="settings-grid">
+            <label class="field" for="bgPreset">
+              <span data-i18n="bgColor">背景颜色</span>
+              <select id="bgPreset">
+                <option value="white" data-i18n="bgWhite">白色</option>
+                <option value="black" data-i18n="bgBlack">黑色</option>
+                <option value="green" data-i18n="bgGreen">绿色</option>
+                <option value="custom" data-i18n="bgCustom">自定义</option>
+              </select>
+            </label>
+
+            <label class="field color-field" for="bgCustomColor">
+              <span data-i18n="customColor">自定义颜色</span>
+              <input id="bgCustomColor" type="color" value="#ffffff">
+            </label>
+          </div>
+
+          <div class="settings-grid">
+            <label class="field" for="bgOutputRatio">
+              <span data-i18n="outputRatio">输出比例</span>
+              <select id="bgOutputRatio">
+                <option value="auto" data-i18n="ratioAuto">自适应</option>
+                <option value="original" data-i18n="ratioOriginal">原图比例</option>
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16</option>
+                <option value="1:1">1:1</option>
+                <option value="2:3">2:3</option>
+                <option value="3:2">3:2</option>
+                <option value="4:5">4:5</option>
+                <option value="5:4">5:4</option>
+              </select>
+            </label>
+
+            <label class="field" for="bgPadding">
+              <span data-i18n="outputPadding">留白</span>
+              <select id="bgPadding">
+                <option value="0.02">2%</option>
+                <option value="0.06" selected>6%</option>
+                <option value="0.1">10%</option>
+                <option value="0.16">16%</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="range-pair">
+            <label class="field" for="bgTolerance">
+              <span data-i18n="bgTolerance">颜色容差</span>
+              <input id="bgTolerance" type="range" min="0" max="160" step="1" value="36">
+            </label>
+            <output id="bgToleranceValue" class="range-value">36</output>
+          </div>
+
+          <div class="range-pair">
+            <label class="field" for="bgFeather">
+              <span data-i18n="edgeFeather">边缘柔化</span>
+              <input id="bgFeather" type="range" min="0" max="6" step="1" value="1">
+            </label>
+            <output id="bgFeatherValue" class="range-value">1</output>
+          </div>
+
+          <div class="command-grid">
+            <button id="removeSolidBgButton" class="primary-button" type="button" data-i18n="removeSolidBg">移除纯色背景</button>
+            <button id="downloadTransparentButton" class="secondary-button" type="button" data-i18n="downloadTransparent">下载透明 PNG</button>
           </div>
         </section>
 

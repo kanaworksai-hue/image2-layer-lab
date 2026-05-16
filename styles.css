@@ -26,6 +26,7 @@
 html,
 body {
   min-height: 100%;
+  overscroll-behavior: none;
 }
 
 body {
@@ -36,6 +37,8 @@ body {
     linear-gradient(115deg, rgba(23, 107, 135, 0.12), transparent 42%),
     linear-gradient(245deg, rgba(185, 67, 85, 0.08), transparent 46%),
     var(--surface);
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
 }
 
 button,
@@ -43,6 +46,7 @@ textarea,
 select,
 input {
   font: inherit;
+  touch-action: manipulation;
 }
 
 button {
@@ -162,7 +166,8 @@ h2 {
 
 textarea,
 select,
-input[type="text"] {
+input[type="text"],
+input[type="color"] {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -180,16 +185,26 @@ textarea {
 }
 
 select,
-input[type="text"] {
+input[type="text"],
+input[type="color"] {
   min-height: 42px;
   padding: 0 11px;
 }
 
 textarea:focus,
 select:focus,
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="color"]:focus {
   border-color: rgba(23, 107, 135, 0.62);
   box-shadow: 0 0 0 4px rgba(23, 107, 135, 0.13);
+}
+
+input[type="color"] {
+  padding: 4px;
+}
+
+.color-field input[type="color"] {
+  cursor: pointer;
 }
 
 input[type="range"] {
@@ -472,6 +487,8 @@ input[type="file"] {
     #fff;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0;
   background-size: 20px 20px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .canvas-stage.dragging {
@@ -515,6 +532,9 @@ input[type="file"] {
 .selection-canvas {
   cursor: crosshair;
   touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
 }
 
 .layer-panel {
