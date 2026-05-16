@@ -42,6 +42,13 @@ const elements = {
   applySolidBgButton: document.querySelector("#applySolidBgButton"),
   resetSolidBgButton: document.querySelector("#resetSolidBgButton"),
   downloadTransparentButton: document.querySelector("#downloadTransparentButton"),
+  sliceMode: document.querySelector("#sliceMode"),
+  sliceRows: document.querySelector("#sliceRows"),
+  sliceColumns: document.querySelector("#sliceColumns"),
+  createSliceLayersButton: document.querySelector("#createSliceLayersButton"),
+  clearSliceLayersButton: document.querySelector("#clearSliceLayersButton"),
+  sliceExportPsdButton: document.querySelector("#sliceExportPsdButton"),
+  sliceExportPngButton: document.querySelector("#sliceExportPngButton"),
   imageModel: document.querySelector("#imageModel"),
   imageQuality: document.querySelector("#imageQuality"),
   inpaintPrompt: document.querySelector("#inpaintPrompt"),
@@ -92,6 +99,7 @@ const I18N = {
     promo: "Want more? Follow me",
     layerWorkspace: "图层剥离",
     backgroundWorkspace: "背景移除",
+    sliceWorkspace: "切分图层",
     layerName: "图层名",
     semanticLevel: "语义层级",
     catDistractor: "干扰元素",
@@ -196,6 +204,20 @@ const I18N = {
     bgPreviewCleared: "已恢复到上传原图，可以重新调整后预览。",
     bgPreviewMissing: "请先生成背景移除预览。",
     transparentDownloaded: "透明 PNG 已下载。",
+    sliceMode: "切分方式",
+    sliceGrid: "网格",
+    sliceRowsMode: "横向条带",
+    sliceColumnsMode: "纵向条带",
+    sliceRows: "行数",
+    sliceColumns: "列数",
+    createSliceLayers: "生成切分图层",
+    clearSliceLayers: "清空切分图层",
+    sliceLayerName: "切分图层",
+    sliceNeedImage: "请先加载图片再切分图层。",
+    sliceGenerated: "已生成 {count} 个切分图层。",
+    sliceCleared: "已清空 {count} 个切分图层。",
+    sliceNoLayers: "当前没有切分图层。",
+    sliceTooMany: "切分图层最多支持 64 个，请减少行数或列数。",
     aiProgressPreparing: "准备 GPT 补洞...",
     aiProgressUploading: "上传图片和蒙版...",
     aiProgressWaiting: "等待 GPT 生成补洞...",
@@ -212,6 +234,7 @@ const I18N = {
     promo: "Want more? Follow me",
     layerWorkspace: "Layer peel",
     backgroundWorkspace: "Background removal",
+    sliceWorkspace: "Slice layers",
     layerName: "Layer name",
     semanticLevel: "Semantic level",
     catDistractor: "Distractor",
@@ -316,6 +339,20 @@ const I18N = {
     bgPreviewCleared: "Restored the uploaded image. Adjust settings and preview again.",
     bgPreviewMissing: "Generate a background removal preview first.",
     transparentDownloaded: "Transparent PNG downloaded.",
+    sliceMode: "Slice mode",
+    sliceGrid: "Grid",
+    sliceRowsMode: "Rows",
+    sliceColumnsMode: "Columns",
+    sliceRows: "Rows",
+    sliceColumns: "Columns",
+    createSliceLayers: "Create slice layers",
+    clearSliceLayers: "Clear slice layers",
+    sliceLayerName: "Slice layer",
+    sliceNeedImage: "Load an image before slicing layers.",
+    sliceGenerated: "Created {count} slice layers.",
+    sliceCleared: "Cleared {count} slice layers.",
+    sliceNoLayers: "There are no slice layers yet.",
+    sliceTooMany: "Slice layers are limited to 64. Reduce rows or columns.",
     aiProgressPreparing: "Preparing GPT fill...",
     aiProgressUploading: "Uploading image and mask...",
     aiProgressWaiting: "Waiting for GPT fill...",
@@ -332,6 +369,7 @@ const I18N = {
     promo: "Want more? Follow me",
     layerWorkspace: "レイヤー切り出し",
     backgroundWorkspace: "背景削除",
+    sliceWorkspace: "レイヤー分割",
     layerName: "レイヤー名",
     semanticLevel: "意味レベル",
     catDistractor: "不要要素",
@@ -436,6 +474,20 @@ const I18N = {
     bgPreviewCleared: "アップロード時の画像に戻しました。調整して再プレビューできます。",
     bgPreviewMissing: "先に背景削除プレビューを生成してください。",
     transparentDownloaded: "透明PNGを書き出しました。",
+    sliceMode: "分割方法",
+    sliceGrid: "グリッド",
+    sliceRowsMode: "横方向",
+    sliceColumnsMode: "縦方向",
+    sliceRows: "行数",
+    sliceColumns: "列数",
+    createSliceLayers: "分割レイヤーを生成",
+    clearSliceLayers: "分割レイヤーをクリア",
+    sliceLayerName: "分割レイヤー",
+    sliceNeedImage: "レイヤー分割の前に画像を読み込んでください。",
+    sliceGenerated: "{count} 個の分割レイヤーを生成しました。",
+    sliceCleared: "{count} 個の分割レイヤーをクリアしました。",
+    sliceNoLayers: "分割レイヤーはまだありません。",
+    sliceTooMany: "分割レイヤーは最大 64 個です。行数または列数を減らしてください。",
     aiProgressPreparing: "GPT補完を準備中...",
     aiProgressUploading: "画像とマスクをアップロード中...",
     aiProgressWaiting: "GPT補完の生成待ち...",
@@ -496,6 +548,7 @@ syncBackgroundColorControls();
 syncWorkspaceView();
 syncToolButtons();
 syncSelectionModeButtons();
+syncSliceControls();
 renderBackgroundPreview();
 applyLanguage(getInitialLanguage());
 setMessage(t("readImage"));
@@ -589,6 +642,16 @@ elements.bgCustomColor.addEventListener("input", () => {
 });
 elements.bgOutputRatio.addEventListener("change", renderBackgroundPreview);
 elements.bgPadding.addEventListener("change", renderBackgroundPreview);
+elements.sliceMode.addEventListener("change", () => {
+  syncSliceControls();
+  renderOverlay();
+});
+elements.sliceRows.addEventListener("input", renderOverlay);
+elements.sliceColumns.addEventListener("input", renderOverlay);
+elements.createSliceLayersButton.addEventListener("click", createSliceLayers);
+elements.clearSliceLayersButton.addEventListener("click", clearSliceLayers);
+elements.sliceExportPsdButton.addEventListener("click", exportPsd);
+elements.sliceExportPngButton.addEventListener("click", exportCompositePng);
 elements.zoomOutButton.addEventListener("click", () => {
   setCanvasZoom(state.zoom / ZOOM_STEP, { announce: true });
 });
@@ -724,7 +787,7 @@ function applyLanguage(language) {
 }
 
 function switchWorkspace(view) {
-  state.view = view === "background" ? "background" : "layers";
+  state.view = ["layers", "background", "slice"].includes(view) ? view : "layers";
   syncWorkspaceView();
 }
 
@@ -740,8 +803,9 @@ function syncWorkspaceView() {
   });
 
   elements.layerPanel.hidden = state.view === "background";
-  elements.selectionStats.hidden = state.view === "background";
+  elements.selectionStats.hidden = state.view !== "layers";
   elements.workbench.classList.toggle("background-mode", state.view === "background");
+  elements.workbench.classList.toggle("slice-mode", state.view === "slice");
   updateCanvasVisibility();
 }
 
@@ -757,7 +821,7 @@ function syncToolButtons() {
 
 function updateCanvasVisibility() {
   elements.backgroundCanvas.hidden = !state.imageLoaded;
-  elements.selectionCanvas.hidden = !state.imageLoaded || state.view === "background";
+  elements.selectionCanvas.hidden = !state.imageLoaded || state.view !== "layers";
   elements.overlayCanvas.hidden = !state.imageLoaded || state.view === "background";
   elements.dropHint.hidden = state.imageLoaded;
   updateZoomControls();
@@ -768,6 +832,13 @@ function syncSelectionModeButtons() {
   elements.selectionModeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.selectionMode === state.selectionMode);
   });
+}
+
+function syncSliceControls() {
+  const mode = elements.sliceMode.value;
+  elements.sliceRows.disabled = mode === "columns";
+  elements.sliceColumns.disabled = mode === "rows";
+  elements.clearSliceLayersButton.disabled = countSliceLayers() === 0;
 }
 
 function computeFitScale() {
@@ -1333,6 +1404,11 @@ function renderOverlay() {
     return;
   }
 
+  if (state.view === "slice") {
+    drawSliceGuides();
+    return;
+  }
+
   if (state.edgeDirty && !state.isDrawing) {
     rebuildSelectionEdgeOverlay();
   }
@@ -1352,6 +1428,62 @@ function renderOverlay() {
 
   drawBrushCursor();
   drawPenPathOverlay();
+}
+
+function drawSliceGuides() {
+  const { rows, columns } = currentSliceGrid();
+  const width = elements.overlayCanvas.width;
+  const height = elements.overlayCanvas.height;
+
+  overlayCtx.save();
+  overlayCtx.lineWidth = canvasLineWidth(2);
+  overlayCtx.strokeStyle = "rgba(255, 255, 255, 0.95)";
+  overlayCtx.setLineDash([canvasLineWidth(10), canvasLineWidth(5)]);
+  drawGridLines(width, height, rows, columns);
+  overlayCtx.stroke();
+
+  overlayCtx.lineWidth = canvasLineWidth(1.2);
+  overlayCtx.strokeStyle = "rgba(23, 107, 135, 0.95)";
+  overlayCtx.setLineDash([]);
+  drawGridLines(width, height, rows, columns);
+  overlayCtx.stroke();
+
+  overlayCtx.font = `${canvasLineWidth(13)}px ui-sans-serif, system-ui, sans-serif`;
+  overlayCtx.textAlign = "center";
+  overlayCtx.textBaseline = "middle";
+  let index = 1;
+  for (let row = 0; row < rows; row += 1) {
+    const top = (row * height) / rows;
+    const bottom = ((row + 1) * height) / rows;
+    for (let column = 0; column < columns; column += 1) {
+      const left = (column * width) / columns;
+      const right = ((column + 1) * width) / columns;
+      const x = (left + right) / 2;
+      const y = (top + bottom) / 2;
+      overlayCtx.fillStyle = "rgba(255, 255, 255, 0.86)";
+      overlayCtx.beginPath();
+      overlayCtx.arc(x, y, canvasLineWidth(14), 0, Math.PI * 2);
+      overlayCtx.fill();
+      overlayCtx.fillStyle = "rgba(14, 80, 103, 0.95)";
+      overlayCtx.fillText(String(index), x, y);
+      index += 1;
+    }
+  }
+  overlayCtx.restore();
+
+  function drawGridLines(width, height, rows, columns) {
+    overlayCtx.beginPath();
+    for (let column = 1; column < columns; column += 1) {
+      const x = (column * width) / columns;
+      overlayCtx.moveTo(x, 0);
+      overlayCtx.lineTo(x, height);
+    }
+    for (let row = 1; row < rows; row += 1) {
+      const y = (row * height) / rows;
+      overlayCtx.moveTo(0, y);
+      overlayCtx.lineTo(width, y);
+    }
+  }
 }
 
 function rebuildSelectionEdgeOverlay() {
@@ -2334,6 +2466,100 @@ function downloadTransparentPng() {
   }, "image/png");
 }
 
+function createSliceLayers() {
+  if (!state.imageLoaded) {
+    setMessage(t("sliceNeedImage"), true);
+    return;
+  }
+
+  const grid = currentSliceGrid();
+  const total = grid.rows * grid.columns;
+  if (total > 64) {
+    setMessage(t("sliceTooMany"), true);
+    return;
+  }
+
+  pushHistory("切分图层");
+  state.backgroundPreview = null;
+  state.transparentCanvas = null;
+  renderBackgroundPreview();
+  state.layers = state.layers.filter((layer) => layer.source !== "slice");
+
+  const source = cloneCanvas(elements.backgroundCanvas);
+  const createdLayers = [];
+  let layerIndex = 1;
+
+  for (let row = 0; row < grid.rows; row += 1) {
+    const top = Math.floor((row * source.height) / grid.rows);
+    const bottom = Math.floor(((row + 1) * source.height) / grid.rows);
+    const sliceHeight = bottom - top;
+
+    for (let column = 0; column < grid.columns; column += 1) {
+      const left = Math.floor((column * source.width) / grid.columns);
+      const right = Math.floor(((column + 1) * source.width) / grid.columns);
+      const sliceWidth = right - left;
+      const layerCanvas = document.createElement("canvas");
+      layerCanvas.width = source.width;
+      layerCanvas.height = source.height;
+      layerCanvas
+        .getContext("2d")
+        .drawImage(source, left, top, sliceWidth, sliceHeight, left, top, sliceWidth, sliceHeight);
+
+      createdLayers.push({
+        id: crypto.randomUUID(),
+        name: uniqueLayerName(`${t("sliceLayerName")} ${layerIndex}`),
+        category: "Scene",
+        canvas: layerCanvas,
+        visible: true,
+        pixels: sliceWidth * sliceHeight,
+        source: "slice",
+        createdAt: new Date().toISOString()
+      });
+      layerIndex += 1;
+    }
+  }
+
+  state.layers.unshift(...createdLayers);
+  renderLayers();
+  syncSliceControls();
+  renderOverlay();
+  setMessage(t("sliceGenerated", { count: createdLayers.length }), false, true);
+}
+
+function clearSliceLayers() {
+  const count = countSliceLayers();
+  if (!count) {
+    setMessage(t("sliceNoLayers"), true);
+    return;
+  }
+
+  pushHistory("清空切分图层");
+  state.layers = state.layers.filter((layer) => layer.source !== "slice");
+  renderLayers();
+  syncSliceControls();
+  setMessage(t("sliceCleared", { count }), false, true);
+}
+
+function countSliceLayers() {
+  return state.layers.filter((layer) => layer.source === "slice").length;
+}
+
+function currentSliceGrid() {
+  const mode = elements.sliceMode.value;
+  const rows = clamp(Math.round(Number(elements.sliceRows.value || 1)), 1, 12);
+  const columns = clamp(Math.round(Number(elements.sliceColumns.value || 1)), 1, 12);
+  elements.sliceRows.value = String(rows);
+  elements.sliceColumns.value = String(columns);
+
+  if (mode === "rows") {
+    return { rows, columns: 1 };
+  }
+  if (mode === "columns") {
+    return { rows: 1, columns };
+  }
+  return { rows, columns };
+}
+
 function createSolidBackgroundRemovedCanvas(sourceCanvas) {
   const width = sourceCanvas.width;
   const height = sourceCanvas.height;
@@ -2698,6 +2924,7 @@ function renderLayers() {
   elements.layerList.replaceChildren();
   elements.layerCount.textContent = String(state.layers.length);
   updatePsdPreview();
+  syncSliceControls();
 
   if (state.layers.length === 0) {
     const empty = document.createElement("p");
@@ -3068,7 +3295,11 @@ function setBusy(isBusy) {
     elements.removeSolidBgButton,
     elements.applySolidBgButton,
     elements.resetSolidBgButton,
-    elements.downloadTransparentButton
+    elements.downloadTransparentButton,
+    elements.createSliceLayersButton,
+    elements.clearSliceLayersButton,
+    elements.sliceExportPsdButton,
+    elements.sliceExportPngButton
   ].forEach((button) => {
     button.disabled = isBusy;
   });
@@ -3076,6 +3307,7 @@ function setBusy(isBusy) {
   if (!isBusy) {
     syncHistoryButtons();
     syncPenButtons();
+    syncSliceControls();
     renderBackgroundPreview();
     elements.peelAiButton.disabled = !state.apiAvailable;
   }
@@ -3119,6 +3351,7 @@ function toolLabel(tool) {
     rect: t("rect"),
     circle: t("circle"),
     roundRect: t("roundRect"),
+    pen: t("pen"),
     magic: t("magic")
   };
   return labels[tool] || "选区";

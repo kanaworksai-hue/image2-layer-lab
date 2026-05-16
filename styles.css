@@ -171,6 +171,7 @@ h2 {
 textarea,
 select,
 input[type="text"],
+input[type="number"],
 input[type="color"] {
   width: 100%;
   border: 1px solid var(--line);
@@ -190,6 +191,7 @@ textarea {
 
 select,
 input[type="text"],
+input[type="number"],
 input[type="color"] {
   min-height: 42px;
   padding: 0 11px;
@@ -198,6 +200,7 @@ input[type="color"] {
 textarea:focus,
 select:focus,
 input[type="text"]:focus,
+input[type="number"]:focus,
 input[type="color"]:focus {
   border-color: rgba(23, 107, 135, 0.62);
   box-shadow: 0 0 0 4px rgba(23, 107, 135, 0.13);
@@ -267,7 +270,7 @@ input[type="file"] {
 
 .mode-tabs {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding: 4px;
   border: 1px solid var(--line);

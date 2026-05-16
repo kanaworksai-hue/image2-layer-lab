@@ -39,6 +39,7 @@
         <div class="mode-tabs" role="tablist" aria-label="工作区">
           <button class="active" type="button" data-workspace-view="layers" data-i18n="layerWorkspace">图层剥离</button>
           <button type="button" data-workspace-view="background" data-i18n="backgroundWorkspace">背景移除</button>
+          <button type="button" data-workspace-view="slice" data-i18n="sliceWorkspace">切分图层</button>
         </div>
 
         <label class="upload-box" for="sourceImage">
@@ -198,6 +199,39 @@
               <button id="applySolidBgButton" class="secondary-button" type="button" disabled data-i18n="applyPreview">应用预览</button>
               <button id="resetSolidBgButton" class="secondary-button danger" type="button" data-i18n="retrySolidBg">重新来做</button>
               <button id="downloadTransparentButton" class="secondary-button" type="button" disabled data-i18n="downloadTransparent">下载透明 PNG</button>
+            </div>
+          </section>
+        </div>
+
+        <div id="sliceControls" class="view-controls" data-workspace-panel="slice" hidden>
+          <section class="tool-section panel-section" aria-label="切分图层">
+            <div class="section-title" data-i18n="sliceWorkspace">切分图层</div>
+            <div class="settings-grid">
+              <label class="field" for="sliceMode">
+                <span data-i18n="sliceMode">切分方式</span>
+                <select id="sliceMode">
+                  <option value="grid" data-i18n="sliceGrid">网格</option>
+                  <option value="rows" data-i18n="sliceRowsMode">横向条带</option>
+                  <option value="columns" data-i18n="sliceColumnsMode">纵向条带</option>
+                </select>
+              </label>
+
+              <label class="field" for="sliceRows">
+                <span data-i18n="sliceRows">行数</span>
+                <input id="sliceRows" type="number" min="1" max="12" step="1" value="2">
+              </label>
+
+              <label class="field" for="sliceColumns">
+                <span data-i18n="sliceColumns">列数</span>
+                <input id="sliceColumns" type="number" min="1" max="12" step="1" value="2">
+              </label>
+            </div>
+
+            <div class="command-grid">
+              <button id="createSliceLayersButton" class="primary-button" type="button" data-i18n="createSliceLayers">生成切分图层</button>
+              <button id="clearSliceLayersButton" class="secondary-button danger" type="button" data-i18n="clearSliceLayers">清空切分图层</button>
+              <button id="sliceExportPsdButton" class="secondary-button" type="button" data-i18n="exportPsd">导出 PSD</button>
+              <button id="sliceExportPngButton" class="secondary-button" type="button" data-i18n="exportPng">导出合成 PNG</button>
             </div>
           </section>
         </div>
