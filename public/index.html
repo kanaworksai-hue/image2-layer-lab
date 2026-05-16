@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-    <title>Image2 Layer Lab</title>
+    <title>Layer Lab</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
@@ -11,8 +11,8 @@
       <aside class="control-panel" aria-label="图层剥离控制台">
         <div class="brand-row">
           <div>
-            <p class="eyebrow" data-i18n="eyebrow">Progressive Layer Lab</p>
-            <h1>Image2 Layer Lab</h1>
+            <p class="eyebrow" data-i18n="eyebrow">Layer Lab</p>
+            <h1>Layer Lab</h1>
           </div>
           <span id="keyStatus" class="status-pill">检查中</span>
         </div>
@@ -48,97 +48,30 @@
           <input id="sourceImage" type="file" accept="image/png,image/jpeg,image/webp">
         </label>
 
-        <div id="layerControls" class="view-controls" data-workspace-panel="layers">
-        <div class="settings-grid">
-          <label class="field" for="layerName">
-            <span data-i18n="layerName">图层名</span>
-            <input id="layerName" type="text" value="剥离图层 1" maxlength="80">
-          </label>
-
-          <label class="field" for="layerCategory">
-            <span data-i18n="semanticLevel">语义层级</span>
-            <select id="layerCategory">
-              <option value="Distractor" data-i18n="catDistractor">干扰元素</option>
-              <option value="Secondary" data-i18n="catSecondary">次要物品</option>
-              <option value="Primary" data-i18n="catPrimary">人物/主体</option>
-              <option value="Text" data-i18n="catText">文字/标识</option>
-              <option value="Scene" data-i18n="catScene">场景结构</option>
-              <option value="Background" data-i18n="catBackground">背景</option>
-            </select>
-          </label>
-        </div>
-
-        <section class="tool-section" aria-label="选择工具">
-          <div class="section-title" data-i18n="selection">选择</div>
-          <div class="segmented tool-segmented" role="group" aria-label="选择工具">
-            <button class="tool-button active" type="button" data-tool="brush" data-i18n="brush">画笔</button>
-            <button class="tool-button" type="button" data-tool="erase" data-i18n="erase">擦除</button>
-            <button class="tool-button" type="button" data-tool="rect" data-i18n="rect">矩形</button>
-            <button class="tool-button" type="button" data-tool="circle" data-i18n="circle">圆形</button>
-            <button class="tool-button" type="button" data-tool="roundRect" data-i18n="roundRect">倒角矩形</button>
-            <button class="tool-button" type="button" data-tool="pen" data-i18n="pen">钢笔</button>
-            <button class="tool-button" type="button" data-tool="magic" data-i18n="magic">魔术棒</button>
-          </div>
-
-          <div id="selectionModeRow" class="mode-row">
-            <span data-i18n="magicSelectionMode">魔术棒模式</span>
-            <div class="segmented compact-segmented" role="group" aria-label="魔术棒模式">
-              <button type="button" data-selection-mode="replace" data-i18n="modeReplace">替换</button>
-              <button class="active" type="button" data-selection-mode="add" data-i18n="modeAdd">加选</button>
-              <button type="button" data-selection-mode="subtract" data-i18n="modeSubtract">减选</button>
-            </div>
-          </div>
-
-          <div id="penToolRow" class="pen-row" hidden>
-            <div class="pen-actions">
-              <button id="finishPenButton" class="secondary-button" type="button" data-i18n="finishPen">闭合成选区</button>
-              <button id="undoPenPointButton" class="secondary-button" type="button" data-i18n="undoPenPoint">撤销点</button>
-              <button id="clearPenButton" class="secondary-button danger" type="button" data-i18n="clearPenPath">清空路径</button>
-            </div>
-            <output id="penPointCount" class="pen-count">0 点</output>
-          </div>
-
-          <div class="command-grid">
-            <button id="undoSelectionButton" class="secondary-button" type="button" disabled data-i18n="undo">撤销上一步</button>
-            <button id="redoSelectionButton" class="secondary-button" type="button" disabled data-i18n="redo">重做</button>
-            <button id="invertSelectionButton" class="secondary-button" type="button" data-i18n="invert">反选</button>
-            <button id="cleanupSelectionButton" class="secondary-button" type="button" data-i18n="cleanup">填洞/平滑</button>
-          </div>
-
-          <div class="range-pair">
-            <label class="field" for="brushSize">
-              <span data-i18n="brushSize">画笔大小</span>
-              <input id="brushSize" type="range" min="4" max="140" step="1" value="36">
+        <div id="layerControls" class="view-controls workflow-controls" data-workspace-panel="layers">
+        <section class="tool-section panel-section" aria-label="图层设置">
+          <div class="section-title" data-i18n="layers">图层</div>
+          <div class="settings-grid">
+            <label class="field" for="layerName">
+              <span data-i18n="layerName">图层名</span>
+              <input id="layerName" type="text" value="剥离图层 1" maxlength="80">
             </label>
-            <output id="brushSizeValue" class="range-value">36</output>
-          </div>
 
-          <div class="range-pair">
-            <label class="field" for="magicTolerance">
-              <span data-i18n="magicTolerance">魔术棒容差</span>
-              <input id="magicTolerance" type="range" min="4" max="96" step="1" value="28">
+            <label class="field" for="layerCategory">
+              <span data-i18n="semanticLevel">语义层级</span>
+              <select id="layerCategory">
+                <option value="Distractor" data-i18n="catDistractor">干扰元素</option>
+                <option value="Secondary" data-i18n="catSecondary">次要物品</option>
+                <option value="Primary" data-i18n="catPrimary">人物/主体</option>
+                <option value="Text" data-i18n="catText">文字/标识</option>
+                <option value="Scene" data-i18n="catScene">场景结构</option>
+                <option value="Background" data-i18n="catBackground">背景</option>
+              </select>
             </label>
-            <output id="magicToleranceValue" class="range-value">28</output>
-          </div>
-
-          <div class="range-pair">
-            <label class="field" for="magicGrow">
-              <span data-i18n="magicGrow">魔术棒扩边</span>
-              <input id="magicGrow" type="range" min="0" max="8" step="1" value="2">
-            </label>
-            <output id="magicGrowValue" class="range-value">2</output>
-          </div>
-
-          <div id="roundRadiusRow" class="range-pair">
-            <label class="field" for="roundRadius">
-              <span data-i18n="roundRadius">倒角半径</span>
-              <input id="roundRadius" type="range" min="0" max="220" step="1" value="36">
-            </label>
-            <output id="roundRadiusValue" class="range-value">36</output>
           </div>
         </section>
 
-        <section class="tool-section" aria-label="剥离与补洞">
+        <section class="tool-section panel-section" aria-label="剥离与补洞">
           <div class="section-title" data-i18n="peel">剥离</div>
           <div class="command-grid">
             <button id="peelQuickButton" class="primary-button" type="button" data-i18n="peelQuick">剥离 + 快速补洞</button>
@@ -148,34 +81,37 @@
           </div>
         </section>
 
-        <label class="field" for="inpaintPrompt">
-          <span data-i18n="inpaintPrompt">GPT补洞提示词</span>
-          <textarea id="inpaintPrompt" rows="5">Remove only the selected masked element and its associated shadows or reflections. Reconstruct the covered area seamlessly by continuing the original lines, textures, lighting, and perspective. Keep every unmasked part of the image unchanged and do not add new objects.</textarea>
-        </label>
-
-        <div class="settings-grid">
-          <label class="field" for="imageModel">
-            <span data-i18n="imageModel">图像模型</span>
-            <select id="imageModel">
-              <option value="gpt-image-2" selected>gpt-image-2</option>
-              <option value="chatgpt-image-latest">chatgpt-image-latest</option>
-              <option value="gpt-image-1.5">gpt-image-1.5</option>
-              <option value="gpt-image-1">gpt-image-1</option>
-            </select>
+        <details class="tool-section panel-section settings-details">
+          <summary data-i18n="inpaintPrompt">GPT补洞提示词</summary>
+          <label class="field" for="inpaintPrompt">
+            <span data-i18n="inpaintPrompt">GPT补洞提示词</span>
+            <textarea id="inpaintPrompt" rows="4">Remove only the selected masked element and its associated shadows or reflections. Reconstruct the covered area seamlessly by continuing the original lines, textures, lighting, and perspective. Keep every unmasked part of the image unchanged and do not add new objects.</textarea>
           </label>
 
-          <label class="field" for="imageQuality">
-            <span data-i18n="quality">质量</span>
-            <select id="imageQuality">
-              <option value="auto">auto</option>
-              <option value="low">low</option>
-              <option value="medium" selected>medium</option>
-              <option value="high">high</option>
-            </select>
-          </label>
-        </div>
+          <div class="settings-grid">
+            <label class="field" for="imageModel">
+              <span data-i18n="imageModel">图像模型</span>
+              <select id="imageModel">
+                <option value="gpt-image-2" selected>gpt-image-2</option>
+                <option value="chatgpt-image-latest">chatgpt-image-latest</option>
+                <option value="gpt-image-1.5">gpt-image-1.5</option>
+                <option value="gpt-image-1">gpt-image-1</option>
+              </select>
+            </label>
 
-        <section class="tool-section" aria-label="导出">
+            <label class="field" for="imageQuality">
+              <span data-i18n="quality">质量</span>
+              <select id="imageQuality">
+                <option value="auto">auto</option>
+                <option value="low">low</option>
+                <option value="medium" selected>medium</option>
+                <option value="high">high</option>
+              </select>
+            </label>
+          </div>
+        </details>
+
+        <section class="tool-section panel-section" aria-label="导出">
           <div class="section-title" data-i18n="export">导出</div>
           <div class="command-grid">
             <button id="exportPsdButton" class="primary-button" type="button" data-i18n="exportPsd">导出 PSD</button>
@@ -187,7 +123,7 @@
         </div>
 
         <div id="backgroundControls" class="view-controls" data-workspace-panel="background" hidden>
-          <section class="tool-section" aria-label="纯色背景移除">
+          <section class="tool-section panel-section" aria-label="纯色背景移除">
             <div class="section-title" data-i18n="solidBgRemove">纯色背景移除</div>
             <div class="settings-grid">
               <label class="field" for="bgPreset">
@@ -295,6 +231,84 @@
             </div>
             <span id="selectionStats">选择 0 px</span>
           </div>
+
+          <section id="selectionDock" class="selection-dock" data-workspace-panel="layers" aria-label="选择工具">
+            <div class="dock-header">
+              <div class="section-title" data-i18n="selection">选择</div>
+              <div class="command-grid selection-command-grid">
+                <button id="undoSelectionButton" class="secondary-button" type="button" disabled data-i18n="undo">撤销上一步</button>
+                <button id="redoSelectionButton" class="secondary-button" type="button" disabled data-i18n="redo">重做</button>
+                <button id="invertSelectionButton" class="secondary-button" type="button" data-i18n="invert">反选</button>
+                <button id="cleanupSelectionButton" class="secondary-button" type="button" data-i18n="cleanup">填洞/平滑</button>
+              </div>
+            </div>
+
+            <div class="segmented tool-segmented" role="group" aria-label="选择工具">
+              <button class="tool-button active" type="button" data-tool="brush" data-i18n="brush">画笔</button>
+              <button class="tool-button" type="button" data-tool="erase" data-i18n="erase">擦除</button>
+              <button class="tool-button" type="button" data-tool="rect" data-i18n="rect">矩形</button>
+              <button class="tool-button" type="button" data-tool="circle" data-i18n="circle">圆形</button>
+              <button class="tool-button" type="button" data-tool="roundRect" data-i18n="roundRect">倒角矩形</button>
+              <button class="tool-button" type="button" data-tool="pen" data-i18n="pen">钢笔</button>
+              <button class="tool-button" type="button" data-tool="magic" data-i18n="magic">魔术棒</button>
+            </div>
+
+            <div class="selection-options">
+              <div class="selection-option-stack">
+                <div id="selectionModeRow" class="mode-row">
+                  <span data-i18n="magicSelectionMode">魔术棒模式</span>
+                  <div class="segmented compact-segmented" role="group" aria-label="魔术棒模式">
+                    <button type="button" data-selection-mode="replace" data-i18n="modeReplace">替换</button>
+                    <button class="active" type="button" data-selection-mode="add" data-i18n="modeAdd">加选</button>
+                    <button type="button" data-selection-mode="subtract" data-i18n="modeSubtract">减选</button>
+                  </div>
+                </div>
+
+                <div id="penToolRow" class="pen-row" hidden>
+                  <div class="pen-actions">
+                    <button id="finishPenButton" class="secondary-button" type="button" data-i18n="finishPen">闭合成选区</button>
+                    <button id="undoPenPointButton" class="secondary-button" type="button" data-i18n="undoPenPoint">撤销点</button>
+                    <button id="clearPenButton" class="secondary-button danger" type="button" data-i18n="clearPenPath">清空路径</button>
+                  </div>
+                  <output id="penPointCount" class="pen-count">0 点</output>
+                </div>
+              </div>
+
+              <div class="selection-ranges">
+                <div class="range-pair">
+                  <label class="field" for="brushSize">
+                    <span data-i18n="brushSize">画笔大小</span>
+                    <input id="brushSize" type="range" min="4" max="140" step="1" value="36">
+                  </label>
+                  <output id="brushSizeValue" class="range-value">36</output>
+                </div>
+
+                <div class="range-pair">
+                  <label class="field" for="magicTolerance">
+                    <span data-i18n="magicTolerance">魔术棒容差</span>
+                    <input id="magicTolerance" type="range" min="4" max="96" step="1" value="28">
+                  </label>
+                  <output id="magicToleranceValue" class="range-value">28</output>
+                </div>
+
+                <div class="range-pair">
+                  <label class="field" for="magicGrow">
+                    <span data-i18n="magicGrow">魔术棒扩边</span>
+                    <input id="magicGrow" type="range" min="0" max="8" step="1" value="2">
+                  </label>
+                  <output id="magicGrowValue" class="range-value">2</output>
+                </div>
+
+                <div id="roundRadiusRow" class="range-pair">
+                  <label class="field" for="roundRadius">
+                    <span data-i18n="roundRadius">倒角半径</span>
+                    <input id="roundRadius" type="range" min="0" max="220" step="1" value="36">
+                  </label>
+                  <output id="roundRadiusValue" class="range-value">36</output>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <div id="canvasStage" class="canvas-stage">
             <div id="dropHint" class="drop-hint">

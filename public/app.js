@@ -84,7 +84,7 @@ const elements = {
 const I18N = {
   zh: {
     htmlLang: "zh-CN",
-    eyebrow: "Progressive Layer Lab",
+    eyebrow: "Layer Lab",
     language: "语言",
     sourceImage: "原图",
     chooseImage: "选择或拖入图片",
@@ -204,7 +204,7 @@ const I18N = {
   },
   en: {
     htmlLang: "en",
-    eyebrow: "Progressive Layer Lab",
+    eyebrow: "Layer Lab",
     language: "Language",
     sourceImage: "Source",
     chooseImage: "Choose or drop an image",
@@ -324,7 +324,7 @@ const I18N = {
   },
   ja: {
     htmlLang: "ja",
-    eyebrow: "Progressive Layer Lab",
+    eyebrow: "Layer Lab",
     language: "言語",
     sourceImage: "元画像",
     chooseImage: "画像を選択またはドロップ",

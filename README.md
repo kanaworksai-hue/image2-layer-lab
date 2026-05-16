@@ -1,6 +1,6 @@
-# Image2 Layer Lab
+# Layer Lab
 
-Image2 Layer Lab is a local browser tool for peeling people, objects, text, and scene elements out of an image, filling the background, and exporting the result as a layered PSD. The workflow is inspired by *Progressive Photorealistic Simplification*: select an element, remove it from the background, keep the removed element as its own layer, and export a clean compositing file.
+Layer Lab is a local browser tool for peeling people, objects, text, and scene elements out of an image, filling the background, and exporting the result as a layered PSD. The workflow is inspired by *Progressive Photorealistic Simplification*: select an element, remove it from the background, keep the removed element as its own layer, and export a clean compositing file.
 
 [KanaWorks_AI on X](https://x.com/kanaworks_ai) · Want more? Follow me.
 
@@ -62,7 +62,7 @@ http://localhost:3000
 
 ## 日本語
 
-Image2 Layer Lab は、画像内の人物、物体、文字、シーン要素を選択して切り出し、背景を補完し、PSD レイヤーとして書き出すローカルブラウザツールです。
+Layer Lab は、画像内の人物、物体、文字、シーン要素を選択して切り出し、背景を補完し、PSD レイヤーとして書き出すローカルブラウザツールです。
 
 使い方:
 
@@ -75,7 +75,7 @@ GPT補完を使う時だけ OpenAI API の費用が発生します。通常の�
 
 ## 中文
 
-Image2 Layer Lab 是一个本地浏览器工具，可以把图片中的人物、物品、文字、场景元素选中并剥离，背景可以本地快速补洞，也可以用 OpenAI Image API 进行蒙版补洞，最后导出 PSD 分层文件。
+Layer Lab 是一个本地浏览器工具，可以把图片中的人物、物品、文字、场景元素选中并剥离，背景可以本地快速补洞，也可以用 OpenAI Image API 进行蒙版补洞，最后导出 PSD 分层文件。
 
 使用方式：
 

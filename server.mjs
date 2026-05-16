@@ -152,7 +152,7 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Image2 Layer Lab running at http://localhost:${PORT}`);
+  console.log(`Layer Lab running at http://localhost:${PORT}`);
   if (!API_KEY) {
     console.log("OPENAI_API_KEY is not set. Add it to .env before generating images.");
   }
