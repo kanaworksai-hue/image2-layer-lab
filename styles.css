@@ -261,6 +261,35 @@ input[type="file"] {
   align-items: center;
 }
 
+.mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.mode-tabs button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 850;
+}
+
+.mode-tabs button.active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.view-controls {
+  display: grid;
+  gap: 17px;
+}
+
 .promo-card {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr);
@@ -351,6 +380,21 @@ input[type="file"] {
   background: var(--accent);
 }
 
+.mode-row {
+  display: grid;
+  gap: 8px;
+}
+
+.mode-row > span {
+  color: #30343a;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.compact-segmented {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .command-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -437,6 +481,10 @@ input[type="file"] {
   grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
   gap: 20px;
   min-width: 0;
+}
+
+.workbench.background-mode {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .canvas-panel {
