@@ -4,6 +4,10 @@ Image2 Layer Lab is a local browser tool for peeling people, objects, text, and 
 
 [KanaWorks_AI on X](https://x.com/kanaworks_ai) · Want more? Follow me.
 
+Live static demo: https://kanaworksai-hue.github.io/image2-layer-lab/
+
+The static demo supports local selection, peeling, quick fill, PNG export, and PSD export directly in the browser. GPT fill requires running the Node server locally with your own OpenAI API key.
+
 ## Languages
 
 The app includes three UI versions:
