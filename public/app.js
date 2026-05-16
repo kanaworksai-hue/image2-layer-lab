@@ -90,6 +90,7 @@ const I18N = {
     keyReady: "已配置",
     keyMissing: "缺少 Key",
     keyOffline: "离线",
+    clientOnly: "本地模式",
     selectionStats: "选择 {count} px",
     topLayer: "顶部",
     layerOrder: "第 {index} 层",
@@ -150,6 +151,7 @@ const I18N = {
     keyReady: "Ready",
     keyMissing: "No key",
     keyOffline: "Offline",
+    clientOnly: "Local mode",
     selectionStats: "Selection {count} px",
     topLayer: "Top",
     layerOrder: "Layer {index}",
@@ -210,6 +212,7 @@ const I18N = {
     keyReady: "設定済み",
     keyMissing: "キーなし",
     keyOffline: "オフライン",
+    clientOnly: "ローカル",
     selectionStats: "選択 {count} px",
     topLayer: "最上部",
     layerOrder: "{index} 番目",
@@ -232,7 +235,8 @@ const state = {
   originalCanvas: document.createElement("canvas"),
   layers: [],
   history: [],
-  redo: []
+  redo: [],
+  apiAvailable: false
 };
 
 const MASK_COLOR = "rgba(23, 107, 135, 0.46)";
@@ -386,16 +390,34 @@ function applyLanguage(language) {
 }
 
 async function checkHealth() {
+  if (isStaticHosted()) {
+    state.apiAvailable = false;
+    elements.keyStatus.textContent = t("clientOnly");
+    elements.keyStatus.classList.remove("ready");
+    elements.keyStatus.classList.add("missing");
+    elements.peelAiButton.disabled = true;
+    elements.peelAiButton.title = "GPT fill requires running the Node server locally with your own OpenAI API key.";
+    return;
+  }
+
   try {
     const response = await fetch("/api/health");
     const data = await response.json();
+    state.apiAvailable = Boolean(data.hasApiKey);
     elements.keyStatus.textContent = data.hasApiKey ? t("keyReady") : t("keyMissing");
     elements.keyStatus.classList.toggle("ready", data.hasApiKey);
     elements.keyStatus.classList.toggle("missing", !data.hasApiKey);
+    elements.peelAiButton.disabled = !data.hasApiKey;
   } catch {
+    state.apiAvailable = false;
     elements.keyStatus.textContent = t("keyOffline");
     elements.keyStatus.classList.add("missing");
+    elements.peelAiButton.disabled = true;
   }
+}
+
+function isStaticHosted() {
+  return location.protocol === "file:" || location.hostname.endsWith("github.io");
 }
 
 async function loadFirstImageFromDrop(files) {
@@ -1581,6 +1603,7 @@ function setBusy(isBusy) {
 
   if (!isBusy) {
     syncHistoryButtons();
+    elements.peelAiButton.disabled = !state.apiAvailable;
   }
 }
 
