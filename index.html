@@ -285,6 +285,14 @@
               <strong id="imageTitle" data-i18n="waitingImage">等待图片</strong>
               <span id="canvasMeta" data-i18n="notLoaded">未加载</span>
             </div>
+            <div class="zoom-controls" aria-label="画布缩放">
+              <button id="zoomOutButton" class="zoom-button" type="button" disabled aria-label="Zoom out">-</button>
+              <input id="zoomSlider" class="zoom-range" type="range" min="25" max="800" step="5" value="100" disabled aria-label="Zoom">
+              <button id="zoomInButton" class="zoom-button" type="button" disabled aria-label="Zoom in">+</button>
+              <output id="zoomValue" class="zoom-value">100%</output>
+              <button id="zoomFitButton" class="zoom-button text-button" type="button" disabled data-i18n="zoomFit">适应</button>
+              <button id="panModeButton" class="zoom-button text-button" type="button" disabled data-i18n="panMode">移动</button>
+            </div>
             <span id="selectionStats">选择 0 px</span>
           </div>
 

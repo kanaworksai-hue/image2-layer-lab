@@ -630,11 +630,14 @@ input[type="file"] {
   overflow: hidden;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  height: calc(100vh - 48px);
+  max-height: calc(100vh - 48px);
   min-height: calc(100vh - 48px);
 }
 
 .canvas-toolbar {
   align-items: center;
+  flex-wrap: wrap;
   padding: 14px 18px;
   border-bottom: 1px solid var(--line);
 }
@@ -659,6 +662,56 @@ input[type="file"] {
   font-weight: 750;
 }
 
+.canvas-toolbar .zoom-controls {
+  display: grid;
+  grid-template-columns: 36px minmax(110px, 180px) 36px 54px repeat(2, minmax(54px, auto));
+  align-items: center;
+  gap: 8px;
+  min-width: min(100%, 440px);
+}
+
+.zoom-button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--accent-strong);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.zoom-button:hover {
+  border-color: rgba(23, 107, 135, 0.5);
+  background: var(--accent-soft);
+}
+
+.zoom-button.active {
+  color: #fff;
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.zoom-button.text-button {
+  min-width: 54px;
+}
+
+.zoom-range {
+  width: 100%;
+}
+
+.zoom-value {
+  display: grid;
+  min-height: 34px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--accent-strong);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 850;
+}
+
 .canvas-stage {
   position: relative;
   overflow: auto;
@@ -681,6 +734,14 @@ input[type="file"] {
 .canvas-stage.dragging {
   outline: 3px solid rgba(23, 107, 135, 0.32);
   outline-offset: -12px;
+}
+
+.canvas-stage.pan-mode .selection-canvas {
+  cursor: grab;
+}
+
+.canvas-stage.panning .selection-canvas {
+  cursor: grabbing;
 }
 
 .drop-hint {
@@ -710,8 +771,8 @@ input[type="file"] {
 .selection-canvas,
 .overlay-canvas {
   grid-area: 1 / 1;
-  max-width: min(100%, 1280px);
-  max-height: calc(100vh - 136px);
+  max-width: none;
+  max-height: none;
   border-radius: 8px;
 }
 
@@ -902,6 +963,14 @@ input[type="file"] {
   .settings-grid,
   .command-grid {
     grid-template-columns: 1fr;
+  }
+
+  .zoom-controls {
+    grid-template-columns: 36px minmax(0, 1fr) 36px 52px;
+  }
+
+  .zoom-controls .text-button {
+    grid-column: span 2;
   }
 
   .segmented {
