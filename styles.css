@@ -60,12 +60,12 @@ button:disabled {
 
 .app-shell {
   display: grid;
-  grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
-  gap: 20px;
-  width: min(1560px, 100%);
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  gap: 16px;
+  width: min(1680px, 100%);
   min-height: 100vh;
   margin: 0 auto;
-  padding: 24px;
+  padding: 18px;
 }
 
 .control-panel,
@@ -79,10 +79,14 @@ button:disabled {
 }
 
 .control-panel {
+  position: sticky;
+  top: 18px;
   align-self: start;
   display: grid;
-  gap: 17px;
-  padding: 22px;
+  gap: 12px;
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  padding: 16px;
 }
 
 .brand-row,
@@ -111,7 +115,7 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: 34px;
+  font-size: 30px;
   line-height: 1;
   letter-spacing: 0;
 }
@@ -223,8 +227,8 @@ input[type="file"] {
 .upload-box {
   display: grid;
   gap: 7px;
-  min-height: 110px;
-  padding: 14px;
+  min-height: 92px;
+  padding: 12px;
   border: 1px dashed rgba(23, 107, 135, 0.46);
   border-radius: 8px;
   background: rgba(220, 239, 245, 0.42);
@@ -232,7 +236,7 @@ input[type="file"] {
 
 .upload-box strong {
   color: var(--accent-strong);
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.2;
 }
 
@@ -287,15 +291,15 @@ input[type="file"] {
 
 .view-controls {
   display: grid;
-  gap: 17px;
+  gap: 12px;
 }
 
 .promo-card {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-columns: 48px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
-  padding: 10px;
+  padding: 9px;
   border: 1px solid rgba(23, 107, 135, 0.24);
   border-radius: 8px;
   color: var(--ink);
@@ -310,8 +314,8 @@ input[type="file"] {
 }
 
 .promo-card img {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   border: 1px solid rgba(23, 107, 135, 0.2);
   border-radius: 8px;
   background: #fff;
@@ -345,6 +349,28 @@ input[type="file"] {
 .tool-section {
   display: grid;
   gap: 12px;
+}
+
+.panel-section {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.workflow-controls .settings-grid {
+  grid-template-columns: 1fr;
+}
+
+.settings-details summary {
+  cursor: pointer;
+  color: #30343a;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.settings-details[open] summary {
+  margin-bottom: 12px;
 }
 
 .segmented,
@@ -618,7 +644,7 @@ input[type="file"] {
 .workbench {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
-  gap: 20px;
+  gap: 16px;
   min-width: 0;
 }
 
@@ -629,7 +655,7 @@ input[type="file"] {
 .canvas-panel {
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   height: calc(100vh - 48px);
   max-height: calc(100vh - 48px);
   min-height: calc(100vh - 48px);
@@ -710,6 +736,50 @@ input[type="file"] {
   background: #fff;
   font-size: 12px;
   font-weight: 850;
+}
+
+.selection-dock {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(244, 246, 248, 0.82);
+}
+
+.dock-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.selection-command-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.selection-dock .tool-segmented {
+  grid-template-columns: repeat(7, minmax(64px, 1fr));
+}
+
+.selection-options {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(320px, 1.6fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.selection-option-stack,
+.selection-ranges {
+  display: grid;
+  gap: 10px;
+}
+
+.selection-ranges {
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+}
+
+.selection-dock .range-pair {
+  grid-template-columns: minmax(0, 1fr) 48px;
 }
 
 .canvas-stage {
@@ -933,10 +1003,24 @@ input[type="file"] {
     grid-template-columns: 1fr;
   }
 
+  .control-panel {
+    position: static;
+    max-height: none;
+  }
+
   .canvas-panel,
   .layer-panel {
     min-height: auto;
     max-height: none;
+  }
+
+  .selection-options,
+  .dock-header {
+    grid-template-columns: 1fr;
+  }
+
+  .selection-dock .tool-segmented {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -965,6 +1049,11 @@ input[type="file"] {
     grid-template-columns: 1fr;
   }
 
+  .selection-command-grid,
+  .selection-ranges {
+    grid-template-columns: 1fr;
+  }
+
   .zoom-controls {
     grid-template-columns: 36px minmax(0, 1fr) 36px 52px;
   }
@@ -974,6 +1063,10 @@ input[type="file"] {
   }
 
   .segmented {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .selection-dock .tool-segmented {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
