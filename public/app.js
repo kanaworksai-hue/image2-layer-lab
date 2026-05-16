@@ -61,6 +61,12 @@ const elements = {
   workbench: document.querySelector("#workbench"),
   canvasStage: document.querySelector("#canvasStage"),
   dropHint: document.querySelector("#dropHint"),
+  zoomOutButton: document.querySelector("#zoomOutButton"),
+  zoomInButton: document.querySelector("#zoomInButton"),
+  zoomFitButton: document.querySelector("#zoomFitButton"),
+  zoomSlider: document.querySelector("#zoomSlider"),
+  zoomValue: document.querySelector("#zoomValue"),
+  panModeButton: document.querySelector("#panModeButton"),
   backgroundCanvas: document.querySelector("#backgroundCanvas"),
   selectionCanvas: document.querySelector("#selectionCanvas"),
   overlayCanvas: document.querySelector("#overlayCanvas"),
@@ -166,6 +172,12 @@ const I18N = {
     psdExportDetails: "顺序：{layers}、填充背景、原图参考（隐藏）。",
     emptyLayer: "剥离后的元素会保留在这里，并在 PSD 中作为独立图层导出。",
     readImage: "读取一张图片后即可开始分层。",
+    zoomFit: "适应",
+    panMode: "移动",
+    zoomedTo: "画布缩放 {zoom}%。",
+    fitZoomed: "画布已适应窗口。",
+    panModeOn: "移动模式已开启，拖动画布查看细节。",
+    panModeOff: "移动模式已关闭。",
     keyReady: "已配置",
     keyMissing: "缺少 Key",
     keyOffline: "离线",
@@ -280,6 +292,12 @@ const I18N = {
     psdExportDetails: "Order: {layers}, filled background, original reference (hidden).",
     emptyLayer: "Peeled elements stay here and export as independent PSD layers.",
     readImage: "Load an image to start layering.",
+    zoomFit: "Fit",
+    panMode: "Pan",
+    zoomedTo: "Canvas zoom {zoom}%.",
+    fitZoomed: "Canvas fit to the window.",
+    panModeOn: "Pan mode on. Drag the canvas to inspect details.",
+    panModeOff: "Pan mode off.",
     keyReady: "Ready",
     keyMissing: "No key",
     keyOffline: "Offline",
@@ -394,6 +412,12 @@ const I18N = {
     psdExportDetails: "順序：{layers}、補完背景、元画像参照（非表示）。",
     emptyLayer: "切り出した要素はここに残り、PSD の独立レイヤーとして書き出されます。",
     readImage: "画像を読み込むとレイヤー作成を開始できます。",
+    zoomFit: "全体",
+    panMode: "移動",
+    zoomedTo: "キャンバスを {zoom}% に拡大しました。",
+    fitZoomed: "キャンバスをウィンドウに合わせました。",
+    panModeOn: "移動モードをオンにしました。ドラッグして細部を確認できます。",
+    panModeOff: "移動モードをオフにしました。",
     keyReady: "設定済み",
     keyMissing: "キーなし",
     keyOffline: "オフライン",
@@ -432,6 +456,11 @@ const state = {
   selectionSnapshot: null,
   pointerPoint: null,
   penPoints: [],
+  zoom: 1,
+  fitScale: 1,
+  panMode: false,
+  isPanning: false,
+  panStart: null,
   edgeCanvas: document.createElement("canvas"),
   edgeDirty: true,
   selectionPixels: 0,
@@ -447,6 +476,9 @@ const state = {
 const MASK_COLOR = "rgba(23, 107, 135, 0.46)";
 const MASK_THRESHOLD = 18;
 const HISTORY_LIMIT = 24;
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 8;
+const ZOOM_STEP = 1.25;
 const SUPPORTED_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 const backgroundCtx = elements.backgroundCanvas.getContext("2d", { willReadFrequently: true });
@@ -557,6 +589,20 @@ elements.bgCustomColor.addEventListener("input", () => {
 });
 elements.bgOutputRatio.addEventListener("change", renderBackgroundPreview);
 elements.bgPadding.addEventListener("change", renderBackgroundPreview);
+elements.zoomOutButton.addEventListener("click", () => {
+  setCanvasZoom(state.zoom / ZOOM_STEP, { announce: true });
+});
+elements.zoomInButton.addEventListener("click", () => {
+  setCanvasZoom(state.zoom * ZOOM_STEP, { announce: true });
+});
+elements.zoomFitButton.addEventListener("click", () => resetCanvasZoom({ announce: true }));
+elements.zoomSlider.addEventListener("input", () => {
+  setCanvasZoom(Number(elements.zoomSlider.value) / 100);
+});
+elements.zoomSlider.addEventListener("change", () => {
+  setMessage(t("zoomedTo", { zoom: Math.round(state.zoom * 100) }), false, true);
+});
+elements.panModeButton.addEventListener("click", togglePanMode);
 elements.undoSelectionButton.addEventListener("click", undoStep);
 elements.redoSelectionButton.addEventListener("click", redoStep);
 elements.invertSelectionButton.addEventListener("click", invertSelection);
@@ -622,7 +668,14 @@ window.addEventListener("keydown", (event) => {
 
 window.addEventListener("pagehide", () => {
   state.isDrawing = false;
+  state.isPanning = false;
 });
+
+window.addEventListener("resize", () => {
+  applyCanvasZoom({ preserveCenter: true });
+});
+
+elements.canvasStage.addEventListener("wheel", onCanvasWheel, { passive: false });
 
 function getInitialLanguage() {
   const saved = localStorage.getItem("image2:language");
@@ -707,6 +760,7 @@ function updateCanvasVisibility() {
   elements.selectionCanvas.hidden = !state.imageLoaded || state.view === "background";
   elements.overlayCanvas.hidden = !state.imageLoaded || state.view === "background";
   elements.dropHint.hidden = state.imageLoaded;
+  updateZoomControls();
   renderOverlay();
 }
 
@@ -714,6 +768,143 @@ function syncSelectionModeButtons() {
   elements.selectionModeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.selectionMode === state.selectionMode);
   });
+}
+
+function computeFitScale() {
+  if (!state.imageLoaded || !elements.backgroundCanvas.width || !elements.backgroundCanvas.height) {
+    return 1;
+  }
+
+  const styles = getComputedStyle(elements.canvasStage);
+  const paddingX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+  const paddingY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+  const availableWidth = Math.max(80, elements.canvasStage.clientWidth - paddingX);
+  const availableHeight = Math.max(80, elements.canvasStage.clientHeight - paddingY);
+  return Math.min(
+    1,
+    availableWidth / elements.backgroundCanvas.width,
+    availableHeight / elements.backgroundCanvas.height
+  );
+}
+
+function resetCanvasZoom({ announce = false } = {}) {
+  state.zoom = 1;
+  state.panMode = false;
+  applyCanvasZoom({ preserveCenter: false });
+  updateZoomControls();
+  elements.canvasStage.scrollLeft = 0;
+  elements.canvasStage.scrollTop = 0;
+  if (announce) {
+    setMessage(t("fitZoomed"), false, true);
+  }
+}
+
+function setCanvasZoom(nextZoom, { anchorEvent = null, announce = false } = {}) {
+  if (!state.imageLoaded) {
+    return;
+  }
+
+  state.zoom = clamp(nextZoom, ZOOM_MIN, ZOOM_MAX);
+  applyCanvasZoom({ anchorEvent, preserveCenter: !anchorEvent });
+  updateZoomControls();
+  if (announce) {
+    setMessage(t("zoomedTo", { zoom: Math.round(state.zoom * 100) }), false, true);
+  }
+}
+
+function applyCanvasZoom({ anchorEvent = null, preserveCenter = true } = {}) {
+  const canvases = [elements.backgroundCanvas, elements.selectionCanvas, elements.overlayCanvas];
+  if (!state.imageLoaded || !elements.backgroundCanvas.width || !elements.backgroundCanvas.height) {
+    canvases.forEach((canvas) => {
+      canvas.style.width = "";
+      canvas.style.height = "";
+    });
+    updateZoomControls();
+    return;
+  }
+
+  const anchor = getZoomAnchor(anchorEvent, preserveCenter);
+  state.fitScale = computeFitScale();
+  const displayScale = state.fitScale * state.zoom;
+  const displayWidth = Math.max(1, Math.round(elements.backgroundCanvas.width * displayScale));
+  const displayHeight = Math.max(1, Math.round(elements.backgroundCanvas.height * displayScale));
+
+  canvases.forEach((canvas) => {
+    canvas.style.width = `${displayWidth}px`;
+    canvas.style.height = `${displayHeight}px`;
+  });
+
+  updateZoomControls();
+  if (anchor) {
+    requestAnimationFrame(() => restoreZoomAnchor(anchor));
+  }
+}
+
+function getZoomAnchor(anchorEvent, preserveCenter) {
+  const canvasRect = elements.backgroundCanvas.getBoundingClientRect();
+  if (!canvasRect.width || !canvasRect.height) {
+    return null;
+  }
+
+  const stageRect = elements.canvasStage.getBoundingClientRect();
+  const clientX = anchorEvent ? anchorEvent.clientX : stageRect.left + stageRect.width / 2;
+  const clientY = anchorEvent ? anchorEvent.clientY : stageRect.top + stageRect.height / 2;
+  if (!anchorEvent && !preserveCenter) {
+    return null;
+  }
+
+  return {
+    xRatio: clamp((clientX - canvasRect.left) / canvasRect.width, 0, 1),
+    yRatio: clamp((clientY - canvasRect.top) / canvasRect.height, 0, 1),
+    clientX,
+    clientY
+  };
+}
+
+function restoreZoomAnchor(anchor) {
+  const canvasRect = elements.backgroundCanvas.getBoundingClientRect();
+  const nextX = canvasRect.left + anchor.xRatio * canvasRect.width;
+  const nextY = canvasRect.top + anchor.yRatio * canvasRect.height;
+  elements.canvasStage.scrollLeft += nextX - anchor.clientX;
+  elements.canvasStage.scrollTop += nextY - anchor.clientY;
+}
+
+function updateZoomControls() {
+  const disabled = !state.imageLoaded;
+  const zoomPercent = Math.round(state.zoom * 100);
+  elements.zoomOutButton.disabled = disabled || state.zoom <= ZOOM_MIN;
+  elements.zoomInButton.disabled = disabled || state.zoom >= ZOOM_MAX;
+  elements.zoomFitButton.disabled = disabled;
+  elements.zoomSlider.disabled = disabled;
+  elements.panModeButton.disabled = disabled;
+  elements.zoomSlider.value = String(zoomPercent);
+  elements.zoomValue.textContent = `${zoomPercent}%`;
+  elements.panModeButton.classList.toggle("active", state.panMode && !disabled);
+  elements.panModeButton.setAttribute("aria-pressed", String(state.panMode && !disabled));
+  elements.canvasStage.classList.toggle("pan-mode", state.panMode && !disabled);
+}
+
+function togglePanMode() {
+  if (!state.imageLoaded) {
+    return;
+  }
+
+  state.panMode = !state.panMode;
+  if (!state.panMode && state.isPanning) {
+    stopCanvasPan();
+  }
+  updateZoomControls();
+  setMessage(t(state.panMode ? "panModeOn" : "panModeOff"), false, true);
+}
+
+function onCanvasWheel(event) {
+  if (!state.imageLoaded || (!event.ctrlKey && !event.metaKey)) {
+    return;
+  }
+
+  event.preventDefault();
+  const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+  setCanvasZoom(state.zoom * factor, { anchorEvent: event });
 }
 
 function syncPenButtons() {
@@ -797,6 +988,7 @@ async function loadSourceImage(file) {
     state.imageName = file.name.replace(/\.[^.]+$/, "") || "image";
     elements.imageTitle.textContent = file.name;
     elements.canvasMeta.textContent = `${width} x ${height}`;
+    resetCanvasZoom();
     updateCanvasVisibility();
     elements.layerName.value = "剥离图层 1";
     renderBackgroundPreview();
@@ -816,6 +1008,7 @@ function setCanvasSize(width, height) {
   });
   state.edgeDirty = true;
   clearOverlay();
+  applyCanvasZoom({ preserveCenter: false });
 }
 
 function onPointerDown(event) {
@@ -824,6 +1017,11 @@ function onPointerDown(event) {
   }
 
   event.preventDefault();
+  if (state.panMode) {
+    startCanvasPan(event);
+    return;
+  }
+
   const point = getCanvasPoint(event);
   state.pointerPoint = point;
   renderOverlay();
@@ -880,6 +1078,11 @@ function onPointerMove(event) {
   }
 
   event.preventDefault();
+  if (state.isPanning) {
+    updateCanvasPan(event);
+    return;
+  }
+
   const point = getCanvasPoint(event);
   state.pointerPoint = point;
   if (!state.isDrawing) {
@@ -897,6 +1100,11 @@ function onPointerMove(event) {
 }
 
 function onPointerUp(event) {
+  if (state.isPanning) {
+    stopCanvasPan(event);
+    return;
+  }
+
   if (!state.isDrawing) {
     return;
   }
@@ -916,6 +1124,11 @@ function onPointerUp(event) {
 }
 
 function onPointerLeave(event) {
+  if (state.isPanning) {
+    stopCanvasPan(event);
+    return;
+  }
+
   if (state.isDrawing) {
     onPointerUp(event);
   }
@@ -994,6 +1207,39 @@ function roundedRectPath(ctx, x, y, width, height, radius) {
   ctx.lineTo(x, y + r);
   ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
+}
+
+function startCanvasPan(event) {
+  state.isPanning = true;
+  state.panStart = {
+    x: event.clientX,
+    y: event.clientY,
+    left: elements.canvasStage.scrollLeft,
+    top: elements.canvasStage.scrollTop
+  };
+  elements.canvasStage.classList.add("panning");
+  elements.selectionCanvas.setPointerCapture(event.pointerId);
+}
+
+function updateCanvasPan(event) {
+  if (!state.panStart) {
+    return;
+  }
+
+  const dx = event.clientX - state.panStart.x;
+  const dy = event.clientY - state.panStart.y;
+  elements.canvasStage.scrollLeft = state.panStart.left - dx;
+  elements.canvasStage.scrollTop = state.panStart.top - dy;
+}
+
+function stopCanvasPan(event) {
+  if (event && elements.selectionCanvas.hasPointerCapture(event.pointerId)) {
+    elements.selectionCanvas.releasePointerCapture(event.pointerId);
+  }
+
+  state.isPanning = false;
+  state.panStart = null;
+  elements.canvasStage.classList.remove("panning");
 }
 
 function addPenPoint(point, event) {

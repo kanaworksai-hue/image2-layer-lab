@@ -22,6 +22,7 @@ Use the language selector in the left panel to switch versions.
 ## Features
 
 - Brush, eraser, rectangle, ellipse, rounded-rectangle, AE-style pen path, and Photoshop-style magic wand selection with replace/add/subtract modes for mobile use
+- Canvas zoom from fit view up to 800%, with pan mode for inspecting small details while selecting
 - Separate workspaces for layer peeling and solid background removal
 - Undo / redo for selection and layer operations
 - Peel selected content into transparent layers
