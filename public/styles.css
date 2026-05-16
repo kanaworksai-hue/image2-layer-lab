@@ -399,6 +399,40 @@ input[type="file"] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.pen-row {
+  display: grid;
+  gap: 8px;
+}
+
+.pen-row[hidden] {
+  display: none;
+}
+
+.pen-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pen-actions .secondary-button {
+  min-height: 38px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.pen-count {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--accent-strong);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 850;
+}
+
 .command-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -872,6 +906,10 @@ input[type="file"] {
 
   .segmented {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pen-actions {
+    grid-template-columns: 1fr;
   }
 
   .canvas-stage {
