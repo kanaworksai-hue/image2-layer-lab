@@ -76,6 +76,7 @@
             <button class="tool-button" type="button" data-tool="rect" data-i18n="rect">矩形</button>
             <button class="tool-button" type="button" data-tool="circle" data-i18n="circle">圆形</button>
             <button class="tool-button" type="button" data-tool="roundRect" data-i18n="roundRect">倒角矩形</button>
+            <button class="tool-button" type="button" data-tool="pen" data-i18n="pen">钢笔</button>
             <button class="tool-button" type="button" data-tool="magic" data-i18n="magic">魔术棒</button>
           </div>
 
@@ -86,6 +87,15 @@
               <button class="active" type="button" data-selection-mode="add" data-i18n="modeAdd">加选</button>
               <button type="button" data-selection-mode="subtract" data-i18n="modeSubtract">减选</button>
             </div>
+          </div>
+
+          <div id="penToolRow" class="pen-row" hidden>
+            <div class="pen-actions">
+              <button id="finishPenButton" class="secondary-button" type="button" data-i18n="finishPen">闭合成选区</button>
+              <button id="undoPenPointButton" class="secondary-button" type="button" data-i18n="undoPenPoint">撤销点</button>
+              <button id="clearPenButton" class="secondary-button danger" type="button" data-i18n="clearPenPath">清空路径</button>
+            </div>
+            <output id="penPointCount" class="pen-count">0 点</output>
           </div>
 
           <div class="command-grid">

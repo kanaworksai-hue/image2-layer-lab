@@ -17,6 +17,11 @@ const elements = {
   magicToleranceValue: document.querySelector("#magicToleranceValue"),
   magicGrow: document.querySelector("#magicGrow"),
   magicGrowValue: document.querySelector("#magicGrowValue"),
+  penToolRow: document.querySelector("#penToolRow"),
+  finishPenButton: document.querySelector("#finishPenButton"),
+  undoPenPointButton: document.querySelector("#undoPenPointButton"),
+  clearPenButton: document.querySelector("#clearPenButton"),
+  penPointCount: document.querySelector("#penPointCount"),
   selectionModeRow: document.querySelector("#selectionModeRow"),
   selectionModeButtons: document.querySelectorAll("[data-selection-mode]"),
   undoSelectionButton: document.querySelector("#undoSelectionButton"),
@@ -95,6 +100,7 @@ const I18N = {
     rect: "矩形",
     circle: "圆形",
     roundRect: "倒角矩形",
+    pen: "钢笔",
     magic: "魔术棒",
     undo: "撤销上一步",
     redo: "重做",
@@ -108,6 +114,15 @@ const I18N = {
     modeReplace: "替换",
     modeAdd: "加选",
     modeSubtract: "减选",
+    finishPen: "闭合成选区",
+    undoPenPoint: "撤销点",
+    clearPenPath: "清空路径",
+    penPointCount: "{count} 点",
+    penNeedThree: "至少需要 3 个点才能闭合路径。",
+    penPointAdded: "已添加 {count} 个点。靠近第一个点或点闭合成选区。",
+    penPointRemoved: "已撤销一个路径点。",
+    penPathCleared: "钢笔路径已清空。",
+    penClosed: "钢笔路径已变成选区。",
     peel: "剥离",
     peelQuick: "剥离 + 快速补洞",
     peelAi: "剥离 + GPT补洞",
@@ -199,6 +214,7 @@ const I18N = {
     rect: "Rectangle",
     circle: "Circle",
     roundRect: "Rounded rect",
+    pen: "Pen",
     magic: "Magic wand",
     undo: "Undo",
     redo: "Redo",
@@ -212,6 +228,15 @@ const I18N = {
     modeReplace: "Replace",
     modeAdd: "Add",
     modeSubtract: "Subtract",
+    finishPen: "Close to selection",
+    undoPenPoint: "Undo point",
+    clearPenPath: "Clear path",
+    penPointCount: "{count} pts",
+    penNeedThree: "Add at least 3 points before closing the path.",
+    penPointAdded: "{count} points added. Tap near the first point or close to make a selection.",
+    penPointRemoved: "Removed one path point.",
+    penPathCleared: "Pen path cleared.",
+    penClosed: "Pen path converted to a selection.",
     peel: "Peel",
     peelQuick: "Peel + quick fill",
     peelAi: "Peel + GPT fill",
@@ -303,6 +328,7 @@ const I18N = {
     rect: "矩形",
     circle: "円形",
     roundRect: "角丸矩形",
+    pen: "ペン",
     magic: "自動選択",
     undo: "元に戻す",
     redo: "やり直す",
@@ -316,6 +342,15 @@ const I18N = {
     modeReplace: "置換",
     modeAdd: "追加",
     modeSubtract: "削除",
+    finishPen: "閉じて選択",
+    undoPenPoint: "点を戻す",
+    clearPenPath: "パスをクリア",
+    penPointCount: "{count} 点",
+    penNeedThree: "パスを閉じるには 3 点以上必要です。",
+    penPointAdded: "{count} 点を追加しました。最初の点付近をタップするか、閉じて選択してください。",
+    penPointRemoved: "パス点を 1 つ戻しました。",
+    penPathCleared: "ペンパスをクリアしました。",
+    penClosed: "ペンパスを選択範囲に変換しました。",
     peel: "切り出し",
     peelQuick: "切り出し + 簡易補完",
     peelAi: "切り出し + GPT補完",
@@ -396,6 +431,7 @@ const state = {
   lastPoint: null,
   selectionSnapshot: null,
   pointerPoint: null,
+  penPoints: [],
   edgeCanvas: document.createElement("canvas"),
   edgeDirty: true,
   selectionPixels: 0,
@@ -485,6 +521,7 @@ elements.toolButtons.forEach((button) => {
   button.addEventListener("click", () => {
     state.tool = button.dataset.tool || "brush";
     syncToolButtons();
+    renderOverlay();
   });
 });
 
@@ -524,6 +561,9 @@ elements.undoSelectionButton.addEventListener("click", undoStep);
 elements.redoSelectionButton.addEventListener("click", redoStep);
 elements.invertSelectionButton.addEventListener("click", invertSelection);
 elements.cleanupSelectionButton.addEventListener("click", cleanupSelection);
+elements.finishPenButton.addEventListener("click", finishPenSelection);
+elements.undoPenPointButton.addEventListener("click", undoPenPoint);
+elements.clearPenButton.addEventListener("click", () => clearPenPath({ showMessage: true }));
 elements.removeSolidBgButton.addEventListener("click", removeSolidBackground);
 elements.applySolidBgButton.addEventListener("click", applySolidBackgroundPreview);
 elements.resetSolidBgButton.addEventListener("click", resetSolidBackgroundWorkflow);
@@ -548,6 +588,25 @@ elements.selectionCanvas.addEventListener("pointerleave", onPointerLeave);
 });
 
 window.addEventListener("keydown", (event) => {
+  const isTextEntry = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName || "");
+  if (state.tool === "pen" && !isTextEntry) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      finishPenSelection();
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      clearPenPath({ showMessage: true });
+      return;
+    }
+    if (event.key === "Backspace" || event.key === "Delete") {
+      event.preventDefault();
+      undoPenPoint();
+      return;
+    }
+  }
+
   const isUndoKey = event.key.toLowerCase() === "z" && (event.metaKey || event.ctrlKey);
   if (!isUndoKey) {
     return;
@@ -600,6 +659,8 @@ function applyLanguage(language) {
     node.textContent = t(key);
   });
 
+  syncPenButtons();
+
   if (!state.imageLoaded) {
     elements.imageTitle.textContent = t("waitingImage");
     elements.canvasMeta.textContent = t("notLoaded");
@@ -637,6 +698,8 @@ function syncToolButtons() {
   });
   elements.selectionModeRow.hidden = state.tool !== "magic";
   elements.roundRadiusRow.hidden = state.tool !== "roundRect";
+  elements.penToolRow.hidden = state.tool !== "pen";
+  syncPenButtons();
 }
 
 function updateCanvasVisibility() {
@@ -651,6 +714,14 @@ function syncSelectionModeButtons() {
   elements.selectionModeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.selectionMode === state.selectionMode);
   });
+}
+
+function syncPenButtons() {
+  const count = state.penPoints.length;
+  elements.penPointCount.textContent = t("penPointCount", { count });
+  elements.finishPenButton.disabled = count < 3;
+  elements.undoPenPointButton.disabled = count === 0;
+  elements.clearPenButton.disabled = count === 0;
 }
 
 async function checkHealth() {
@@ -715,6 +786,7 @@ async function loadSourceImage(file) {
     backgroundCtx.clearRect(0, 0, width, height);
     backgroundCtx.drawImage(image, 0, 0, width, height);
     clearSelection({ recordHistory: false });
+    clearPenPath();
 
     state.layers = [];
     state.history = [];
@@ -766,6 +838,11 @@ function onPointerDown(event) {
       const hint = result.transparent && result.ratio > 0.2 ? "已选中透明背景；点反选可得到主体。" : `魔术棒已${action} ${formatPixels(result.pixels)} px。`;
       setMessage(hint, false, true);
     }
+    return;
+  }
+
+  if (state.tool === "pen") {
+    addPenPoint(point, event);
     return;
   }
 
@@ -919,6 +996,87 @@ function roundedRectPath(ctx, x, y, width, height, radius) {
   ctx.closePath();
 }
 
+function addPenPoint(point, event) {
+  if (state.penPoints.length >= 3 && isNearPenStart(point)) {
+    finishPenSelection();
+    return;
+  }
+
+  state.penPoints.push(point);
+  syncPenButtons();
+  renderOverlay();
+
+  if (event.detail >= 2 && state.penPoints.length >= 3) {
+    finishPenSelection();
+    return;
+  }
+
+  setMessage(t("penPointAdded", { count: state.penPoints.length }), false, true);
+}
+
+function finishPenSelection() {
+  if (!state.imageLoaded) {
+    setMessage("请先加载图片。", true);
+    return;
+  }
+
+  if (state.penPoints.length < 3) {
+    setMessage(t("penNeedThree"), true);
+    return;
+  }
+
+  pushHistory(`${t("pen")}选择`);
+  selectionCtx.save();
+  selectionCtx.fillStyle = MASK_COLOR;
+  selectionCtx.beginPath();
+  selectionCtx.moveTo(state.penPoints[0].x, state.penPoints[0].y);
+  for (let index = 1; index < state.penPoints.length; index += 1) {
+    selectionCtx.lineTo(state.penPoints[index].x, state.penPoints[index].y);
+  }
+  selectionCtx.closePath();
+  selectionCtx.fill();
+  selectionCtx.restore();
+
+  clearPenPath();
+  updateSelectionStats();
+  state.edgeDirty = true;
+  rebuildSelectionEdgeOverlay();
+  renderOverlay();
+  setMessage(t("penClosed"), false, true);
+}
+
+function undoPenPoint() {
+  if (!state.penPoints.length) {
+    return;
+  }
+
+  state.penPoints.pop();
+  syncPenButtons();
+  renderOverlay();
+  setMessage(t("penPointRemoved"), false, true);
+}
+
+function clearPenPath({ showMessage = false } = {}) {
+  state.penPoints = [];
+  syncPenButtons();
+  renderOverlay();
+  if (showMessage) {
+    setMessage(t("penPathCleared"), false, true);
+  }
+}
+
+function isNearPenStart(point) {
+  const first = state.penPoints[0];
+  if (!first) {
+    return false;
+  }
+
+  const dx = point.x - first.x;
+  const dy = point.y - first.y;
+  const closeRadius = Math.max(8, canvasLineWidth(14));
+  return Math.sqrt(dx * dx + dy * dy) <= closeRadius;
+}
+
 function clearOverlay() {
   overlayCtx.clearRect(0, 0, elements.overlayCanvas.width, elements.overlayCanvas.height);
 }
@@ -947,6 +1105,7 @@ function renderOverlay() {
   }
 
   drawBrushCursor();
+  drawPenPathOverlay();
 }
 
 function rebuildSelectionEdgeOverlay() {
@@ -1017,6 +1176,62 @@ function drawBrushCursor() {
   overlayCtx.setLineDash([canvasLineWidth(6), canvasLineWidth(4)]);
   overlayCtx.stroke();
   overlayCtx.restore();
+}
+
+function drawPenPathOverlay() {
+  if (state.tool !== "pen" || !state.penPoints.length) {
+    return;
+  }
+
+  const first = state.penPoints[0];
+  const last = state.penPoints[state.penPoints.length - 1];
+  const closePreview = state.pointerPoint && state.penPoints.length >= 3 && isNearPenStart(state.pointerPoint);
+
+  overlayCtx.save();
+  overlayCtx.lineJoin = "round";
+  overlayCtx.lineCap = "round";
+  overlayCtx.lineWidth = canvasLineWidth(2);
+  overlayCtx.strokeStyle = "rgba(255, 255, 255, 0.96)";
+  overlayCtx.setLineDash([canvasLineWidth(7), canvasLineWidth(5)]);
+  drawOpenPenPath();
+  overlayCtx.stroke();
+
+  overlayCtx.lineWidth = canvasLineWidth(4);
+  overlayCtx.strokeStyle = "rgba(23, 107, 135, 0.9)";
+  overlayCtx.setLineDash([]);
+  drawOpenPenPath();
+  overlayCtx.stroke();
+
+  if (state.pointerPoint && last) {
+    overlayCtx.lineWidth = canvasLineWidth(2);
+    overlayCtx.strokeStyle = closePreview ? "rgba(255, 191, 71, 0.95)" : "rgba(23, 107, 135, 0.65)";
+    overlayCtx.setLineDash([canvasLineWidth(5), canvasLineWidth(4)]);
+    overlayCtx.beginPath();
+    overlayCtx.moveTo(last.x, last.y);
+    overlayCtx.lineTo(closePreview ? first.x : state.pointerPoint.x, closePreview ? first.y : state.pointerPoint.y);
+    overlayCtx.stroke();
+  }
+
+  state.penPoints.forEach((point, index) => {
+    const radius = index === 0 ? canvasLineWidth(6) : canvasLineWidth(5);
+    overlayCtx.beginPath();
+    overlayCtx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    overlayCtx.fillStyle = index === 0 ? "rgba(255, 191, 71, 0.96)" : "rgba(255, 255, 255, 0.96)";
+    overlayCtx.fill();
+    overlayCtx.lineWidth = canvasLineWidth(2);
+    overlayCtx.strokeStyle = "rgba(23, 107, 135, 0.95)";
+    overlayCtx.stroke();
+  });
+
+  overlayCtx.restore();
+
+  function drawOpenPenPath() {
+    overlayCtx.beginPath();
+    overlayCtx.moveTo(first.x, first.y);
+    for (let index = 1; index < state.penPoints.length; index += 1) {
+      overlayCtx.lineTo(state.penPoints[index].x, state.penPoints[index].y);
+    }
+  }
 }
 
 function canvasLineWidth(cssPixels) {
@@ -1777,6 +1992,7 @@ function resetCanvas() {
   backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
   backgroundCtx.drawImage(state.originalCanvas, 0, 0);
   clearSelection({ recordHistory: false });
+  clearPenPath();
   state.layers = [];
   state.backgroundPreview = null;
   state.transparentCanvas = null;
@@ -2470,6 +2686,7 @@ function restoreSnapshot(snapshot) {
       }
     : null;
   state.transparentCanvas = snapshot.transparentCanvas ? cloneCanvas(snapshot.transparentCanvas) : null;
+  clearPenPath();
   updateCanvasVisibility();
   renderBackgroundPreview();
   renderLayers();
@@ -2599,6 +2816,9 @@ function setBusy(isBusy) {
     elements.resetButton,
     elements.invertSelectionButton,
     elements.cleanupSelectionButton,
+    elements.finishPenButton,
+    elements.undoPenPointButton,
+    elements.clearPenButton,
     elements.removeSolidBgButton,
     elements.applySolidBgButton,
     elements.resetSolidBgButton,
@@ -2609,6 +2829,7 @@ function setBusy(isBusy) {
 
   if (!isBusy) {
     syncHistoryButtons();
+    syncPenButtons();
     renderBackgroundPreview();
     elements.peelAiButton.disabled = !state.apiAvailable;
   }
