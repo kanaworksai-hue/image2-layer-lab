@@ -495,6 +495,10 @@ input[type="file"] {
   gap: 10px;
 }
 
+.source-preview {
+  gap: 6px;
+}
+
 .preview-box {
   overflow: hidden;
   display: grid;
@@ -527,6 +531,58 @@ input[type="file"] {
   width: 100%;
   max-height: 360px;
   object-fit: contain;
+}
+
+.source-box {
+  min-height: 150px;
+}
+
+.source-box canvas,
+.source-box video {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+}
+
+.source-box video {
+  background: #111;
+}
+
+.sample-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 48px;
+  gap: 8px;
+  align-items: center;
+}
+
+.sample-row .secondary-button.active {
+  color: #fff;
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.sample-count {
+  display: grid;
+  min-height: 38px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--accent-strong);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.bg-preview-stage {
+  background:
+    linear-gradient(45deg, #edf0f4 25%, transparent 25%),
+    linear-gradient(-45deg, #edf0f4 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #edf0f4 75%),
+    linear-gradient(-45deg, transparent 75%, #edf0f4 75%),
+    #fff;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-size: 20px 20px;
 }
 
 .message {
@@ -979,7 +1035,8 @@ input[type="file"] {
   }
 
   .settings-grid,
-  .command-grid {
+  .command-grid,
+  .sample-row {
     grid-template-columns: 1fr;
   }
 

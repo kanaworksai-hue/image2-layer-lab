@@ -41,10 +41,10 @@
         </div>
 
         <label class="upload-box" for="sourceImage">
-          <span data-i18n="sourceImage">图片</span>
+          <span data-i18n="sourceImage">文件</span>
           <strong data-i18n="chooseImage">上传</strong>
-          <small data-i18n="imageHint">PNG / JPG / WebP</small>
-          <input id="sourceImage" type="file" accept="image/png,image/jpeg,image/webp">
+          <small data-i18n="imageHint">图片 / 视频</small>
+          <input id="sourceImage" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm,video/quicktime">
         </label>
 
         <div id="layerControls" class="view-controls workflow-controls" data-workspace-panel="layers">
@@ -93,6 +93,15 @@
         <div id="backgroundControls" class="view-controls" data-workspace-panel="background" hidden>
           <section class="tool-section panel-section" aria-label="纯色背景移除">
             <div class="section-title" data-i18n="solidBgRemove">纯色</div>
+            <div class="background-preview source-preview">
+              <div class="section-title" data-i18n="sourcePreview">源</div>
+              <div id="bgSourceBox" class="preview-box source-box">
+                <span id="bgSourceEmpty" data-i18n="bgSourceEmpty">待上传</span>
+                <canvas id="bgSourceCanvas" hidden></canvas>
+                <video id="bgSourceVideo" hidden muted loop playsinline controls></video>
+              </div>
+            </div>
+
             <div class="settings-grid">
               <label class="field" for="bgPreset">
                 <span data-i18n="bgColor">颜色</span>
@@ -153,12 +162,10 @@
               <output id="bgFeatherValue" class="range-value">1</output>
             </div>
 
-            <div class="background-preview">
-              <div class="section-title" data-i18n="bgPreview">预览</div>
-              <div id="bgPreviewBox" class="preview-box">
-                <span id="bgPreviewEmpty" data-i18n="bgPreviewEmpty">调色后预览</span>
-                <canvas id="bgPreviewCanvas" hidden></canvas>
-              </div>
+            <div class="sample-row">
+              <button id="sampleBgButton" class="secondary-button" type="button" data-i18n="sampleBg">吸色+</button>
+              <button id="clearBgSamplesButton" class="secondary-button danger" type="button" data-i18n="clearSamples">清色</button>
+              <output id="bgSampleCount" class="sample-count">0</output>
             </div>
 
             <div class="command-grid">
@@ -166,6 +173,7 @@
               <button id="applySolidBgButton" class="secondary-button" type="button" disabled data-i18n="applyPreview">应用</button>
               <button id="resetSolidBgButton" class="secondary-button danger" type="button" data-i18n="retrySolidBg">重来</button>
               <button id="downloadTransparentButton" class="secondary-button" type="button" disabled data-i18n="downloadTransparent">下载 PNG</button>
+              <button id="downloadVideoButton" class="secondary-button" type="button" disabled data-i18n="downloadVideo">下载 WebM</button>
             </div>
           </section>
         </div>
@@ -279,6 +287,7 @@
               <canvas id="backgroundCanvas" class="image-canvas"></canvas>
               <canvas id="selectionCanvas" class="selection-canvas"></canvas>
               <canvas id="overlayCanvas" class="overlay-canvas" aria-hidden="true"></canvas>
+              <canvas id="bgPreviewCanvas" class="image-canvas bg-preview-stage" hidden></canvas>
             </div>
           </div>
         </div>
