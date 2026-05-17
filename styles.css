@@ -83,7 +83,7 @@ button:disabled {
   top: 18px;
   align-self: start;
   display: grid;
-  gap: 12px;
+  gap: 10px;
   max-height: calc(100vh - 36px);
   overflow: auto;
   padding: 16px;
@@ -99,12 +99,7 @@ button:disabled {
 }
 
 .eyebrow {
-  margin: 0 0 5px;
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
+  display: none;
 }
 
 h1,
@@ -216,8 +211,8 @@ input[type="file"] {
 
 .upload-box {
   display: grid;
-  gap: 7px;
-  min-height: 92px;
+  gap: 5px;
+  min-height: 66px;
   padding: 12px;
   border: 1px dashed rgba(23, 107, 135, 0.46);
   border-radius: 8px;
@@ -231,6 +226,7 @@ input[type="file"] {
 }
 
 .upload-box small {
+  display: none;
   color: var(--muted);
   line-height: 1.4;
 }
@@ -281,15 +277,15 @@ input[type="file"] {
 
 .view-controls {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .promo-card {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-columns: 38px minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
-  padding: 9px;
+  gap: 10px;
+  padding: 8px;
   border: 1px solid rgba(23, 107, 135, 0.24);
   border-radius: 8px;
   color: var(--ink);
@@ -304,8 +300,8 @@ input[type="file"] {
 }
 
 .promo-card img {
-  width: 48px;
-  height: 48px;
+  width: 38px;
+  height: 38px;
   border: 1px solid rgba(23, 107, 135, 0.2);
   border-radius: 8px;
   background: #fff;
@@ -327,22 +323,22 @@ input[type="file"] {
 
 .promo-card strong {
   color: var(--accent-strong);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .promo-card small {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
 .tool-section {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .panel-section {
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.72);
@@ -369,7 +365,7 @@ input[type="file"] {
 .segmented button,
 .secondary-button,
 .primary-button {
-  min-height: 40px;
+  min-height: 38px;
   border-radius: 8px;
   font-weight: 800;
 }

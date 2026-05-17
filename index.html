@@ -31,19 +31,19 @@
           <img src="./assets/kanaworks-logo.png" alt="KanaWorks AI logo">
           <span>
             <strong>KanaWorks_AI</strong>
-            <small data-i18n="promo">Want more? Follow me</small>
+            <small data-i18n="promo">Follow</small>
           </span>
         </a>
 
         <div class="mode-tabs" role="tablist" aria-label="工作区">
-          <button class="active" type="button" data-workspace-view="layers" data-i18n="layerWorkspace">图层剥离</button>
-          <button type="button" data-workspace-view="background" data-i18n="backgroundWorkspace">背景移除</button>
+          <button class="active" type="button" data-workspace-view="layers" data-i18n="layerWorkspace">剥离</button>
+          <button type="button" data-workspace-view="background" data-i18n="backgroundWorkspace">背景</button>
         </div>
 
         <label class="upload-box" for="sourceImage">
-          <span data-i18n="sourceImage">原图</span>
-          <strong data-i18n="chooseImage">选择或拖入图片</strong>
-          <small data-i18n="imageHint">PNG / JPG / WebP，建议先用 1K 到 2K 尺寸做分层</small>
+          <span data-i18n="sourceImage">图片</span>
+          <strong data-i18n="chooseImage">上传</strong>
+          <small data-i18n="imageHint">PNG / JPG / WebP</small>
           <input id="sourceImage" type="file" accept="image/png,image/jpeg,image/webp">
         </label>
 
@@ -52,18 +52,18 @@
           <div class="section-title" data-i18n="layers">图层</div>
           <div class="settings-grid">
             <label class="field" for="layerName">
-              <span data-i18n="layerName">图层名</span>
+              <span data-i18n="layerName">名称</span>
               <input id="layerName" type="text" value="剥离图层 1" maxlength="80">
             </label>
 
             <label class="field" for="layerCategory">
-              <span data-i18n="semanticLevel">语义层级</span>
+              <span data-i18n="semanticLevel">类型</span>
               <select id="layerCategory">
-                <option value="Distractor" data-i18n="catDistractor">干扰元素</option>
-                <option value="Secondary" data-i18n="catSecondary">次要物品</option>
-                <option value="Primary" data-i18n="catPrimary">人物/主体</option>
-                <option value="Text" data-i18n="catText">文字/标识</option>
-                <option value="Scene" data-i18n="catScene">场景结构</option>
+                <option value="Distractor" data-i18n="catDistractor">干扰</option>
+                <option value="Secondary" data-i18n="catSecondary">物品</option>
+                <option value="Primary" data-i18n="catPrimary">主体</option>
+                <option value="Text" data-i18n="catText">文字</option>
+                <option value="Scene" data-i18n="catScene">场景</option>
                 <option value="Background" data-i18n="catBackground">背景</option>
               </select>
             </label>
@@ -73,49 +73,49 @@
         <section class="tool-section panel-section" aria-label="剥离与补洞">
           <div class="section-title" data-i18n="peel">剥离</div>
           <div class="command-grid">
-            <button id="peelQuickButton" class="primary-button" type="button" data-i18n="peelQuick">剥离 + 快速补洞</button>
-            <button id="peelOnlyButton" class="secondary-button" type="button" data-i18n="peelOnly">仅剥离成图层</button>
-            <button id="healButton" class="secondary-button" type="button" data-i18n="quickHeal">快速补当前选择</button>
+            <button id="peelQuickButton" class="primary-button" type="button" data-i18n="peelQuick">剥离+补洞</button>
+            <button id="peelOnlyButton" class="secondary-button" type="button" data-i18n="peelOnly">剥离</button>
+            <button id="healButton" class="secondary-button" type="button" data-i18n="quickHeal">补洞</button>
           </div>
         </section>
 
         <section class="tool-section panel-section" aria-label="导出">
           <div class="section-title" data-i18n="export">导出</div>
           <div class="command-grid">
-            <button id="exportPsdButton" class="primary-button" type="button" data-i18n="exportPsd">导出 PSD</button>
-            <button id="exportPngButton" class="secondary-button" type="button" data-i18n="exportPng">导出合成 PNG</button>
-            <button id="clearMaskButton" class="secondary-button" type="button" data-i18n="clearSelection">清空选择</button>
-            <button id="resetButton" class="secondary-button danger" type="button" data-i18n="resetCanvas">重置画布</button>
+            <button id="exportPsdButton" class="primary-button" type="button" data-i18n="exportPsd">PSD</button>
+            <button id="exportPngButton" class="secondary-button" type="button" data-i18n="exportPng">PNG</button>
+            <button id="clearMaskButton" class="secondary-button" type="button" data-i18n="clearSelection">清空</button>
+            <button id="resetButton" class="secondary-button danger" type="button" data-i18n="resetCanvas">重置</button>
           </div>
         </section>
         </div>
 
         <div id="backgroundControls" class="view-controls" data-workspace-panel="background" hidden>
           <section class="tool-section panel-section" aria-label="纯色背景移除">
-            <div class="section-title" data-i18n="solidBgRemove">纯色背景移除</div>
+            <div class="section-title" data-i18n="solidBgRemove">纯色</div>
             <div class="settings-grid">
               <label class="field" for="bgPreset">
-                <span data-i18n="bgColor">背景颜色</span>
+                <span data-i18n="bgColor">颜色</span>
                 <select id="bgPreset">
-                  <option value="white" data-i18n="bgWhite">白色</option>
-                  <option value="black" data-i18n="bgBlack">黑色</option>
-                  <option value="green" data-i18n="bgGreen">绿色</option>
-                  <option value="custom" data-i18n="bgCustom">自定义</option>
+                  <option value="white" data-i18n="bgWhite">白</option>
+                  <option value="black" data-i18n="bgBlack">黑</option>
+                  <option value="green" data-i18n="bgGreen">绿</option>
+                  <option value="custom" data-i18n="bgCustom">自选</option>
                 </select>
               </label>
 
               <label class="field color-field" for="bgCustomColor">
-                <span data-i18n="customColor">自定义颜色</span>
+                <span data-i18n="customColor">自选</span>
                 <input id="bgCustomColor" type="color" value="#ffffff">
               </label>
             </div>
 
             <div class="settings-grid">
               <label class="field" for="bgOutputRatio">
-                <span data-i18n="outputRatio">输出比例</span>
+                <span data-i18n="outputRatio">比例</span>
                 <select id="bgOutputRatio">
                   <option value="auto" data-i18n="ratioAuto">自适应</option>
-                  <option value="original" data-i18n="ratioOriginal">原图比例</option>
+                  <option value="original" data-i18n="ratioOriginal">原图</option>
                   <option value="16:9">16:9</option>
                   <option value="9:16">9:16</option>
                   <option value="1:1">1:1</option>
@@ -139,7 +139,7 @@
 
             <div class="range-pair">
               <label class="field" for="bgTolerance">
-                <span data-i18n="bgTolerance">颜色容差</span>
+                <span data-i18n="bgTolerance">容差</span>
                 <input id="bgTolerance" type="range" min="0" max="160" step="1" value="36">
               </label>
               <output id="bgToleranceValue" class="range-value">36</output>
@@ -147,25 +147,25 @@
 
             <div class="range-pair">
               <label class="field" for="bgFeather">
-                <span data-i18n="edgeFeather">边缘柔化</span>
+                <span data-i18n="edgeFeather">柔化</span>
                 <input id="bgFeather" type="range" min="0" max="6" step="1" value="1">
               </label>
               <output id="bgFeatherValue" class="range-value">1</output>
             </div>
 
             <div class="background-preview">
-              <div class="section-title" data-i18n="bgPreview">移除预览</div>
+              <div class="section-title" data-i18n="bgPreview">预览</div>
               <div id="bgPreviewBox" class="preview-box">
-                <span id="bgPreviewEmpty" data-i18n="bgPreviewEmpty">调好颜色和容差后点预览，这里会显示透明背景效果。</span>
+                <span id="bgPreviewEmpty" data-i18n="bgPreviewEmpty">调色后预览</span>
                 <canvas id="bgPreviewCanvas" hidden></canvas>
               </div>
             </div>
 
             <div class="command-grid">
-              <button id="removeSolidBgButton" class="primary-button" type="button" data-i18n="removeSolidBg">预览移除背景</button>
-              <button id="applySolidBgButton" class="secondary-button" type="button" disabled data-i18n="applyPreview">应用预览</button>
-              <button id="resetSolidBgButton" class="secondary-button danger" type="button" data-i18n="retrySolidBg">重新来做</button>
-              <button id="downloadTransparentButton" class="secondary-button" type="button" disabled data-i18n="downloadTransparent">下载透明 PNG</button>
+              <button id="removeSolidBgButton" class="primary-button" type="button" data-i18n="removeSolidBg">预览</button>
+              <button id="applySolidBgButton" class="secondary-button" type="button" disabled data-i18n="applyPreview">应用</button>
+              <button id="resetSolidBgButton" class="secondary-button danger" type="button" data-i18n="retrySolidBg">重来</button>
+              <button id="downloadTransparentButton" class="secondary-button" type="button" disabled data-i18n="downloadTransparent">下载 PNG</button>
             </div>
           </section>
         </div>
@@ -177,7 +177,7 @@
         <div class="canvas-panel">
           <div class="canvas-toolbar">
             <div>
-              <strong id="imageTitle" data-i18n="waitingImage">等待图片</strong>
+              <strong id="imageTitle" data-i18n="waitingImage">待上传</strong>
               <span id="canvasMeta" data-i18n="notLoaded">未加载</span>
             </div>
             <div class="zoom-controls" aria-label="画布缩放">
@@ -188,18 +188,18 @@
               <button id="zoomFitButton" class="zoom-button text-button" type="button" disabled data-i18n="zoomFit">适应</button>
               <button id="panModeButton" class="zoom-button text-button" type="button" disabled data-i18n="panMode">移动</button>
             </div>
-            <span id="selectionStats">选择 0 px</span>
+            <span id="selectionStats">0 px</span>
           </div>
 
           <section id="selectionDock" class="selection-dock" data-workspace-panel="layers" aria-label="选择工具">
             <div class="dock-header">
               <div class="section-title" data-i18n="selection">选择</div>
               <div class="command-grid selection-command-grid">
-                <button id="undoSelectionButton" class="secondary-button" type="button" disabled data-i18n="undo">撤销上一步</button>
+                <button id="undoSelectionButton" class="secondary-button" type="button" disabled data-i18n="undo">撤销</button>
                 <button id="redoSelectionButton" class="secondary-button" type="button" disabled data-i18n="redo">重做</button>
-                <button id="restorePeelStartButton" class="secondary-button" type="button" disabled data-i18n="restorePeelStart">回到剥离前</button>
+                <button id="restorePeelStartButton" class="secondary-button" type="button" disabled data-i18n="restorePeelStart">回退</button>
                 <button id="invertSelectionButton" class="secondary-button" type="button" data-i18n="invert">反选</button>
-                <button id="cleanupSelectionButton" class="secondary-button" type="button" data-i18n="cleanup">填洞/平滑</button>
+                <button id="cleanupSelectionButton" class="secondary-button" type="button" data-i18n="cleanup">清理</button>
               </div>
             </div>
 
@@ -208,27 +208,27 @@
               <button class="tool-button" type="button" data-tool="erase" data-i18n="erase">擦除</button>
               <button class="tool-button" type="button" data-tool="rect" data-i18n="rect">矩形</button>
               <button class="tool-button" type="button" data-tool="circle" data-i18n="circle">圆形</button>
-              <button class="tool-button" type="button" data-tool="roundRect" data-i18n="roundRect">倒角矩形</button>
+              <button class="tool-button" type="button" data-tool="roundRect" data-i18n="roundRect">倒角</button>
               <button class="tool-button" type="button" data-tool="pen" data-i18n="pen">钢笔</button>
-              <button class="tool-button" type="button" data-tool="magic" data-i18n="magic">魔术棒</button>
+              <button class="tool-button" type="button" data-tool="magic" data-i18n="magic">魔棒</button>
             </div>
 
             <div class="selection-options">
               <div class="selection-option-stack">
                 <div id="selectionModeRow" class="mode-row">
-                  <span data-i18n="magicSelectionMode">魔术棒模式</span>
+                  <span data-i18n="magicSelectionMode">模式</span>
                   <div class="segmented compact-segmented" role="group" aria-label="魔术棒模式">
                     <button type="button" data-selection-mode="replace" data-i18n="modeReplace">替换</button>
-                    <button class="active" type="button" data-selection-mode="add" data-i18n="modeAdd">加选</button>
-                    <button type="button" data-selection-mode="subtract" data-i18n="modeSubtract">减选</button>
+                    <button class="active" type="button" data-selection-mode="add" data-i18n="modeAdd">添加</button>
+                    <button type="button" data-selection-mode="subtract" data-i18n="modeSubtract">减少</button>
                   </div>
                 </div>
 
                 <div id="penToolRow" class="pen-row" hidden>
                   <div class="pen-actions">
-                    <button id="finishPenButton" class="secondary-button" type="button" data-i18n="finishPen">闭合成选区</button>
-                    <button id="undoPenPointButton" class="secondary-button" type="button" data-i18n="undoPenPoint">撤销点</button>
-                    <button id="clearPenButton" class="secondary-button danger" type="button" data-i18n="clearPenPath">清空路径</button>
+                    <button id="finishPenButton" class="secondary-button" type="button" data-i18n="finishPen">闭合</button>
+                    <button id="undoPenPointButton" class="secondary-button" type="button" data-i18n="undoPenPoint">撤点</button>
+                    <button id="clearPenButton" class="secondary-button danger" type="button" data-i18n="clearPenPath">清空</button>
                   </div>
                   <output id="penPointCount" class="pen-count">0 点</output>
                 </div>
@@ -237,7 +237,7 @@
               <div class="selection-ranges">
                 <div class="range-pair">
                   <label class="field" for="brushSize">
-                    <span data-i18n="brushSize">画笔大小</span>
+                    <span data-i18n="brushSize">大小</span>
                     <input id="brushSize" type="range" min="4" max="140" step="1" value="36">
                   </label>
                   <output id="brushSizeValue" class="range-value">36</output>
@@ -245,7 +245,7 @@
 
                 <div class="range-pair">
                   <label class="field" for="magicTolerance">
-                    <span data-i18n="magicTolerance">魔术棒容差</span>
+                    <span data-i18n="magicTolerance">容差</span>
                     <input id="magicTolerance" type="range" min="4" max="96" step="1" value="28">
                   </label>
                   <output id="magicToleranceValue" class="range-value">28</output>
@@ -253,7 +253,7 @@
 
                 <div class="range-pair">
                   <label class="field" for="magicGrow">
-                    <span data-i18n="magicGrow">魔术棒扩边</span>
+                    <span data-i18n="magicGrow">扩边</span>
                     <input id="magicGrow" type="range" min="0" max="8" step="1" value="2">
                   </label>
                   <output id="magicGrowValue" class="range-value">2</output>
@@ -261,7 +261,7 @@
 
                 <div id="roundRadiusRow" class="range-pair">
                   <label class="field" for="roundRadius">
-                    <span data-i18n="roundRadius">倒角半径</span>
+                    <span data-i18n="roundRadius">圆角</span>
                     <input id="roundRadius" type="range" min="0" max="220" step="1" value="36">
                   </label>
                   <output id="roundRadiusValue" class="range-value">36</output>
@@ -273,8 +273,8 @@
           <div id="canvasStage" class="canvas-stage">
             <div id="canvasScrollContent" class="canvas-scroll-content">
               <div id="dropHint" class="drop-hint">
-                <strong data-i18n="dropStart">拖入图片开始</strong>
-                <span data-i18n="dropHint">用选择工具圈出人物、物品、文字或场景区域</span>
+                <strong data-i18n="dropStart">拖入图片</strong>
+                <span data-i18n="dropHint">选择区域</span>
               </div>
               <canvas id="backgroundCanvas" class="image-canvas"></canvas>
               <canvas id="selectionCanvas" class="selection-canvas"></canvas>
@@ -293,7 +293,7 @@
           </div>
 
           <section class="psd-preview" aria-label="PSD 导出预览">
-            <div class="section-title" data-i18n="psdPreview">PSD 预览</div>
+            <div class="section-title" data-i18n="psdPreview">PSD</div>
             <canvas id="psdPreviewCanvas" width="160" height="110"></canvas>
             <strong id="psdLayerSummary"></strong>
             <span id="psdLayerDetails"></span>
