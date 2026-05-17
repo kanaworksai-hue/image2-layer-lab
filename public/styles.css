@@ -788,10 +788,8 @@ input[type="file"] {
 .canvas-stage {
   position: relative;
   overflow: auto;
-  display: grid;
-  place-items: center;
+  display: block;
   min-height: 0;
-  padding: 22px;
   background:
     linear-gradient(45deg, #edf0f4 25%, transparent 25%),
     linear-gradient(-45deg, #edf0f4 25%, transparent 25%),
@@ -801,7 +799,39 @@ input[type="file"] {
   background-position: 0 0, 0 10px, 10px -10px, -10px 0;
   background-size: 20px 20px;
   overscroll-behavior: contain;
+  scrollbar-color: rgba(23, 107, 135, 0.45) rgba(238, 242, 246, 0.9);
+  scrollbar-gutter: stable both-edges;
+  scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
+}
+
+.canvas-stage::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.canvas-stage::-webkit-scrollbar-track {
+  background: rgba(238, 242, 246, 0.9);
+}
+
+.canvas-stage::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(238, 242, 246, 0.9);
+  border-radius: 999px;
+  background: rgba(23, 107, 135, 0.48);
+}
+
+.canvas-stage::-webkit-scrollbar-thumb:hover {
+  background: rgba(23, 107, 135, 0.68);
+}
+
+.canvas-scroll-content {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  min-width: 100%;
+  min-height: 100%;
+  place-items: center;
+  padding: 22px;
 }
 
 .canvas-stage.dragging {
@@ -1079,6 +1109,9 @@ input[type="file"] {
 
   .canvas-stage {
     min-height: 0;
+  }
+
+  .canvas-scroll-content {
     padding: 14px;
   }
 }

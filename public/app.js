@@ -61,6 +61,7 @@ const elements = {
   aiProgressBar: document.querySelector("#aiProgressBar"),
   workbench: document.querySelector("#workbench"),
   canvasStage: document.querySelector("#canvasStage"),
+  canvasScrollContent: document.querySelector("#canvasScrollContent"),
   dropHint: document.querySelector("#dropHint"),
   zoomOutButton: document.querySelector("#zoomOutButton"),
   zoomInButton: document.querySelector("#zoomInButton"),
@@ -856,9 +857,9 @@ function computeFitScale() {
     return 1;
   }
 
-  const styles = getComputedStyle(elements.canvasStage);
-  const paddingX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
-  const paddingY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+  const contentStyles = getComputedStyle(elements.canvasScrollContent);
+  const paddingX = parseFloat(contentStyles.paddingLeft) + parseFloat(contentStyles.paddingRight);
+  const paddingY = parseFloat(contentStyles.paddingTop) + parseFloat(contentStyles.paddingBottom);
   const availableWidth = Math.max(80, elements.canvasStage.clientWidth - paddingX);
   const availableHeight = Math.max(80, elements.canvasStage.clientHeight - paddingY);
   return Math.min(
@@ -900,6 +901,8 @@ function applyCanvasZoom({ anchorEvent = null, preserveCenter = true } = {}) {
       canvas.style.width = "";
       canvas.style.height = "";
     });
+    elements.canvasScrollContent.style.width = "";
+    elements.canvasScrollContent.style.height = "";
     updateZoomControls();
     return;
   }
@@ -914,11 +917,22 @@ function applyCanvasZoom({ anchorEvent = null, preserveCenter = true } = {}) {
     canvas.style.width = `${displayWidth}px`;
     canvas.style.height = `${displayHeight}px`;
   });
+  sizeCanvasScrollContent(displayWidth, displayHeight);
 
   updateZoomControls();
   if (anchor) {
     requestAnimationFrame(() => restoreZoomAnchor(anchor));
   }
+}
+
+function sizeCanvasScrollContent(displayWidth, displayHeight) {
+  const styles = getComputedStyle(elements.canvasScrollContent);
+  const paddingX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+  const paddingY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+  const contentWidth = Math.ceil(displayWidth + paddingX);
+  const contentHeight = Math.ceil(displayHeight + paddingY);
+  elements.canvasScrollContent.style.width = `${Math.max(elements.canvasStage.clientWidth, contentWidth)}px`;
+  elements.canvasScrollContent.style.height = `${Math.max(elements.canvasStage.clientHeight, contentHeight)}px`;
 }
 
 function getZoomAnchor(anchorEvent, preserveCenter) {
