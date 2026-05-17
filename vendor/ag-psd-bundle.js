@@ -1742,7 +1742,7 @@ function serializeFilterFXItem(f) {
                 'Rds ': uvRadius(f.filter),
             }, filterID: 697 });
         case 'gaussian blur': return __assign(__assign({}, base), { Fltr: {
-                // _name: '高斯模糊', // Testing
+                // _name: 'Gaussian Blur', // Testing
                 _name: 'Gaussian Blur',
                 _classID: 'GsnB',
                 'Rds ': uvRadius(f.filter),
@@ -3844,12 +3844,11 @@ function makeType(name, classID) {
     return { name: name, classID: classID };
 }
 var nullType = makeType('', 'null');
-var USE_CHINESE = false; // Testing
 var fieldToExtType = {
     strokeStyleContent: makeType('', 'solidColorLayer'),
-    printProofSetup: makeType(USE_CHINESE ? '校样设置' : 'Proof Setup', 'proofSetup'),
-    Grad: makeType(USE_CHINESE ? '渐变' : 'Gradient', 'Grdn'),
-    Trnf: makeType(USE_CHINESE ? '变换' : 'Transform', 'Trnf'),
+    printProofSetup: makeType('Proof Setup', 'proofSetup'),
+    Grad: makeType('Gradient', 'Grdn'),
+    Trnf: makeType('Transform', 'Trnf'),
     patternFill: makeType('', 'patternFill'),
     ebbl: makeType('', 'ebbl'),
     SoFi: makeType('', 'SoFi'),
