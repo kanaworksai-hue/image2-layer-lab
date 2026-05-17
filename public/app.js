@@ -719,6 +719,17 @@ window.addEventListener("resize", () => {
   applyCanvasZoom({ preserveCenter: true });
 });
 
+if ("ResizeObserver" in window) {
+  const canvasStageObserver = new ResizeObserver(() => {
+    if (!state.imageLoaded) {
+      return;
+    }
+
+    applyCanvasZoom({ preserveCenter: state.zoom !== 1 });
+  });
+  canvasStageObserver.observe(elements.canvasStage);
+}
+
 elements.canvasStage.addEventListener("wheel", onCanvasWheel, { passive: false });
 
 function getInitialLanguage() {
