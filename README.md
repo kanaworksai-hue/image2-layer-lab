@@ -1,40 +1,32 @@
-# Layer Lab
+# KANA Layer Lab
 
-Layer Lab is a local browser tool for peeling people, objects, text, and scene elements out of an image, filling the background, and exporting the result as a layered PSD. The workflow is inspired by *Progressive Photorealistic Simplification*: select an element, remove it from the background, keep the removed element as its own layer, and export a clean compositing file.
+Language tags: [English](README.md) | [Japanese](README.ja.md) | [Chinese](README.zh.md)
+
+KANA Layer Lab is a browser-based tool for layer peeling and solid-color background removal. It runs locally in the browser, so the core workflow does not require an API key or upload user images to a server.
 
 [KanaWorks_AI on X](https://x.com/kanaworks_ai) · Want more? Follow me.
 
-Live static demo: https://kanaworksai-hue.github.io/image2-layer-lab/
+Live demo: https://kanaworksai-hue.github.io/image2-layer-lab/
 
-The static demo supports local selection, peeling, quick fill, PNG export, and PSD export directly in the browser.
-It also includes a solid background remover for white, black, green, and custom-color backgrounds, with transparent PNG export in auto, original, 16:9, 9:16, 1:1, 2:3, 3:2, 4:5, and 5:4 ratios.
+## Main Features
 
-## Languages
+### Layer Peeling
 
-The app includes three UI versions:
+Select people, objects, text, UI, or scene elements in an image with brush, eraser, shapes, pen paths, or a magic wand. The selected area can be peeled into a transparent layer while the original position is quickly filled in the background. Export the result as PNG or PSD for further editing in Photoshop or other layer-based tools.
 
-- English
-- 日本語
-- 中文
+### Solid Background Removal
 
-Use the language selector in the left panel to switch versions.
+Remove white, black, green, or custom-color backgrounds from images and videos. Tolerance and feather can be adjusted live, and extra sampled colors can be added when the background is not fully removed. Images export as transparent PNG, while videos export as transparent WebM or MOV.
 
-## Features
+## Supported Files
 
-- Brush, eraser, rectangle, ellipse, rounded-rectangle, AE-style pen path, and Photoshop-style magic wand selection with replace/add/subtract modes for mobile use
-- Canvas zoom from fit view up to 800%, with pan mode for inspecting small details while selecting
-- Separate workspaces for layer peeling and solid background removal
-- Undo / redo for selection and layer operations
-- Peel selected content into transparent layers
-- Local quick background fill
-- Solid-color background removal with non-destructive preview, start-over recovery, transparent PNG export, and common output ratios
-- PSD export preview showing the composite and final layer count before download
-- Layer visibility, ordering, single-layer PNG export
-- PSD export with peeled layers, filled background, and hidden original reference
+- Images: PNG, JPG, WebP
+- Videos: MP4, WebM, MOV
+- Exports: PNG, PSD, WebM, MOV
 
 ## Run Locally
 
-1. Start the server:
+1. Start the local server:
 
 ```bash
 node server.mjs
@@ -46,29 +38,8 @@ node server.mjs
 http://localhost:3000
 ```
 
-## 日本語
-
-Layer Lab は、画像内の人物、物体、文字、シーン要素を選択して切り出し、背景を補完し、PSD レイヤーとして書き出すローカルブラウザツールです。
-
-使い方:
-
-1. `node server.mjs` を実行します。
-2. `http://localhost:3000` を開きます。
-
-選択、切り出し、簡易補完、PSD 書き出しはブラウザ内で動作します。
-
-## 中文
-
-Layer Lab 是一个本地浏览器工具，可以把图片中的人物、物品、文字、场景元素选中并剥离，背景可以本地快速补洞，最后导出 PSD 分层文件。
-
-使用方式：
-
-1. 运行 `node server.mjs`
-2. 打开 `http://localhost:3000`
-
-选择、剥离、快速补洞、背景移除、导出 PSD 都在浏览器里完成。
-
-## Security Notes
+## Notes
 
 - No API key is required for the browser workflow.
-- Do not publish user images unless you intentionally want to share them.
+- User files are processed locally in the browser.
+- Transparent MOV export uses PNG frames inside a QuickTime MOV container, so files may be larger than WebM.
