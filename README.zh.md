@@ -1,6 +1,6 @@
 # KANA Layer Lab
 
-语言标签：[英文](README.md) | [日文](README.ja.md) | [中文](README.zh.md)
+语言标签：[English](README.md) | [日本語](README.ja.md) | [中文](README.zh.md)
 
 KANA Layer Lab 是一个浏览器工具，用于图层剥离和纯色背景移除。核心流程在浏览器本地运行，不需要 API key，也不会把用户图片上传到服务器。
 

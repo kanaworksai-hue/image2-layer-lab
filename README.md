@@ -1,6 +1,6 @@
 # KANA Layer Lab
 
-Language tags: [English](README.md) | [Japanese](README.ja.md) | [Chinese](README.zh.md)
+Language tags: [English](README.md) | [日本語](README.ja.md) | [中文](README.zh.md)
 
 KANA Layer Lab is a browser-based tool for layer peeling and solid-color background removal. It runs locally in the browser, so the core workflow does not require an API key or upload user images to a server.
 
