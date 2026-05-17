@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-    <title>Layer Lab</title>
+    <title>KANA Layer Lab</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
@@ -11,9 +11,10 @@
       <aside class="control-panel" aria-label="图层剥离控制台">
         <div class="brand-row">
           <div>
-            <p class="eyebrow" data-i18n="eyebrow">Layer Lab</p>
-            <h1>Layer Lab</h1>
+            <p class="eyebrow" data-i18n="eyebrow">KANA Layer Lab</p>
+            <h1 data-i18n="appName">KANA Layer Lab</h1>
           </div>
+          <button id="helpButton" class="help-button" type="button" aria-haspopup="dialog" aria-controls="helpDialog" aria-expanded="false" aria-label="使用教程">?</button>
         </div>
 
         <div class="language-row" aria-label="Language">
@@ -31,7 +32,7 @@
           <img src="./assets/kanaworks-logo.png" alt="KanaWorks AI logo">
           <span>
             <strong>KanaWorks_AI</strong>
-            <small data-i18n="promo">Follow</small>
+            <small data-i18n="promo">Want more? Follow me</small>
           </span>
         </a>
 
@@ -41,9 +42,9 @@
         </div>
 
         <label class="upload-box" for="sourceImage">
-          <span data-i18n="sourceImage">文件</span>
-          <strong data-i18n="chooseImage">上传</strong>
-          <small data-i18n="imageHint">图片 / 视频</small>
+          <span data-i18n="sourceImage">上传</span>
+          <strong data-i18n="chooseImage">支持类型：PNG / JPG / WebP / MP4 / WebM / MOV</strong>
+          <small data-i18n="imageHint">支持方式：点击 / 拖入</small>
           <input id="sourceImage" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm,video/quicktime">
         </label>
 
@@ -181,6 +182,22 @@
 
         <p id="message" class="message" role="status" aria-live="polite"></p>
       </aside>
+
+      <div id="helpBackdrop" class="help-backdrop" hidden></div>
+      <section id="helpDialog" class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
+        <div class="help-card">
+          <header class="help-header">
+            <h2 id="helpTitle" data-i18n="helpTitle">使用教程</h2>
+            <button id="helpCloseButton" class="help-close-button" type="button" aria-label="关闭">x</button>
+          </header>
+          <ol class="help-list">
+            <li data-i18n="helpStepUpload">上传图片或视频，也可以直接拖入文件。</li>
+            <li data-i18n="helpStepPeel">剥离页：用画笔、魔棒、形状或钢笔选中区域，再导出 PNG 或 PSD。</li>
+            <li data-i18n="helpStepBackground">背景页：选择白、黑、绿或自选颜色，点预览后拖动容差和柔化实时查看。</li>
+            <li data-i18n="helpStepVideo">视频背景：预览后可导出透明 WebM 或 MOV。</li>
+          </ol>
+        </div>
+      </section>
 
       <section id="workbench" class="workbench" aria-label="分层工作台">
         <div class="canvas-panel">
