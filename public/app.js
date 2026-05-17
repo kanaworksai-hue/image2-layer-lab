@@ -36,12 +36,18 @@ const elements = {
   bgToleranceValue: document.querySelector("#bgToleranceValue"),
   bgFeather: document.querySelector("#bgFeather"),
   bgFeatherValue: document.querySelector("#bgFeatherValue"),
+  bgSourceCanvas: document.querySelector("#bgSourceCanvas"),
+  bgSourceVideo: document.querySelector("#bgSourceVideo"),
+  bgSourceEmpty: document.querySelector("#bgSourceEmpty"),
   bgPreviewCanvas: document.querySelector("#bgPreviewCanvas"),
-  bgPreviewEmpty: document.querySelector("#bgPreviewEmpty"),
+  sampleBgButton: document.querySelector("#sampleBgButton"),
+  clearBgSamplesButton: document.querySelector("#clearBgSamplesButton"),
+  bgSampleCount: document.querySelector("#bgSampleCount"),
   removeSolidBgButton: document.querySelector("#removeSolidBgButton"),
   applySolidBgButton: document.querySelector("#applySolidBgButton"),
   resetSolidBgButton: document.querySelector("#resetSolidBgButton"),
   downloadTransparentButton: document.querySelector("#downloadTransparentButton"),
+  downloadVideoButton: document.querySelector("#downloadVideoButton"),
   peelQuickButton: document.querySelector("#peelQuickButton"),
   peelOnlyButton: document.querySelector("#peelOnlyButton"),
   healButton: document.querySelector("#healButton"),
@@ -79,9 +85,9 @@ const I18N = {
     htmlLang: "zh-CN",
     eyebrow: "Layer Lab",
     language: "语言",
-    sourceImage: "图片",
+    sourceImage: "文件",
     chooseImage: "上传",
-    imageHint: "PNG / JPG / WebP",
+    imageHint: "图片 / 视频",
     promo: "Follow",
     layerWorkspace: "剥离",
     backgroundWorkspace: "背景",
@@ -144,12 +150,16 @@ const I18N = {
     outputPadding: "边距",
     bgTolerance: "容差",
     edgeFeather: "柔化",
+    sourcePreview: "源",
+    bgSourceEmpty: "待上传",
+    sampleBg: "吸色+",
+    clearSamples: "清色",
     bgPreview: "预览",
-    bgPreviewEmpty: "调色后预览",
     removeSolidBg: "预览",
     applyPreview: "应用",
     retrySolidBg: "重来",
     downloadTransparent: "下载 PNG",
+    downloadVideo: "下载 WebM",
     export: "导出",
     exportPsd: "PSD",
     exportPng: "PNG",
@@ -185,15 +195,20 @@ const I18N = {
     bgPreviewApplied: "已应用预览，移除 {count} px 背景。",
     bgPreviewCleared: "已恢复到上传原图，可以重新调整后预览。",
     bgPreviewMissing: "请先生成背景移除预览。",
-    transparentDownloaded: "透明 PNG 已下载。"
+    transparentDownloaded: "透明 PNG 已下载。",
+    videoDownloaded: "透明 WebM 已下载。",
+    sampleAdded: "已加 {count} 色。",
+    sampleModeOn: "点预览或源图吸色。",
+    samplesCleared: "已清色。",
+    videoProcessing: "正在处理视频 {time}s / {duration}s..."
   },
   en: {
     htmlLang: "en",
     eyebrow: "Layer Lab",
     language: "Language",
-    sourceImage: "Image",
+    sourceImage: "File",
     chooseImage: "Upload",
-    imageHint: "PNG / JPG / WebP",
+    imageHint: "Image / video",
     promo: "Follow",
     layerWorkspace: "Peel",
     backgroundWorkspace: "BG",
@@ -256,12 +271,16 @@ const I18N = {
     outputPadding: "Padding",
     bgTolerance: "Tolerance",
     edgeFeather: "Feather",
+    sourcePreview: "Source",
+    bgSourceEmpty: "No file",
+    sampleBg: "Pick+",
+    clearSamples: "Clear color",
     bgPreview: "Preview",
-    bgPreviewEmpty: "Tune, then preview",
     removeSolidBg: "Preview",
     applyPreview: "Apply",
     retrySolidBg: "Redo",
     downloadTransparent: "Download PNG",
+    downloadVideo: "Download WebM",
     export: "Export",
     exportPsd: "PSD",
     exportPng: "PNG",
@@ -297,15 +316,20 @@ const I18N = {
     bgPreviewApplied: "Preview applied. Removed {count} px of background.",
     bgPreviewCleared: "Restored the uploaded image. Adjust settings and preview again.",
     bgPreviewMissing: "Generate a background removal preview first.",
-    transparentDownloaded: "Transparent PNG downloaded."
+    transparentDownloaded: "Transparent PNG downloaded.",
+    videoDownloaded: "Transparent WebM downloaded.",
+    sampleAdded: "{count} colors added.",
+    sampleModeOn: "Tap preview/source to pick.",
+    samplesCleared: "Colors cleared.",
+    videoProcessing: "Processing video {time}s / {duration}s..."
   },
   ja: {
     htmlLang: "ja",
     eyebrow: "Layer Lab",
     language: "言語",
-    sourceImage: "画像",
+    sourceImage: "ファイル",
     chooseImage: "アップ",
-    imageHint: "PNG / JPG / WebP",
+    imageHint: "画像 / 動画",
     promo: "Follow",
     layerWorkspace: "抽出",
     backgroundWorkspace: "背景",
@@ -368,12 +392,16 @@ const I18N = {
     outputPadding: "余白",
     bgTolerance: "許容差",
     edgeFeather: "ぼかし",
+    sourcePreview: "元",
+    bgSourceEmpty: "未選択",
+    sampleBg: "色追加",
+    clearSamples: "色消去",
     bgPreview: "プレビュー",
-    bgPreviewEmpty: "調整してプレビュー",
     removeSolidBg: "プレビュー",
     applyPreview: "適用",
     retrySolidBg: "やり直す",
     downloadTransparent: "PNG保存",
+    downloadVideo: "WebM保存",
     export: "出力",
     exportPsd: "PSD",
     exportPng: "PNG",
@@ -409,13 +437,23 @@ const I18N = {
     bgPreviewApplied: "プレビューを適用しました。{count} px の背景を削除しました。",
     bgPreviewCleared: "アップロード時の画像に戻しました。調整して再プレビューできます。",
     bgPreviewMissing: "先に背景削除プレビューを生成してください。",
-    transparentDownloaded: "透明PNGを書き出しました。"
+    transparentDownloaded: "透明PNGを書き出しました。",
+    videoDownloaded: "透明WebMを書き出しました。",
+    sampleAdded: "{count} 色を追加しました。",
+    sampleModeOn: "プレビューか元画像をタップ。",
+    samplesCleared: "色をクリアしました。",
+    videoProcessing: "動画処理中 {time}s / {duration}s..."
   }
 };
 
 const state = {
   imageLoaded: false,
   imageName: "image",
+  mediaType: "image",
+  sourceObjectUrl: null,
+  videoElement: null,
+  videoPreviewActive: false,
+  videoPreviewFrame: 0,
   view: "layers",
   tool: "brush",
   selectionMode: "add",
@@ -441,7 +479,9 @@ const state = {
   redo: [],
   recoverySnapshot: null,
   backgroundPreview: null,
-  transparentCanvas: null
+  transparentCanvas: null,
+  bgExtraColors: [],
+  bgPickMode: false
 };
 
 const MASK_COLOR = "rgba(23, 107, 135, 0.46)";
@@ -452,7 +492,8 @@ const ZOOM_MAX = 8;
 const ZOOM_STEP = 1.25;
 const SHAPE_MIN_SIZE = 2;
 const SHAPE_HANDLES = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
-const SUPPORTED_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+const SUPPORTED_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+const SUPPORTED_VIDEO_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
 
 const backgroundCtx = elements.backgroundCanvas.getContext("2d", { willReadFrequently: true });
 const selectionCtx = elements.selectionCanvas.getContext("2d", { willReadFrequently: true });
@@ -461,6 +502,7 @@ const overlayCtx = elements.overlayCanvas.getContext("2d");
 elements.backgroundCanvas.hidden = true;
 elements.selectionCanvas.hidden = true;
 elements.overlayCanvas.hidden = true;
+elements.bgPreviewCanvas.hidden = true;
 
 renderLayers();
 syncRangeLabels();
@@ -480,7 +522,7 @@ elements.languageSelect.addEventListener("change", () => {
 elements.sourceImage.addEventListener("change", async () => {
   const file = elements.sourceImage.files?.[0];
   if (file) {
-    await loadSourceImage(file);
+    await loadSourceFile(file);
   }
   elements.sourceImage.value = "";
 });
@@ -571,6 +613,11 @@ elements.bgCustomColor.addEventListener("input", () => {
 });
 elements.bgOutputRatio.addEventListener("change", renderBackgroundPreview);
 elements.bgPadding.addEventListener("change", renderBackgroundPreview);
+elements.sampleBgButton.addEventListener("click", toggleBackgroundSampleMode);
+elements.clearBgSamplesButton.addEventListener("click", clearBackgroundSamples);
+elements.bgSourceCanvas.addEventListener("pointerdown", onBackgroundSamplePointer);
+elements.bgPreviewCanvas.addEventListener("pointerdown", onBackgroundSamplePointer);
+elements.bgSourceVideo.addEventListener("pointerdown", onBackgroundSamplePointer);
 elements.zoomOutButton.addEventListener("click", () => {
   setCanvasZoom(state.zoom / ZOOM_STEP, { announce: true });
 });
@@ -597,6 +644,7 @@ elements.removeSolidBgButton.addEventListener("click", removeSolidBackground);
 elements.applySolidBgButton.addEventListener("click", applySolidBackgroundPreview);
 elements.resetSolidBgButton.addEventListener("click", resetSolidBackgroundWorkflow);
 elements.downloadTransparentButton.addEventListener("click", downloadTransparentPng);
+elements.downloadVideoButton.addEventListener("click", () => void downloadTransparentVideo());
 elements.peelQuickButton.addEventListener("click", () => void peelAndQuickHeal());
 elements.peelOnlyButton.addEventListener("click", () => peelSelection({ clearAfter: false, recordHistory: true }));
 elements.healButton.addEventListener("click", () => quickHealSelection({ clearAfter: false, recordHistory: true }));
@@ -651,6 +699,7 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("pagehide", () => {
   state.isDrawing = false;
   state.isPanning = false;
+  stopVideoPreviewLoop({ pause: true });
 });
 
 window.addEventListener("resize", () => {
@@ -741,6 +790,7 @@ function syncWorkspaceView() {
   elements.selectionStats.hidden = state.view !== "layers";
   elements.workbench.classList.toggle("background-mode", state.view === "background");
   updateCanvasVisibility();
+  renderBackgroundPreview();
 }
 
 function syncToolButtons() {
@@ -754,10 +804,13 @@ function syncToolButtons() {
 }
 
 function updateCanvasVisibility() {
-  elements.backgroundCanvas.hidden = !state.imageLoaded;
+  const isBackgroundView = state.view === "background";
+  const hasBackgroundPreview = Boolean(state.backgroundPreview || state.transparentCanvas || state.videoPreviewActive);
+  elements.backgroundCanvas.hidden = !state.imageLoaded || isBackgroundView;
   elements.selectionCanvas.hidden = !state.imageLoaded || state.view !== "layers";
   elements.overlayCanvas.hidden = !state.imageLoaded || state.view === "background";
-  elements.dropHint.hidden = state.imageLoaded;
+  elements.bgPreviewCanvas.hidden = !state.imageLoaded || !isBackgroundView || !hasBackgroundPreview;
+  elements.dropHint.hidden = state.imageLoaded && (!isBackgroundView || hasBackgroundPreview);
   updateZoomControls();
   renderOverlay();
 }
@@ -811,7 +864,7 @@ function setCanvasZoom(nextZoom, { anchorEvent = null, announce = false } = {}) 
 }
 
 function applyCanvasZoom({ anchorEvent = null, preserveCenter = true } = {}) {
-  const canvases = [elements.backgroundCanvas, elements.selectionCanvas, elements.overlayCanvas];
+  const canvases = [elements.backgroundCanvas, elements.selectionCanvas, elements.overlayCanvas, elements.bgPreviewCanvas];
   if (!state.imageLoaded || !elements.backgroundCanvas.width || !elements.backgroundCanvas.height) {
     canvases.forEach((canvas) => {
       canvas.style.width = "";
@@ -852,7 +905,8 @@ function sizeCanvasScrollContent(displayWidth, displayHeight) {
 }
 
 function getZoomAnchor(anchorEvent, preserveCenter) {
-  const canvasRect = elements.backgroundCanvas.getBoundingClientRect();
+  const zoomCanvas = getActiveZoomCanvas();
+  const canvasRect = zoomCanvas.getBoundingClientRect();
   if (!canvasRect.width || !canvasRect.height) {
     return null;
   }
@@ -873,11 +927,18 @@ function getZoomAnchor(anchorEvent, preserveCenter) {
 }
 
 function restoreZoomAnchor(anchor) {
-  const canvasRect = elements.backgroundCanvas.getBoundingClientRect();
+  const zoomCanvas = getActiveZoomCanvas();
+  const canvasRect = zoomCanvas.getBoundingClientRect();
   const nextX = canvasRect.left + anchor.xRatio * canvasRect.width;
   const nextY = canvasRect.top + anchor.yRatio * canvasRect.height;
   elements.canvasStage.scrollLeft += nextX - anchor.clientX;
   elements.canvasStage.scrollTop += nextY - anchor.clientY;
+}
+
+function getActiveZoomCanvas() {
+  return state.view === "background" && !elements.bgPreviewCanvas.hidden
+    ? elements.bgPreviewCanvas
+    : elements.backgroundCanvas;
 }
 
 function updateZoomControls() {
@@ -927,21 +988,36 @@ function syncPenButtons() {
 }
 
 async function loadFirstImageFromDrop(files) {
-  const image = Array.from(files).find((file) => SUPPORTED_TYPES.has(file.type));
-  if (!image) {
-    setMessage("请拖入 PNG、JPG 或 WebP 图片。", true);
+  const source = Array.from(files).find((file) => isSupportedSourceFile(file));
+  if (!source) {
+    setMessage("请拖入图片或视频。", true);
     return;
   }
-  await loadSourceImage(image);
+  await loadSourceFile(source);
+}
+
+async function loadSourceFile(file) {
+  if (SUPPORTED_IMAGE_TYPES.has(file.type)) {
+    await loadSourceImage(file);
+    return;
+  }
+
+  if (SUPPORTED_VIDEO_TYPES.has(file.type)) {
+    await loadSourceVideo(file);
+    return;
+  }
+
+  setMessage("只支持图片或视频。", true);
 }
 
 async function loadSourceImage(file) {
-  if (!SUPPORTED_TYPES.has(file.type)) {
+  if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
     setMessage("只支持 PNG、JPG 或 WebP 图片。", true);
     return;
   }
 
   try {
+    cleanupSourceMedia();
     const url = URL.createObjectURL(file);
     const image = await loadImage(url);
     URL.revokeObjectURL(url);
@@ -959,12 +1035,16 @@ async function loadSourceImage(file) {
     clearSelection({ recordHistory: false });
     clearPenPath();
 
+    state.mediaType = "image";
     state.layers = [];
     state.history = [];
     state.redo = [];
     state.recoverySnapshot = null;
     state.backgroundPreview = null;
     state.transparentCanvas = null;
+    state.bgExtraColors = [];
+    state.bgPickMode = false;
+    state.videoPreviewActive = false;
     state.imageLoaded = true;
     state.imageName = file.name.replace(/\.[^.]+$/, "") || "image";
     elements.imageTitle.textContent = file.name;
@@ -973,18 +1053,89 @@ async function loadSourceImage(file) {
     updateCanvasVisibility();
     elements.layerName.value = "剥离图层 1";
     renderBackgroundPreview();
+    renderBackgroundSourcePreview();
     renderLayers();
     updatePsdPreview();
     syncHistoryButtons();
     syncRecoveryButton();
+    syncBackgroundSampleUi();
     setMessage("图片已加载。", false, true);
   } catch (error) {
     setMessage(error.message || "图片加载失败。", true);
   }
 }
 
+async function loadSourceVideo(file) {
+  if (!SUPPORTED_VIDEO_TYPES.has(file.type)) {
+    setMessage("只支持 MP4、WebM 或 MOV 视频。", true);
+    return;
+  }
+
+  try {
+    cleanupSourceMedia();
+    const url = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    video.src = url;
+    await waitForVideoMetadata(video);
+
+    const width = video.videoWidth || 1;
+    const height = video.videoHeight || 1;
+    await seekVideo(video, 0);
+    setCanvasSize(width, height);
+
+    state.originalCanvas.width = width;
+    state.originalCanvas.height = height;
+    drawVideoFrame(video, state.originalCanvas);
+    backgroundCtx.clearRect(0, 0, width, height);
+    backgroundCtx.drawImage(state.originalCanvas, 0, 0);
+    clearSelection({ recordHistory: false });
+    clearPenPath();
+
+    state.mediaType = "video";
+    state.sourceObjectUrl = url;
+    state.videoElement = video;
+    state.videoPreviewActive = false;
+    state.layers = [];
+    state.history = [];
+    state.redo = [];
+    state.recoverySnapshot = null;
+    state.backgroundPreview = null;
+    state.transparentCanvas = null;
+    state.bgExtraColors = [];
+    state.bgPickMode = false;
+    state.imageLoaded = true;
+    state.imageName = file.name.replace(/\.[^.]+$/, "") || "video";
+    elements.imageTitle.textContent = file.name;
+    elements.canvasMeta.textContent = `${width} x ${height} · ${formatVideoDuration(video.duration)}`;
+    elements.bgSourceVideo.src = url;
+    elements.bgSourceVideo.currentTime = 0;
+    resetCanvasZoom();
+    switchWorkspace("background");
+    elements.layerName.value = "剥离图层 1";
+    renderBackgroundPreview();
+    renderBackgroundSourcePreview();
+    renderLayers();
+    updatePsdPreview();
+    syncHistoryButtons();
+    syncRecoveryButton();
+    syncBackgroundSampleUi();
+    setMessage("视频已加载。", false, true);
+  } catch (error) {
+    cleanupSourceMedia();
+    setMessage(error.message || "视频加载失败。", true);
+  }
+}
+
+function isSupportedSourceFile(file) {
+  return SUPPORTED_IMAGE_TYPES.has(file.type) || SUPPORTED_VIDEO_TYPES.has(file.type);
+}
+
 function setCanvasSize(width, height) {
-  [elements.backgroundCanvas, elements.selectionCanvas, elements.overlayCanvas, state.edgeCanvas].forEach((canvas) => {
+  [elements.backgroundCanvas, elements.selectionCanvas, elements.overlayCanvas, elements.bgPreviewCanvas, state.edgeCanvas].forEach((canvas) => {
     canvas.width = width;
     canvas.height = height;
   });
@@ -2417,10 +2568,19 @@ function resetCanvas() {
 
 function removeSolidBackground() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("请先加载文件。", true);
     return;
   }
 
+  if (state.mediaType === "video") {
+    previewVideoBackgroundRemoval();
+    return;
+  }
+
+  previewImageBackgroundRemoval();
+}
+
+function previewImageBackgroundRemoval() {
   const source = cloneCanvas(state.originalCanvas);
   const result = createSolidBackgroundRemovedCanvas(source);
   if (!result.removedPixels) {
@@ -2437,9 +2597,64 @@ function removeSolidBackground() {
   setMessage(t("bgPreviewReady", { count: formatPixels(result.removedPixels) }), false, true);
 }
 
+function previewVideoBackgroundRemoval({ announce = true } = {}) {
+  if (!state.videoElement) {
+    setMessage("请先加载视频。", true);
+    return;
+  }
+
+  stopVideoPreviewLoop({ pause: false });
+  state.backgroundPreview = null;
+  state.transparentCanvas = null;
+  state.videoPreviewActive = true;
+  elements.downloadVideoButton.disabled = false;
+  updateCanvasVisibility();
+
+  const video = state.videoElement;
+  video.muted = true;
+  video.loop = true;
+  video.play().catch(() => {
+    setMessage("视频预览播放失败，可以重新点预览。", true);
+  });
+  renderVideoPreviewFrame();
+  if (announce) {
+    setMessage(t("bgPreviewReady", { count: "..." }), false, true);
+  }
+}
+
+function renderVideoPreviewFrame() {
+  if (!state.videoPreviewActive || state.mediaType !== "video" || !state.videoElement) {
+    return;
+  }
+
+  if (state.videoElement.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+    const frame = videoFrameCanvas(state.videoElement);
+    const result = createSolidBackgroundRemovedCanvas(frame);
+    drawBackgroundPreviewCanvas(result.canvas);
+  }
+
+  state.videoPreviewFrame = requestAnimationFrame(renderVideoPreviewFrame);
+}
+
+function stopVideoPreviewLoop({ pause = false } = {}) {
+  state.videoPreviewActive = false;
+  if (state.videoPreviewFrame) {
+    cancelAnimationFrame(state.videoPreviewFrame);
+    state.videoPreviewFrame = 0;
+  }
+  if (pause && state.videoElement) {
+    state.videoElement.pause();
+  }
+}
+
 function applySolidBackgroundPreview() {
   if (!state.imageLoaded) {
     setMessage("请先加载图片。", true);
+    return;
+  }
+
+  if (state.mediaType === "video") {
+    setMessage("视频可直接下载 WebM。", true);
     return;
   }
 
@@ -2463,18 +2678,25 @@ function applySolidBackgroundPreview() {
 
 function resetSolidBackgroundWorkflow() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("请先加载文件。", true);
     return;
   }
 
-  backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
-  backgroundCtx.drawImage(state.originalCanvas, 0, 0);
+  stopVideoPreviewLoop({ pause: true });
+  if (state.mediaType === "image") {
+    backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
+    backgroundCtx.drawImage(state.originalCanvas, 0, 0);
+  }
   clearSelection({ recordHistory: false });
   state.layers = [];
   state.backgroundPreview = null;
   state.transparentCanvas = null;
+  state.bgExtraColors = [];
+  state.bgPickMode = false;
   renderBackgroundPreview();
+  renderBackgroundSourcePreview();
   renderLayers();
+  syncBackgroundSampleUi();
   setMessage(t("bgPreviewCleared"), false, true);
 }
 
@@ -2501,16 +2723,143 @@ function downloadTransparentPng() {
   }, "image/png");
 }
 
+async function downloadTransparentVideo() {
+  if (!state.imageLoaded || state.mediaType !== "video" || !state.sourceObjectUrl) {
+    setMessage("请先加载视频。", true);
+    return;
+  }
+
+  if (!("MediaRecorder" in window) || typeof HTMLCanvasElement.prototype.captureStream !== "function") {
+    setMessage("当前浏览器不支持透明视频导出。", true);
+    return;
+  }
+
+  const mimeType = preferredVideoMimeType();
+  const exportVideo = document.createElement("video");
+  exportVideo.muted = true;
+  exportVideo.playsInline = true;
+  exportVideo.preload = "auto";
+  exportVideo.src = state.sourceObjectUrl;
+
+  const frameCanvas = document.createElement("canvas");
+  const outputCanvas = document.createElement("canvas");
+  let recorder = null;
+  let frameId = 0;
+
+  try {
+    setBusy(true);
+    stopVideoPreviewLoop({ pause: true });
+    await waitForVideoMetadata(exportVideo);
+    await seekVideo(exportVideo, 0);
+
+    outputCanvas.width = exportVideo.videoWidth || elements.backgroundCanvas.width;
+    outputCanvas.height = exportVideo.videoHeight || elements.backgroundCanvas.height;
+    const outputCtx = outputCanvas.getContext("2d");
+    drawTransparentVideoFrame(exportVideo, frameCanvas, outputCanvas, outputCtx);
+
+    const stream = outputCanvas.captureStream(30);
+    const chunks = [];
+    recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+    const stopped = new Promise((resolve, reject) => {
+      recorder.addEventListener("dataavailable", (event) => {
+        if (event.data?.size) {
+          chunks.push(event.data);
+        }
+      });
+      recorder.addEventListener("error", () => reject(new Error("视频录制失败。")), { once: true });
+      recorder.addEventListener("stop", resolve, { once: true });
+    });
+
+    recorder.start(250);
+    await exportVideo.play();
+
+    const duration = Number.isFinite(exportVideo.duration) ? exportVideo.duration : 0;
+    let lastStatusAt = 0;
+    await new Promise((resolve) => {
+      const tick = (time) => {
+        drawTransparentVideoFrame(exportVideo, frameCanvas, outputCanvas, outputCtx);
+        if (time - lastStatusAt > 250) {
+          lastStatusAt = time;
+          setMessage(t("videoProcessing", {
+            time: exportVideo.currentTime.toFixed(1),
+            duration: formatVideoDuration(duration)
+          }), false, true);
+        }
+
+        if (exportVideo.ended || (duration > 0 && exportVideo.currentTime >= duration - 0.02)) {
+          resolve();
+          return;
+        }
+        frameId = requestAnimationFrame(tick);
+      };
+      frameId = requestAnimationFrame(tick);
+    });
+
+    if (recorder.state !== "inactive") {
+      recorder.stop();
+    }
+    await stopped;
+
+    const blob = new Blob(chunks, { type: mimeType || "video/webm" });
+    if (!blob.size) {
+      throw new Error("透明 WebM 生成失败。");
+    }
+    downloadBlob(blob, `${safeBaseName(state.imageName)}-transparent.webm`);
+    setMessage(t("videoDownloaded"), false, true);
+  } catch (error) {
+    if (recorder && recorder.state !== "inactive") {
+      recorder.stop();
+    }
+    setMessage(error.message || "透明 WebM 导出失败。", true);
+  } finally {
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+    }
+    exportVideo.pause();
+    exportVideo.removeAttribute("src");
+    exportVideo.load();
+    setBusy(false);
+    if (state.mediaType === "video" && state.imageLoaded) {
+      previewVideoBackgroundRemoval({ announce: false });
+    }
+  }
+}
+
+function drawTransparentVideoFrame(video, frameCanvas, outputCanvas, outputCtx) {
+  drawVideoFrame(video, frameCanvas);
+  const result = createSolidBackgroundRemovedCanvas(frameCanvas);
+  if (outputCanvas.width !== result.canvas.width || outputCanvas.height !== result.canvas.height) {
+    outputCanvas.width = result.canvas.width;
+    outputCanvas.height = result.canvas.height;
+  }
+  outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+  outputCtx.drawImage(result.canvas, 0, 0);
+  return result.removedPixels;
+}
+
+function preferredVideoMimeType() {
+  if (!("MediaRecorder" in window) || typeof MediaRecorder.isTypeSupported !== "function") {
+    return "";
+  }
+
+  return [
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
+    "video/webm"
+  ].find((type) => MediaRecorder.isTypeSupported(type)) || "";
+}
+
 function createSolidBackgroundRemovedCanvas(sourceCanvas) {
   const width = sourceCanvas.width;
   const height = sourceCanvas.height;
   const ctx = sourceCanvas.getContext("2d", { willReadFrequently: true });
   const image = ctx.getImageData(0, 0, width, height);
-  const target = selectedBackgroundColor();
+  const targets = selectedBackgroundColors();
   const tolerance = Number(elements.bgTolerance.value || 36);
   const feather = Number(elements.bgFeather.value || 1);
-  const mask = findConnectedSolidBackgroundMask(image.data, width, height, target, tolerance);
-  softenBackgroundMask(mask, image.data, width, height, target, tolerance, feather);
+  const mask = findConnectedSolidBackgroundMask(image.data, width, height, targets[0], tolerance);
+  addExtraBackgroundColorMasks(mask, image.data, width, height, targets.slice(1), tolerance);
+  softenBackgroundMask(mask, image.data, width, height, targets, tolerance, feather);
 
   let removedPixels = 0;
   for (let index = 0; index < mask.length; index += 1) {
@@ -2535,6 +2884,10 @@ function createSolidBackgroundRemovedCanvas(sourceCanvas) {
   canvas.height = height;
   canvas.getContext("2d").putImageData(image, 0, 0);
   return { canvas, removedPixels };
+}
+
+function selectedBackgroundColors() {
+  return [selectedBackgroundColor(), ...state.bgExtraColors.map((color) => [...color])];
 }
 
 function selectedBackgroundColor() {
@@ -2565,7 +2918,10 @@ function syncBackgroundColorControls() {
 }
 
 function invalidateBackgroundPreview() {
-  if (!state.backgroundPreview && !state.transparentCanvas) {
+  const hadVideoPreview = state.videoPreviewActive;
+  stopVideoPreviewLoop({ pause: false });
+
+  if (!state.backgroundPreview && !state.transparentCanvas && !hadVideoPreview) {
     renderBackgroundPreview();
     return;
   }
@@ -2577,25 +2933,175 @@ function invalidateBackgroundPreview() {
 
 function renderBackgroundPreview() {
   const source = state.backgroundPreview?.canvas || state.transparentCanvas;
-  elements.applySolidBgButton.disabled = !state.backgroundPreview;
-  elements.downloadTransparentButton.disabled = !source;
+  elements.applySolidBgButton.hidden = state.mediaType === "video";
+  elements.applySolidBgButton.disabled = !state.backgroundPreview || state.mediaType === "video";
+  elements.downloadTransparentButton.disabled = !source || state.mediaType === "video";
+  elements.downloadTransparentButton.hidden = state.mediaType === "video";
+  elements.downloadVideoButton.hidden = state.mediaType !== "video";
+  elements.downloadVideoButton.disabled = state.mediaType !== "video" || !state.videoPreviewActive;
+  syncBackgroundSampleUi();
 
   if (!source) {
-    elements.bgPreviewCanvas.hidden = true;
-    elements.bgPreviewEmpty.hidden = false;
-    const previewCtx = elements.bgPreviewCanvas.getContext("2d");
-    previewCtx.clearRect(0, 0, elements.bgPreviewCanvas.width, elements.bgPreviewCanvas.height);
+    if (state.mediaType !== "video" || !state.videoPreviewActive) {
+      elements.bgPreviewCanvas.hidden = true;
+      const previewCtx = elements.bgPreviewCanvas.getContext("2d");
+      previewCtx.clearRect(0, 0, elements.bgPreviewCanvas.width, elements.bgPreviewCanvas.height);
+    }
+    updateCanvasVisibility();
     return;
   }
 
-  const preview = buildRatioOutputCanvas(source, elements.bgOutputRatio.value, Number(elements.bgPadding.value || 0.06));
-  elements.bgPreviewCanvas.width = preview.width;
-  elements.bgPreviewCanvas.height = preview.height;
+  drawBackgroundPreviewCanvas(source, { syncZoom: true });
+  updateCanvasVisibility();
+}
+
+function drawBackgroundPreviewCanvas(source, { syncZoom = false } = {}) {
+  const sizeChanged = elements.bgPreviewCanvas.width !== source.width || elements.bgPreviewCanvas.height !== source.height;
+  if (sizeChanged) {
+    elements.bgPreviewCanvas.width = source.width;
+    elements.bgPreviewCanvas.height = source.height;
+  }
   const previewCtx = elements.bgPreviewCanvas.getContext("2d");
-  previewCtx.clearRect(0, 0, preview.width, preview.height);
-  previewCtx.drawImage(preview, 0, 0);
-  elements.bgPreviewCanvas.hidden = false;
-  elements.bgPreviewEmpty.hidden = true;
+  previewCtx.clearRect(0, 0, source.width, source.height);
+  previewCtx.drawImage(source, 0, 0);
+  elements.bgPreviewCanvas.hidden = state.view !== "background";
+  if (syncZoom || sizeChanged) {
+    applyCanvasZoom({ preserveCenter: true });
+  }
+  updateCanvasVisibility();
+}
+
+function renderBackgroundSourcePreview() {
+  elements.bgSourceCanvas.hidden = true;
+  elements.bgSourceVideo.hidden = true;
+  elements.bgSourceEmpty.hidden = state.imageLoaded;
+
+  if (!state.imageLoaded) {
+    const ctx = elements.bgSourceCanvas.getContext("2d");
+    ctx.clearRect(0, 0, elements.bgSourceCanvas.width, elements.bgSourceCanvas.height);
+    return;
+  }
+
+  if (state.mediaType === "video" && state.sourceObjectUrl) {
+    elements.bgSourceVideo.hidden = false;
+    if (elements.bgSourceVideo.src !== state.sourceObjectUrl) {
+      elements.bgSourceVideo.src = state.sourceObjectUrl;
+    }
+    return;
+  }
+
+  elements.bgSourceCanvas.width = state.originalCanvas.width;
+  elements.bgSourceCanvas.height = state.originalCanvas.height;
+  const ctx = elements.bgSourceCanvas.getContext("2d");
+  ctx.clearRect(0, 0, elements.bgSourceCanvas.width, elements.bgSourceCanvas.height);
+  ctx.drawImage(state.originalCanvas, 0, 0);
+  elements.bgSourceCanvas.hidden = false;
+}
+
+function syncBackgroundSampleUi() {
+  elements.sampleBgButton.classList.toggle("active", state.bgPickMode);
+  elements.sampleBgButton.setAttribute("aria-pressed", String(state.bgPickMode));
+  elements.bgSampleCount.textContent = String(state.bgExtraColors.length);
+  elements.clearBgSamplesButton.disabled = state.bgExtraColors.length === 0;
+}
+
+function toggleBackgroundSampleMode() {
+  if (!state.imageLoaded) {
+    setMessage("请先加载文件。", true);
+    return;
+  }
+
+  state.bgPickMode = !state.bgPickMode;
+  syncBackgroundSampleUi();
+  if (state.bgPickMode) {
+    setMessage(t("sampleModeOn"), false, true);
+  }
+}
+
+function clearBackgroundSamples() {
+  if (!state.bgExtraColors.length) {
+    return;
+  }
+
+  state.bgExtraColors = [];
+  state.bgPickMode = false;
+  invalidateBackgroundPreview();
+  syncBackgroundSampleUi();
+  setMessage(t("samplesCleared"), false, true);
+}
+
+function onBackgroundSamplePointer(event) {
+  if (!state.bgPickMode || !state.imageLoaded) {
+    return;
+  }
+
+  event.preventDefault();
+  const point = getPointInElementMedia(event, event.currentTarget);
+  const color = sampleSourceColor(point.x, point.y);
+  if (!color) {
+    return;
+  }
+
+  addBackgroundSampleColor(color);
+}
+
+function addBackgroundSampleColor(color) {
+  const exists = state.bgExtraColors.some((sample) => colorArrayDistance(sample, color) < 4);
+  if (!exists) {
+    state.bgExtraColors.push(color);
+  }
+
+  state.bgPickMode = false;
+  if (state.mediaType === "image") {
+    previewImageBackgroundRemoval();
+  }
+  syncBackgroundSampleUi();
+  setMessage(t("sampleAdded", { count: state.bgExtraColors.length }), false, true);
+}
+
+function sampleSourceColor(x, y) {
+  const width = elements.backgroundCanvas.width;
+  const height = elements.backgroundCanvas.height;
+  const px = clamp(Math.round(x), 0, width - 1);
+  const py = clamp(Math.round(y), 0, height - 1);
+  const canvas = state.mediaType === "video" && state.videoElement
+    ? videoFrameCanvas(state.videoElement)
+    : state.originalCanvas;
+  if (!canvas?.width || !canvas?.height) {
+    return null;
+  }
+  const data = canvas.getContext("2d", { willReadFrequently: true }).getImageData(px, py, 1, 1).data;
+  return [data[0], data[1], data[2]];
+}
+
+function getPointInElementMedia(event, element) {
+  const rect = element.getBoundingClientRect();
+  const width = element instanceof HTMLVideoElement ? element.videoWidth : element.width;
+  const height = element instanceof HTMLVideoElement ? element.videoHeight : element.height;
+  return {
+    x: ((event.clientX - rect.left) / Math.max(1, rect.width)) * width,
+    y: ((event.clientY - rect.top) / Math.max(1, rect.height)) * height
+  };
+}
+
+function addExtraBackgroundColorMasks(mask, data, width, height, targets, tolerance) {
+  if (!targets.length) {
+    return;
+  }
+
+  for (let index = 0; index < mask.length; index += 1) {
+    const pixel = index * 4;
+    if (targets.some((target) => isBackgroundLike(data, pixel, target, tolerance))) {
+      mask[index] = 255;
+    }
+  }
+}
+
+function colorArrayDistance(a, b) {
+  const dr = a[0] - b[0];
+  const dg = a[1] - b[1];
+  const db = a[2] - b[2];
+  return Math.sqrt(dr * dr + dg * dg + db * db);
 }
 
 function findConnectedSolidBackgroundMask(data, width, height, target, tolerance) {
@@ -2646,7 +3152,7 @@ function findConnectedSolidBackgroundMask(data, width, height, target, tolerance
   }
 }
 
-function softenBackgroundMask(mask, data, width, height, target, tolerance, feather) {
+function softenBackgroundMask(mask, data, width, height, targets, tolerance, feather) {
   if (feather <= 0) {
     return;
   }
@@ -2661,7 +3167,7 @@ function softenBackgroundMask(mask, data, width, height, target, tolerance, feat
         }
 
         const pixel = index * 4;
-        const close = isBackgroundLike(data, pixel, target, tolerance + 36 + feather * 8);
+        const close = targets.some((target) => isBackgroundLike(data, pixel, target, tolerance + 36 + feather * 8));
         if (!close) {
           continue;
         }
@@ -3289,7 +3795,10 @@ function setBusy(isBusy) {
     elements.removeSolidBgButton,
     elements.applySolidBgButton,
     elements.resetSolidBgButton,
-    elements.downloadTransparentButton
+    elements.downloadTransparentButton,
+    elements.downloadVideoButton,
+    elements.sampleBgButton,
+    elements.clearBgSamplesButton
   ].forEach((button) => {
     button.disabled = isBusy;
   });
@@ -3349,6 +3858,126 @@ function loadImage(url) {
     image.onerror = () => reject(new Error("图片无法读取。"));
     image.src = url;
   });
+}
+
+function cleanupSourceMedia() {
+  stopVideoPreviewLoop({ pause: true });
+  if (state.videoElement) {
+    state.videoElement.pause();
+    state.videoElement.removeAttribute("src");
+    state.videoElement.load();
+  }
+  elements.bgSourceVideo.pause();
+  elements.bgSourceVideo.removeAttribute("src");
+  elements.bgSourceVideo.load();
+  if (state.sourceObjectUrl) {
+    URL.revokeObjectURL(state.sourceObjectUrl);
+  }
+  state.sourceObjectUrl = null;
+  state.videoElement = null;
+  state.mediaType = "image";
+}
+
+function waitForVideoMetadata(video) {
+  if (video.readyState >= HTMLMediaElement.HAVE_METADATA && video.videoWidth && video.videoHeight) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const clean = () => {
+      video.removeEventListener("loadedmetadata", onLoaded);
+      video.removeEventListener("error", onError);
+    };
+    const onLoaded = () => {
+      clean();
+      resolve();
+    };
+    const onError = () => {
+      clean();
+      reject(new Error("视频无法读取。"));
+    };
+    video.addEventListener("loadedmetadata", onLoaded, { once: true });
+    video.addEventListener("error", onError, { once: true });
+    video.load();
+  });
+}
+
+function waitForVideoFrame(video) {
+  if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const clean = () => {
+      video.removeEventListener("loadeddata", onReady);
+      video.removeEventListener("canplay", onReady);
+      video.removeEventListener("timeupdate", onReady);
+      video.removeEventListener("error", onError);
+    };
+    const onReady = () => {
+      clean();
+      resolve();
+    };
+    const onError = () => {
+      clean();
+      reject(new Error("视频帧无法读取。"));
+    };
+    video.addEventListener("loadeddata", onReady, { once: true });
+    video.addEventListener("canplay", onReady, { once: true });
+    video.addEventListener("timeupdate", onReady, { once: true });
+    video.addEventListener("error", onError, { once: true });
+  });
+}
+
+async function seekVideo(video, time) {
+  await waitForVideoMetadata(video);
+  const duration = Number.isFinite(video.duration) ? video.duration : time;
+  const target = clamp(time, 0, Math.max(0, duration || 0));
+  if (Math.abs(video.currentTime - target) < 0.015 && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+    return;
+  }
+
+  await new Promise((resolve, reject) => {
+    const clean = () => {
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("loadeddata", onSeeked);
+      video.removeEventListener("error", onError);
+    };
+    const onSeeked = () => {
+      clean();
+      resolve();
+    };
+    const onError = () => {
+      clean();
+      reject(new Error("视频定位失败。"));
+    };
+    video.addEventListener("seeked", onSeeked, { once: true });
+    video.addEventListener("loadeddata", onSeeked, { once: true });
+    video.addEventListener("error", onError, { once: true });
+    video.currentTime = target;
+  });
+  await waitForVideoFrame(video);
+}
+
+function drawVideoFrame(video, canvas) {
+  const width = video.videoWidth || canvas.width || 1;
+  const height = video.videoHeight || canvas.height || 1;
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.clearRect(0, 0, width, height);
+  ctx.drawImage(video, 0, 0, width, height);
+  return canvas;
+}
+
+function videoFrameCanvas(video) {
+  return drawVideoFrame(video, document.createElement("canvas"));
+}
+
+function formatVideoDuration(duration) {
+  return Number.isFinite(duration) && duration > 0 ? `${duration.toFixed(1)}s` : "--";
 }
 
 function nextPaint() {
