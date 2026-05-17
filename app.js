@@ -2744,6 +2744,11 @@ async function downloadTransparentVideo() {
   }
 
   const mimeType = preferredVideoMimeType();
+  if (!mimeType) {
+    setMessage("当前浏览器不支持透明 WebM 导出。请用 Chrome 或 Edge 下载。", true);
+    return;
+  }
+
   const exportVideo = document.createElement("video");
   exportVideo.muted = true;
   exportVideo.playsInline = true;
