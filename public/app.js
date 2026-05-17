@@ -1,5 +1,9 @@
 const elements = {
   languageSelect: document.querySelector("#languageSelect"),
+  helpButton: document.querySelector("#helpButton"),
+  helpDialog: document.querySelector("#helpDialog"),
+  helpBackdrop: document.querySelector("#helpBackdrop"),
+  helpCloseButton: document.querySelector("#helpCloseButton"),
   workspaceButtons: document.querySelectorAll("[data-workspace-view]"),
   workspacePanels: document.querySelectorAll("[data-workspace-panel]"),
   sourceImage: document.querySelector("#sourceImage"),
@@ -84,12 +88,20 @@ const elements = {
 const I18N = {
   zh: {
     htmlLang: "zh-CN",
-    eyebrow: "Layer Lab",
+    appName: "KANA Layer Lab",
+    eyebrow: "KANA Layer Lab",
     language: "语言",
-    sourceImage: "文件",
-    chooseImage: "上传",
-    imageHint: "图片 / 视频",
-    promo: "Follow",
+    sourceImage: "上传",
+    chooseImage: "支持类型：PNG / JPG / WebP / MP4 / WebM / MOV",
+    imageHint: "支持方式：点击 / 拖入",
+    promo: "Want more? Follow me",
+    helpOpenLabel: "使用教程",
+    helpClose: "关闭",
+    helpTitle: "使用教程",
+    helpStepUpload: "上传图片或视频，也可以直接拖入文件。",
+    helpStepPeel: "剥离页：用画笔、魔棒、形状或钢笔选中区域，再导出 PNG 或 PSD。",
+    helpStepBackground: "背景页：选择白、黑、绿或自选颜色，点预览后拖动容差和柔化实时查看。",
+    helpStepVideo: "视频背景：预览后可导出透明 WebM 或 MOV。",
     layerWorkspace: "剥离",
     backgroundWorkspace: "背景",
     layerName: "名称",
@@ -208,12 +220,20 @@ const I18N = {
   },
   en: {
     htmlLang: "en",
-    eyebrow: "Layer Lab",
+    appName: "KANA Layer Lab",
+    eyebrow: "KANA Layer Lab",
     language: "Language",
-    sourceImage: "File",
-    chooseImage: "Upload",
-    imageHint: "Image / video",
-    promo: "Follow",
+    sourceImage: "Upload",
+    chooseImage: "Types: PNG / JPG / WebP / MP4 / WebM / MOV",
+    imageHint: "Ways: click / drag in",
+    promo: "Want more? Follow me",
+    helpOpenLabel: "How to use",
+    helpClose: "Close",
+    helpTitle: "How to use",
+    helpStepUpload: "Upload an image or video, or drag a file into the app.",
+    helpStepPeel: "Peel: select an area with Brush, Wand, Shape, or Pen, then export PNG or PSD.",
+    helpStepBackground: "Background: choose white, black, green, or custom color. Preview, then tune tolerance and feather live.",
+    helpStepVideo: "Video background: preview, then export transparent WebM or MOV.",
     layerWorkspace: "Peel",
     backgroundWorkspace: "BG",
     layerName: "Name",
@@ -332,12 +352,20 @@ const I18N = {
   },
   ja: {
     htmlLang: "ja",
-    eyebrow: "Layer Lab",
+    appName: "KANA Layer Lab",
+    eyebrow: "KANA Layer Lab",
     language: "言語",
-    sourceImage: "ファイル",
-    chooseImage: "アップ",
-    imageHint: "画像 / 動画",
-    promo: "Follow",
+    sourceImage: "アップロード",
+    chooseImage: "対応形式：PNG / JPG / WebP / MP4 / WebM / MOV",
+    imageHint: "方法：クリック / ドロップ",
+    promo: "Want more? Follow me",
+    helpOpenLabel: "使い方",
+    helpClose: "閉じる",
+    helpTitle: "使い方",
+    helpStepUpload: "画像や動画をアップロード、またはファイルをドロップします。",
+    helpStepPeel: "抽出：ブラシ、自動、図形、ペンで範囲を選び、PNG または PSD で保存します。",
+    helpStepBackground: "背景：白、黒、緑、任意色を選び、プレビュー後に許容差とぼかしをリアルタイム調整します。",
+    helpStepVideo: "動画背景：プレビュー後、透明 WebM または MOV で保存できます。",
     layerWorkspace: "抽出",
     backgroundWorkspace: "背景",
     layerName: "名前",
@@ -531,6 +559,10 @@ elements.languageSelect.addEventListener("change", () => {
   localStorage.setItem("image2:language", elements.languageSelect.value);
 });
 
+elements.helpButton.addEventListener("click", openHelpDialog);
+elements.helpCloseButton.addEventListener("click", closeHelpDialog);
+elements.helpBackdrop.addEventListener("click", closeHelpDialog);
+
 elements.sourceImage.addEventListener("change", async () => {
   const file = elements.sourceImage.files?.[0];
   if (file) {
@@ -677,6 +709,12 @@ elements.selectionCanvas.addEventListener("pointerleave", onPointerLeave);
 });
 
 window.addEventListener("keydown", (event) => {
+  if (!elements.helpDialog.hidden && event.key === "Escape") {
+    event.preventDefault();
+    closeHelpDialog();
+    return;
+  }
+
   const isTextEntry = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName || "");
   if (state.tool === "pen" && !isTextEntry) {
     if (event.key === "Enter") {
@@ -762,12 +800,15 @@ function applyLanguage(language) {
   const nextLanguage = I18N[language] ? language : "zh";
   elements.languageSelect.value = nextLanguage;
   document.documentElement.lang = I18N[nextLanguage].htmlLang;
+  document.title = t("appName");
 
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     const key = node.dataset.i18n;
     node.textContent = t(key);
   });
 
+  elements.helpButton.setAttribute("aria-label", t("helpOpenLabel"));
+  elements.helpCloseButton.setAttribute("aria-label", t("helpClose"));
   syncPenButtons();
 
   if (!state.imageLoaded) {
@@ -779,6 +820,20 @@ function applyLanguage(language) {
   updateSelectionStats();
   renderLayers();
   updatePsdPreview();
+}
+
+function openHelpDialog() {
+  elements.helpBackdrop.hidden = false;
+  elements.helpDialog.hidden = false;
+  elements.helpButton.setAttribute("aria-expanded", "true");
+  elements.helpCloseButton.focus();
+}
+
+function closeHelpDialog() {
+  elements.helpBackdrop.hidden = true;
+  elements.helpDialog.hidden = true;
+  elements.helpButton.setAttribute("aria-expanded", "false");
+  elements.helpButton.focus();
 }
 
 function switchWorkspace(view) {

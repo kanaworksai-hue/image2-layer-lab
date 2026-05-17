@@ -93,7 +93,7 @@ button:disabled {
 .layer-header,
 .canvas-toolbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 14px;
 }
@@ -110,9 +110,30 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1;
   letter-spacing: 0;
+}
+
+.help-button {
+  flex: 0 0 auto;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--accent-strong);
+  background: #fff;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.help-button:hover,
+.help-button[aria-expanded="true"] {
+  border-color: rgba(23, 107, 135, 0.5);
+  color: #fff;
+  background: var(--accent);
 }
 
 h2 {
@@ -212,7 +233,7 @@ input[type="file"] {
 .upload-box {
   display: grid;
   gap: 5px;
-  min-height: 66px;
+  min-height: 82px;
   padding: 12px;
   border: 1px dashed rgba(23, 107, 135, 0.46);
   border-radius: 8px;
@@ -221,13 +242,16 @@ input[type="file"] {
 
 .upload-box strong {
   color: var(--accent-strong);
-  font-size: 16px;
-  line-height: 1.2;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .upload-box small {
-  display: none;
+  display: block;
   color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
   line-height: 1.4;
 }
 
@@ -599,6 +623,69 @@ input[type="file"] {
 
 .message.good {
   color: var(--green);
+}
+
+.help-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(23, 25, 31, 0.34);
+}
+
+.help-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 21;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.help-card {
+  width: min(460px, 100%);
+  padding: 18px;
+  border: 1px solid rgba(216, 221, 230, 0.96);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.help-close-button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: #fff;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.help-close-button:hover {
+  border-color: rgba(185, 67, 85, 0.5);
+  color: var(--rose);
+  background: #fff7f8;
+}
+
+.help-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 22px;
+  color: #30343a;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
 }
 
 .workbench {
@@ -1024,10 +1111,13 @@ input[type="file"] {
     padding: 16px;
   }
 
-  .brand-row,
   .canvas-toolbar,
   .layer-header {
     display: grid;
+  }
+
+  .brand-row {
+    display: flex;
   }
 
   h1 {
