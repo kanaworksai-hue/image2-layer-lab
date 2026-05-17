@@ -1,5 +1,4 @@
 const elements = {
-  keyStatus: document.querySelector("#keyStatus"),
   languageSelect: document.querySelector("#languageSelect"),
   workspaceButtons: document.querySelectorAll("[data-workspace-view]"),
   workspacePanels: document.querySelectorAll("[data-workspace-panel]"),
@@ -43,11 +42,7 @@ const elements = {
   applySolidBgButton: document.querySelector("#applySolidBgButton"),
   resetSolidBgButton: document.querySelector("#resetSolidBgButton"),
   downloadTransparentButton: document.querySelector("#downloadTransparentButton"),
-  imageModel: document.querySelector("#imageModel"),
-  imageQuality: document.querySelector("#imageQuality"),
-  inpaintPrompt: document.querySelector("#inpaintPrompt"),
   peelQuickButton: document.querySelector("#peelQuickButton"),
-  peelAiButton: document.querySelector("#peelAiButton"),
   peelOnlyButton: document.querySelector("#peelOnlyButton"),
   healButton: document.querySelector("#healButton"),
   exportPsdButton: document.querySelector("#exportPsdButton"),
@@ -55,10 +50,6 @@ const elements = {
   clearMaskButton: document.querySelector("#clearMaskButton"),
   resetButton: document.querySelector("#resetButton"),
   message: document.querySelector("#message"),
-  aiProgress: document.querySelector("#aiProgress"),
-  aiProgressLabel: document.querySelector("#aiProgressLabel"),
-  aiProgressValue: document.querySelector("#aiProgressValue"),
-  aiProgressBar: document.querySelector("#aiProgressBar"),
   workbench: document.querySelector("#workbench"),
   canvasStage: document.querySelector("#canvasStage"),
   canvasScrollContent: document.querySelector("#canvasScrollContent"),
@@ -135,11 +126,9 @@ const I18N = {
     penClosed: "钢笔路径已变成选区。",
     restorePeelStartMissing: "还没有可恢复的剥离前状态。",
     peelStartRestored: "已回到上次剥离前，选区也恢复了。",
-    peelAutoRestored: "已复用上次框选，保留当前结果并继续执行 {mode}。",
-    peelRecoveryHint: "已用本地快速补洞更新背景。若不满意，可直接点“剥离 + GPT补洞”复用这次框选，或点“回到剥离前”。",
+    peelRecoveryHint: "已用本地快速补洞更新背景。若不满意，可点“回到剥离前”恢复选区和背景。",
     peel: "剥离",
     peelQuick: "剥离 + 快速补洞",
-    peelAi: "剥离 + GPT补洞",
     peelOnly: "仅剥离成图层",
     quickHeal: "快速补当前选择",
     solidBgRemove: "纯色背景移除",
@@ -161,10 +150,6 @@ const I18N = {
     applyPreview: "应用预览",
     retrySolidBg: "重新来做",
     downloadTransparent: "下载透明 PNG",
-    inpaintPrompt: "GPT补洞提示词",
-    inpaintPromptDefault: "只移除选区蒙版内的元素，以及它关联的阴影或反光。根据原图的线条、纹理、光照和透视自然补全被遮挡区域。保持所有未选中的区域完全不变，不要添加新的物体。",
-    imageModel: "图像模型",
-    quality: "质量",
     export: "导出",
     exportPsd: "导出 PSD",
     exportPng: "导出合成 PNG",
@@ -187,10 +172,6 @@ const I18N = {
     fitZoomed: "画布已适应窗口。",
     panModeOn: "移动模式已开启，拖动画布查看细节。",
     panModeOff: "移动模式已关闭。",
-    keyReady: "已配置",
-    keyMissing: "缺少 Key",
-    keyOffline: "离线",
-    clientOnly: "本地模式",
     selectionStats: "选择 {count} px",
     topLayer: "顶部",
     layerOrder: "第 {index} 层",
@@ -204,12 +185,7 @@ const I18N = {
     bgPreviewApplied: "已应用预览，移除 {count} px 背景。",
     bgPreviewCleared: "已恢复到上传原图，可以重新调整后预览。",
     bgPreviewMissing: "请先生成背景移除预览。",
-    transparentDownloaded: "透明 PNG 已下载。",
-    aiProgressPreparing: "准备 GPT 补洞...",
-    aiProgressUploading: "上传图片和蒙版...",
-    aiProgressWaiting: "等待 GPT 生成补洞...",
-    aiProgressMerging: "只合并选中区域...",
-    aiProgressDone: "GPT 补洞完成"
+    transparentDownloaded: "透明 PNG 已下载。"
   },
   en: {
     htmlLang: "en",
@@ -262,11 +238,9 @@ const I18N = {
     penClosed: "Pen path converted to a selection.",
     restorePeelStartMissing: "There is no saved peel-start state yet.",
     peelStartRestored: "Restored the last peel-start state and its selection.",
-    peelAutoRestored: "Reused the last selection, kept the current result, and continued with {mode}.",
-    peelRecoveryHint: "Quick fill updated the background. If it is not right, click GPT fill directly to reuse this selection, or restore the peel start.",
+    peelRecoveryHint: "Quick fill updated the background. If it is not right, restore the peel-start state to recover the selection and background.",
     peel: "Peel",
     peelQuick: "Peel + quick fill",
-    peelAi: "Peel + GPT fill",
     peelOnly: "Peel to layer only",
     quickHeal: "Quick fill selection",
     solidBgRemove: "Solid background removal",
@@ -288,10 +262,6 @@ const I18N = {
     applyPreview: "Apply preview",
     retrySolidBg: "Start over",
     downloadTransparent: "Download transparent PNG",
-    inpaintPrompt: "GPT fill prompt",
-    inpaintPromptDefault: "Remove only the selected masked element and its associated shadows or reflections. Reconstruct the covered area seamlessly by continuing the original lines, textures, lighting, and perspective. Keep every unmasked part of the image unchanged and do not add new objects.",
-    imageModel: "Image model",
-    quality: "Quality",
     export: "Export",
     exportPsd: "Export PSD",
     exportPng: "Export composite PNG",
@@ -314,10 +284,6 @@ const I18N = {
     fitZoomed: "Canvas fit to the window.",
     panModeOn: "Pan mode on. Drag the canvas to inspect details.",
     panModeOff: "Pan mode off.",
-    keyReady: "Ready",
-    keyMissing: "No key",
-    keyOffline: "Offline",
-    clientOnly: "Local mode",
     selectionStats: "Selection {count} px",
     topLayer: "Top",
     layerOrder: "Layer {index}",
@@ -331,12 +297,7 @@ const I18N = {
     bgPreviewApplied: "Preview applied. Removed {count} px of background.",
     bgPreviewCleared: "Restored the uploaded image. Adjust settings and preview again.",
     bgPreviewMissing: "Generate a background removal preview first.",
-    transparentDownloaded: "Transparent PNG downloaded.",
-    aiProgressPreparing: "Preparing GPT fill...",
-    aiProgressUploading: "Uploading image and mask...",
-    aiProgressWaiting: "Waiting for GPT fill...",
-    aiProgressMerging: "Merging only the selected area...",
-    aiProgressDone: "GPT fill complete"
+    transparentDownloaded: "Transparent PNG downloaded."
   },
   ja: {
     htmlLang: "ja",
@@ -389,11 +350,9 @@ const I18N = {
     penClosed: "ペンパスを選択範囲に変換しました。",
     restorePeelStartMissing: "復元できる切り出し前の状態はまだありません。",
     peelStartRestored: "前回の切り出し前に戻し、選択範囲も復元しました。",
-    peelAutoRestored: "前回の選択範囲を再利用し、現在の結果を残したまま {mode} を続行します。",
-    peelRecoveryHint: "簡易補完で背景を更新しました。気に入らない場合は、そのまま GPT補完を押してこの選択範囲を再利用するか、切り出し前へ戻せます。",
+    peelRecoveryHint: "簡易補完で背景を更新しました。気に入らない場合は、切り出し前へ戻して選択範囲と背景を復元できます。",
     peel: "切り出し",
     peelQuick: "切り出し + 簡易補完",
-    peelAi: "切り出し + GPT補完",
     peelOnly: "レイヤー化のみ",
     quickHeal: "選択範囲を簡易補完",
     solidBgRemove: "単色背景削除",
@@ -415,10 +374,6 @@ const I18N = {
     applyPreview: "プレビューを適用",
     retrySolidBg: "やり直す",
     downloadTransparent: "透明PNGを保存",
-    inpaintPrompt: "GPT補完プロンプト",
-    inpaintPromptDefault: "選択マスク内の要素と、それに伴う影や反射だけを削除してください。元画像の線、質感、光、遠近感を自然につなげて、隠れていた部分を補完してください。選択されていない部分は完全に変更せず、新しい物体は追加しないでください。",
-    imageModel: "画像モデル",
-    quality: "品質",
     export: "書き出し",
     exportPsd: "PSDを書き出し",
     exportPng: "合成PNGを書き出し",
@@ -441,10 +396,6 @@ const I18N = {
     fitZoomed: "キャンバスをウィンドウに合わせました。",
     panModeOn: "移動モードをオンにしました。ドラッグして細部を確認できます。",
     panModeOff: "移動モードをオフにしました。",
-    keyReady: "設定済み",
-    keyMissing: "キーなし",
-    keyOffline: "オフライン",
-    clientOnly: "ローカル",
     selectionStats: "選択 {count} px",
     topLayer: "最上部",
     layerOrder: "{index} 番目",
@@ -458,12 +409,7 @@ const I18N = {
     bgPreviewApplied: "プレビューを適用しました。{count} px の背景を削除しました。",
     bgPreviewCleared: "アップロード時の画像に戻しました。調整して再プレビューできます。",
     bgPreviewMissing: "先に背景削除プレビューを生成してください。",
-    transparentDownloaded: "透明PNGを書き出しました。",
-    aiProgressPreparing: "GPT補完を準備中...",
-    aiProgressUploading: "画像とマスクをアップロード中...",
-    aiProgressWaiting: "GPT補完の生成待ち...",
-    aiProgressMerging: "選択範囲だけを合成中...",
-    aiProgressDone: "GPT補完が完了しました"
+    transparentDownloaded: "透明PNGを書き出しました。"
   }
 };
 
@@ -494,8 +440,6 @@ const state = {
   history: [],
   redo: [],
   recoverySnapshot: null,
-  promptCustomized: false,
-  apiAvailable: false,
   backgroundPreview: null,
   transparentCanvas: null
 };
@@ -518,7 +462,6 @@ elements.backgroundCanvas.hidden = true;
 elements.selectionCanvas.hidden = true;
 elements.overlayCanvas.hidden = true;
 
-checkHealth();
 renderLayers();
 syncRangeLabels();
 syncBackgroundColorControls();
@@ -656,11 +599,7 @@ elements.removeSolidBgButton.addEventListener("click", removeSolidBackground);
 elements.applySolidBgButton.addEventListener("click", applySolidBackgroundPreview);
 elements.resetSolidBgButton.addEventListener("click", resetSolidBackgroundWorkflow);
 elements.downloadTransparentButton.addEventListener("click", downloadTransparentPng);
-elements.inpaintPrompt.addEventListener("input", () => {
-  state.promptCustomized = !isKnownDefaultPrompt(elements.inpaintPrompt.value);
-});
 elements.peelQuickButton.addEventListener("click", () => void peelAndQuickHeal());
-elements.peelAiButton.addEventListener("click", () => void peelAndAiHeal());
 elements.peelOnlyButton.addEventListener("click", () => peelSelection({ clearAfter: false, recordHistory: true }));
 elements.healButton.addEventListener("click", () => quickHealSelection({ clearAfter: false, recordHistory: true }));
 elements.exportPsdButton.addEventListener("click", exportPsd);
@@ -768,7 +707,6 @@ function applyLanguage(language) {
     node.textContent = t(key);
   });
 
-  syncInpaintPromptLanguage(nextLanguage);
   syncPenButtons();
 
   if (!state.imageLoaded) {
@@ -777,7 +715,6 @@ function applyLanguage(language) {
   }
 
   updatePsdPreview();
-  checkHealth();
 }
 
 function switchWorkspace(view) {
@@ -828,28 +765,6 @@ function syncSelectionModeButtons() {
   elements.selectionModeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.selectionMode === state.selectionMode);
   });
-}
-
-function syncInpaintPromptLanguage(language) {
-  if (state.promptCustomized && !isKnownDefaultPrompt(elements.inpaintPrompt.value)) {
-    return;
-  }
-
-  elements.inpaintPrompt.value = getDefaultInpaintPrompt(language);
-  state.promptCustomized = false;
-}
-
-function getDefaultInpaintPrompt(language = elements.languageSelect.value || "zh") {
-  return I18N[language]?.inpaintPromptDefault || I18N.zh.inpaintPromptDefault;
-}
-
-function isKnownDefaultPrompt(value) {
-  const normalizedValue = normalizePrompt(value);
-  return Object.keys(I18N).some((language) => normalizePrompt(I18N[language].inpaintPromptDefault) === normalizedValue);
-}
-
-function normalizePrompt(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
 }
 
 function computeFitScale() {
@@ -1008,37 +923,6 @@ function syncPenButtons() {
   elements.finishPenButton.disabled = count < 3;
   elements.undoPenPointButton.disabled = count === 0;
   elements.clearPenButton.disabled = count === 0;
-}
-
-async function checkHealth() {
-  if (isStaticHosted()) {
-    state.apiAvailable = false;
-    elements.keyStatus.textContent = t("clientOnly");
-    elements.keyStatus.classList.remove("ready");
-    elements.keyStatus.classList.add("missing");
-    elements.peelAiButton.disabled = true;
-    elements.peelAiButton.title = "GPT fill requires running the Node server locally with your own OpenAI API key.";
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/health");
-    const data = await response.json();
-    state.apiAvailable = Boolean(data.hasApiKey);
-    elements.keyStatus.textContent = data.hasApiKey ? t("keyReady") : t("keyMissing");
-    elements.keyStatus.classList.toggle("ready", data.hasApiKey);
-    elements.keyStatus.classList.toggle("missing", !data.hasApiKey);
-    elements.peelAiButton.disabled = !data.hasApiKey;
-  } catch {
-    state.apiAvailable = false;
-    elements.keyStatus.textContent = t("keyOffline");
-    elements.keyStatus.classList.add("missing");
-    elements.peelAiButton.disabled = true;
-  }
-}
-
-function isStaticHosted() {
-  return location.protocol === "file:" || location.hostname.endsWith("github.io");
 }
 
 async function loadFirstImageFromDrop(files) {
@@ -2270,7 +2154,7 @@ function cleanupSelection() {
 }
 
 async function peelAndQuickHeal() {
-  if (!ensureReadyForPeelWorkflow(t("peelQuick"))) {
+  if (!ensureReadyWithSelection()) {
     return;
   }
 
@@ -2281,20 +2165,6 @@ async function peelAndQuickHeal() {
     return;
   }
   quickHealSelection({ clearAfter: true, recordHistory: false });
-}
-
-async function peelAndAiHeal() {
-  if (!ensureReadyForPeelWorkflow(t("peelAi"))) {
-    return;
-  }
-
-  rememberPeelStart();
-  pushHistory("剥离 + GPT补洞");
-  const layer = peelSelection({ clearAfter: false, recordHistory: false });
-  if (!layer) {
-    return;
-  }
-  await aiHealSelection({ clearAfter: true, recordHistory: false });
 }
 
 function peelSelection({ clearAfter, recordHistory = false }) {
@@ -2486,74 +2356,6 @@ function buildNearestBackgroundFill() {
   }
 }
 
-async function aiHealSelection({ clearAfter, recordHistory = false }) {
-  if (!ensureReadyWithSelection()) {
-    return false;
-  }
-
-  if (recordHistory) {
-    pushHistory("GPT补洞");
-  }
-
-  setBusy(true);
-  setMessage("正在调用 GPT 图像编辑补洞，复杂图片可能需要一两分钟。");
-  setAiProgress(8, "aiProgressPreparing");
-
-  try {
-    const baseCanvas = cloneCanvas(elements.backgroundCanvas);
-    const selectedMaskCanvas = createBinaryMaskCanvas();
-    const openAiMaskCanvas = createOpenAiEditMaskCanvas();
-    const imageBlob = await canvasToBlob(baseCanvas);
-    const maskBlob = await canvasToBlob(openAiMaskCanvas);
-    const formData = new FormData();
-    formData.append("image", imageBlob, "source.png");
-    formData.append("mask", maskBlob, "mask.png");
-    formData.append("prompt", elements.inpaintPrompt.value.trim());
-    formData.append("model", elements.imageModel.value);
-    formData.append("quality", elements.imageQuality.value);
-
-    setAiProgress(32, "aiProgressUploading");
-    await nextPaint();
-    setAiProgress(52, "aiProgressWaiting", true);
-    const response = await fetch("/api/fill-background", {
-      method: "POST",
-      body: formData
-    });
-    setAiProgress(72, "aiProgressWaiting");
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "GPT补洞失败。");
-    }
-
-    const image = await loadImage(`data:image/png;base64,${data.image.b64}`);
-    setAiProgress(88, "aiProgressMerging");
-    const mergedCanvas = mergeMaskedAiResult(baseCanvas, image, selectedMaskCanvas);
-    state.backgroundPreview = null;
-    state.transparentCanvas = null;
-    renderBackgroundPreview();
-    backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
-    backgroundCtx.drawImage(mergedCanvas, 0, 0);
-    updatePsdPreview();
-
-    if (clearAfter) {
-      clearSelection({ recordHistory: false });
-    }
-
-    const requestId = data.requestId ? ` Request ID: ${data.requestId}` : "";
-    setAiProgress(100, "aiProgressDone");
-    setMessage(`GPT补洞完成，未选中区域已保留原图。${requestId}`, false, true);
-    return true;
-  } catch (error) {
-    setMessage(error.message || "GPT补洞失败。", true);
-    return false;
-  } finally {
-    setBusy(false);
-    window.setTimeout(() => {
-      hideAiProgress();
-    }, 850);
-  }
-}
-
 function createBinaryMaskCanvas() {
   const width = elements.selectionCanvas.width;
   const height = elements.selectionCanvas.height;
@@ -2576,44 +2378,6 @@ function createBinaryMaskCanvas() {
 
   maskCtx.putImageData(output, 0, 0);
   return maskCanvas;
-}
-
-function createOpenAiEditMaskCanvas() {
-  const width = elements.selectionCanvas.width;
-  const height = elements.selectionCanvas.height;
-  const source = selectionCtx.getImageData(0, 0, width, height);
-  const maskCanvas = document.createElement("canvas");
-  maskCanvas.width = width;
-  maskCanvas.height = height;
-  const maskCtx = maskCanvas.getContext("2d");
-  const output = maskCtx.createImageData(width, height);
-
-  for (let index = 0; index < source.data.length; index += 4) {
-    const selected = source.data[index + 3] > MASK_THRESHOLD;
-    output.data[index] = 255;
-    output.data[index + 1] = 255;
-    output.data[index + 2] = 255;
-    output.data[index + 3] = selected ? 0 : 255;
-  }
-
-  maskCtx.putImageData(output, 0, 0);
-  return maskCanvas;
-}
-
-function mergeMaskedAiResult(baseCanvas, generatedImage, maskCanvas) {
-  const width = baseCanvas.width;
-  const height = baseCanvas.height;
-  const result = cloneCanvas(baseCanvas);
-  const patchCanvas = document.createElement("canvas");
-  patchCanvas.width = width;
-  patchCanvas.height = height;
-  const patchCtx = patchCanvas.getContext("2d");
-  patchCtx.drawImage(generatedImage, 0, 0, width, height);
-  patchCtx.globalCompositeOperation = "destination-in";
-  patchCtx.drawImage(maskCanvas, 0, 0, width, height);
-  patchCtx.globalCompositeOperation = "source-over";
-  result.getContext("2d").drawImage(patchCanvas, 0, 0);
-  return result;
 }
 
 function clearSelection({ recordHistory = false } = {}) {
@@ -3362,26 +3126,6 @@ function syncRecoveryButton() {
   elements.restorePeelStartButton.disabled = !hasRecoverySelection();
 }
 
-function ensureReadyForPeelWorkflow(modeLabel) {
-  if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
-    return false;
-  }
-
-  if (hasSelection()) {
-    return true;
-  }
-
-  if (!hasRecoverySelection()) {
-    setMessage("请先选中需要剥离或补洞的区域。", true);
-    return false;
-  }
-
-  restoreRecoverySelection({ showMessage: false });
-  setMessage(t("peelAutoRestored", { mode: modeLabel }), false, true);
-  return true;
-}
-
 function rememberPeelStart() {
   if (!state.imageLoaded || !hasSelection()) {
     return;
@@ -3407,29 +3151,6 @@ function restorePeelStart({ recordHistory = false, showMessage = true } = {}) {
   syncRecoveryButton();
   if (showMessage) {
     setMessage(t("peelStartRestored"), false, true);
-  }
-  return true;
-}
-
-function restoreRecoverySelection({ showMessage = true } = {}) {
-  if (!hasRecoverySelection()) {
-    if (showMessage) {
-      setMessage(t("restorePeelStartMissing"), true);
-    }
-    return false;
-  }
-
-  clearShapeEdit();
-  clearPenPath();
-  selectionCtx.clearRect(0, 0, elements.selectionCanvas.width, elements.selectionCanvas.height);
-  selectionCtx.drawImage(state.recoverySnapshot.selection, 0, 0);
-  updateSelectionStats();
-  state.edgeDirty = true;
-  rebuildSelectionEdgeOverlay();
-  renderOverlay();
-  syncRecoveryButton();
-  if (showMessage) {
-    setMessage(t("peelAutoRestored", { mode: t("peelAi") }), false, true);
   }
   return true;
 }
@@ -3552,7 +3273,6 @@ function nextLayerName() {
 function setBusy(isBusy) {
   [
     elements.peelQuickButton,
-    elements.peelAiButton,
     elements.peelOnlyButton,
     elements.healButton,
     elements.exportPsdButton,
@@ -3578,7 +3298,6 @@ function setBusy(isBusy) {
     syncPenButtons();
     syncRecoveryButton();
     renderBackgroundPreview();
-    elements.peelAiButton.disabled = !state.apiAvailable;
   }
 }
 
@@ -3586,22 +3305,6 @@ function setMessage(text, isError = false, isGood = false) {
   elements.message.textContent = text;
   elements.message.classList.toggle("error", Boolean(isError));
   elements.message.classList.toggle("good", Boolean(isGood) && !isError);
-}
-
-function setAiProgress(percent, labelKey, indeterminate = false) {
-  const value = clamp(Math.round(percent), 0, 100);
-  elements.aiProgress.hidden = false;
-  elements.aiProgress.classList.toggle("indeterminate", Boolean(indeterminate));
-  elements.aiProgressLabel.textContent = t(labelKey);
-  elements.aiProgressValue.textContent = `${value}%`;
-  elements.aiProgressBar.style.width = `${value}%`;
-}
-
-function hideAiProgress() {
-  elements.aiProgress.hidden = true;
-  elements.aiProgress.classList.remove("indeterminate");
-  elements.aiProgressBar.style.width = "0%";
-  elements.aiProgressValue.textContent = "0%";
 }
 
 function syncRangeLabels() {
