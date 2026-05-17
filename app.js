@@ -480,6 +480,7 @@ const state = {
   recoverySnapshot: null,
   backgroundPreview: null,
   transparentCanvas: null,
+  bgPreviewMap: null,
   bgExtraColors: [],
   bgPickMode: false
 };
@@ -822,7 +823,8 @@ function syncSelectionModeButtons() {
 }
 
 function computeFitScale() {
-  if (!state.imageLoaded || !elements.backgroundCanvas.width || !elements.backgroundCanvas.height) {
+  const baseCanvas = getZoomBaseCanvas();
+  if (!state.imageLoaded || !baseCanvas.width || !baseCanvas.height) {
     return 1;
   }
 
@@ -833,8 +835,8 @@ function computeFitScale() {
   const availableHeight = Math.max(80, elements.canvasStage.clientHeight - paddingY);
   return Math.min(
     1,
-    availableWidth / elements.backgroundCanvas.width,
-    availableHeight / elements.backgroundCanvas.height
+    availableWidth / baseCanvas.width,
+    availableHeight / baseCanvas.height
   );
 }
 
@@ -865,7 +867,8 @@ function setCanvasZoom(nextZoom, { anchorEvent = null, announce = false } = {}) 
 
 function applyCanvasZoom({ anchorEvent = null, preserveCenter = true } = {}) {
   const canvases = [elements.backgroundCanvas, elements.selectionCanvas, elements.overlayCanvas, elements.bgPreviewCanvas];
-  if (!state.imageLoaded || !elements.backgroundCanvas.width || !elements.backgroundCanvas.height) {
+  const baseCanvas = getZoomBaseCanvas();
+  if (!state.imageLoaded || !baseCanvas.width || !baseCanvas.height) {
     canvases.forEach((canvas) => {
       canvas.style.width = "";
       canvas.style.height = "";
@@ -879,8 +882,8 @@ function applyCanvasZoom({ anchorEvent = null, preserveCenter = true } = {}) {
   const anchor = getZoomAnchor(anchorEvent, preserveCenter);
   state.fitScale = computeFitScale();
   const displayScale = state.fitScale * state.zoom;
-  const displayWidth = Math.max(1, Math.round(elements.backgroundCanvas.width * displayScale));
-  const displayHeight = Math.max(1, Math.round(elements.backgroundCanvas.height * displayScale));
+  const displayWidth = Math.max(1, Math.round(baseCanvas.width * displayScale));
+  const displayHeight = Math.max(1, Math.round(baseCanvas.height * displayScale));
 
   canvases.forEach((canvas) => {
     canvas.style.width = `${displayWidth}px`;
@@ -937,6 +940,12 @@ function restoreZoomAnchor(anchor) {
 
 function getActiveZoomCanvas() {
   return state.view === "background" && !elements.bgPreviewCanvas.hidden
+    ? elements.bgPreviewCanvas
+    : elements.backgroundCanvas;
+}
+
+function getZoomBaseCanvas() {
+  return state.view === "background" && !elements.bgPreviewCanvas.hidden && elements.bgPreviewCanvas.width && elements.bgPreviewCanvas.height
     ? elements.bgPreviewCanvas
     : elements.backgroundCanvas;
 }
@@ -2942,6 +2951,7 @@ function renderBackgroundPreview() {
   syncBackgroundSampleUi();
 
   if (!source) {
+    state.bgPreviewMap = null;
     if (state.mediaType !== "video" || !state.videoPreviewActive) {
       elements.bgPreviewCanvas.hidden = true;
       const previewCtx = elements.bgPreviewCanvas.getContext("2d");
@@ -2951,11 +2961,13 @@ function renderBackgroundPreview() {
     return;
   }
 
-  drawBackgroundPreviewCanvas(source, { syncZoom: true });
+  const preview = buildRatioOutput(source, elements.bgOutputRatio.value, Number(elements.bgPadding.value || 0.06));
+  drawBackgroundPreviewCanvas(preview.canvas, { syncZoom: true, map: preview.map });
   updateCanvasVisibility();
 }
 
-function drawBackgroundPreviewCanvas(source, { syncZoom = false } = {}) {
+function drawBackgroundPreviewCanvas(source, { syncZoom = false, map = null } = {}) {
+  state.bgPreviewMap = map;
   const sizeChanged = elements.bgPreviewCanvas.width !== source.width || elements.bgPreviewCanvas.height !== source.height;
   if (sizeChanged) {
     elements.bgPreviewCanvas.width = source.width;
@@ -3037,7 +3049,7 @@ function onBackgroundSamplePointer(event) {
 
   event.preventDefault();
   const point = getPointInElementMedia(event, event.currentTarget);
-  const color = sampleSourceColor(point.x, point.y);
+  const color = sampleSourceColor(point.x, point.y, event.currentTarget);
   if (!color) {
     return;
   }
@@ -3059,11 +3071,25 @@ function addBackgroundSampleColor(color) {
   setMessage(t("sampleAdded", { count: state.bgExtraColors.length }), false, true);
 }
 
-function sampleSourceColor(x, y) {
+function sampleSourceColor(x, y, sourceElement) {
   const width = elements.backgroundCanvas.width;
   const height = elements.backgroundCanvas.height;
-  const px = clamp(Math.round(x), 0, width - 1);
-  const py = clamp(Math.round(y), 0, height - 1);
+  let sampleX = x;
+  let sampleY = y;
+  if (sourceElement === elements.bgPreviewCanvas && state.bgPreviewMap) {
+    const map = state.bgPreviewMap;
+    const inDrawArea = x >= map.drawLeft
+      && y >= map.drawTop
+      && x <= map.drawLeft + map.drawWidth
+      && y <= map.drawTop + map.drawHeight;
+    if (!inDrawArea) {
+      return null;
+    }
+    sampleX = map.sourceLeft + ((x - map.drawLeft) / map.drawWidth) * map.sourceWidth;
+    sampleY = map.sourceTop + ((y - map.drawTop) / map.drawHeight) * map.sourceHeight;
+  }
+  const px = clamp(Math.round(sampleX), 0, width - 1);
+  const py = clamp(Math.round(sampleY), 0, height - 1);
   const canvas = state.mediaType === "video" && state.videoElement
     ? videoFrameCanvas(state.videoElement)
     : state.originalCanvas;
@@ -3202,9 +3228,25 @@ function isBackgroundLike(data, pixel, target, tolerance) {
 }
 
 function buildRatioOutputCanvas(sourceCanvas, ratioValue, padding) {
+  return buildRatioOutput(sourceCanvas, ratioValue, padding).canvas;
+}
+
+function buildRatioOutput(sourceCanvas, ratioValue, padding) {
   const bounds = findAlphaBounds(sourceCanvas);
   if (!bounds) {
-    return cloneCanvas(sourceCanvas);
+    return {
+      canvas: cloneCanvas(sourceCanvas),
+      map: {
+        sourceLeft: 0,
+        sourceTop: 0,
+        sourceWidth: sourceCanvas.width,
+        sourceHeight: sourceCanvas.height,
+        drawLeft: 0,
+        drawTop: 0,
+        drawWidth: sourceCanvas.width,
+        drawHeight: sourceCanvas.height
+      }
+    };
   }
 
   const sourceRatio = sourceCanvas.width / sourceCanvas.height;
@@ -3245,7 +3287,19 @@ function buildRatioOutputCanvas(sourceCanvas, ratioValue, padding) {
     contentWidth,
     contentHeight
   );
-  return canvas;
+  return {
+    canvas,
+    map: {
+      sourceLeft: bounds.left,
+      sourceTop: bounds.top,
+      sourceWidth: contentWidth,
+      sourceHeight: contentHeight,
+      drawLeft: dx,
+      drawTop: dy,
+      drawWidth: contentWidth,
+      drawHeight: contentHeight
+    }
+  };
 }
 
 function findAlphaBounds(canvas) {
