@@ -126,7 +126,7 @@ const I18N = {
     penClosed: "钢笔路径已变成选区。",
     restorePeelStartMissing: "还没有可恢复的剥离前状态。",
     peelStartRestored: "已回到上次剥离前，选区也恢复了。",
-    peelRecoveryHint: "已用本地快速补洞更新背景。若不满意，可点“回到剥离前”恢复选区和背景。",
+    peelRecoveryHint: "已补洞。可点“回退”。",
     peel: "剥离",
     peelQuick: "剥离+补洞",
     peelOnly: "剥离",
@@ -238,7 +238,7 @@ const I18N = {
     penClosed: "Pen path converted to a selection.",
     restorePeelStartMissing: "There is no saved peel-start state yet.",
     peelStartRestored: "Restored the last peel-start state and its selection.",
-    peelRecoveryHint: "Quick fill updated the background. If it is not right, restore the peel-start state to recover the selection and background.",
+    peelRecoveryHint: "Filled. Use Back if needed.",
     peel: "Peel",
     peelQuick: "Peel+Fill",
     peelOnly: "Peel",
@@ -350,7 +350,7 @@ const I18N = {
     penClosed: "ペンパスを選択範囲に変換しました。",
     restorePeelStartMissing: "復元できる切り出し前の状態はまだありません。",
     peelStartRestored: "前回の切り出し前に戻し、選択範囲も復元しました。",
-    peelRecoveryHint: "簡易補完で背景を更新しました。気に入らない場合は、切り出し前へ戻して選択範囲と背景を復元できます。",
+    peelRecoveryHint: "補完済み。必要なら戻せます。",
     peel: "抽出",
     peelQuick: "抽出+補完",
     peelOnly: "抽出",
@@ -1010,13 +1010,13 @@ function onPointerDown(event) {
 
   if (state.tool === "magic") {
     clearShapeEdit();
-    const snapshot = captureSnapshot("魔术棒选择");
+    const snapshot = captureSnapshot("魔棒");
     const mode = event.altKey ? "subtract" : event.shiftKey ? "add" : state.selectionMode;
     const result = magicSelect(point.x, point.y, { mode });
     if (result.changed) {
       pushSnapshot(snapshot);
       const action = mode === "add" ? "加选" : mode === "subtract" ? "减选" : "选择";
-      const hint = result.transparent && result.ratio > 0.2 ? "已选中透明背景；点反选可得到主体。" : `魔术棒已${action} ${formatPixels(result.pixels)} px。`;
+      const hint = result.transparent && result.ratio > 0.2 ? "已选透明背景；可反选。" : `魔棒${action} ${formatPixels(result.pixels)} px。`;
       setMessage(hint, false, true);
     }
     return;
@@ -1819,12 +1819,12 @@ function magicSelect(x, y, { mode = "replace" } = {}) {
   }
 
   if (selectedPixels === 0) {
-    setMessage("魔术棒没有找到可选区域，请提高一点容差。", true);
+    setMessage("无区域，请调高容差。", true);
     return { changed: false, pixels: 0 };
   }
 
   if (!seedTransparent && selectedPixels > width * height * 0.62) {
-    setMessage("这次魔术棒会选中大半张图，已取消。请降低容差或点在更明确的颜色区域。", true);
+    setMessage("范围过大，已取消。", true);
     return { changed: false, pixels: 0 };
   }
 
@@ -2160,7 +2160,7 @@ async function peelAndQuickHeal() {
   }
 
   rememberPeelStart();
-  pushHistory("剥离 + 快速补洞");
+  pushHistory("剥离+补洞");
   const layer = peelSelection({ clearAfter: false, recordHistory: false });
   if (!layer) {
     return;
@@ -2243,7 +2243,7 @@ function quickHealSelection({ clearAfter, recordHistory = false }) {
   }
 
   if (recordHistory) {
-    pushHistory("快速补洞");
+    pushHistory("补洞");
   }
 
   const width = elements.backgroundCanvas.width;
@@ -2280,7 +2280,7 @@ function quickHealSelection({ clearAfter, recordHistory = false }) {
     clearSelection({ recordHistory: false });
   }
 
-  setMessage(clearAfter ? t("peelRecoveryHint") : "已用本地快速补洞更新背景。", false, true);
+  setMessage(clearAfter ? t("peelRecoveryHint") : "已补洞。", false, true);
   return true;
 }
 
@@ -2383,7 +2383,7 @@ function createBinaryMaskCanvas() {
 
 function clearSelection({ recordHistory = false } = {}) {
   if (recordHistory && state.imageLoaded && hasSelection()) {
-    pushHistory("清空选择");
+    pushHistory("清空");
   }
 
   clearShapeEdit();
@@ -2398,7 +2398,7 @@ function resetCanvas() {
     return;
   }
 
-  pushHistory("重置画布");
+  pushHistory("重置");
   backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
   backgroundCtx.drawImage(state.originalCanvas, 0, 0);
   clearSelection({ recordHistory: false });
