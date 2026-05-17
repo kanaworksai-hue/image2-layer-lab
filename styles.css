@@ -661,7 +661,7 @@ input[type="file"] {
   grid-template-rows: auto auto minmax(0, 1fr);
   height: calc(100vh - 48px);
   max-height: calc(100vh - 48px);
-  min-height: calc(100vh - 48px);
+  min-height: 0;
 }
 
 .canvas-toolbar {
@@ -790,7 +790,7 @@ input[type="file"] {
   overflow: auto;
   display: grid;
   place-items: center;
-  min-height: 560px;
+  min-height: 0;
   padding: 22px;
   background:
     linear-gradient(45deg, #edf0f4 25%, transparent 25%),
@@ -1078,7 +1078,7 @@ input[type="file"] {
   }
 
   .canvas-stage {
-    min-height: 420px;
+    min-height: 0;
     padding: 14px;
   }
 }
