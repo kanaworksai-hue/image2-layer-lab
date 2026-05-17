@@ -14,7 +14,6 @@
             <p class="eyebrow" data-i18n="eyebrow">Layer Lab</p>
             <h1>Layer Lab</h1>
           </div>
-          <span id="keyStatus" class="status-pill">检查中</span>
         </div>
 
         <div class="language-row" aria-label="Language">
@@ -75,41 +74,10 @@
           <div class="section-title" data-i18n="peel">剥离</div>
           <div class="command-grid">
             <button id="peelQuickButton" class="primary-button" type="button" data-i18n="peelQuick">剥离 + 快速补洞</button>
-            <button id="peelAiButton" class="primary-button alt" type="button" data-i18n="peelAi">剥离 + GPT补洞</button>
             <button id="peelOnlyButton" class="secondary-button" type="button" data-i18n="peelOnly">仅剥离成图层</button>
             <button id="healButton" class="secondary-button" type="button" data-i18n="quickHeal">快速补当前选择</button>
           </div>
         </section>
-
-        <details class="tool-section panel-section settings-details">
-          <summary data-i18n="inpaintPrompt">GPT补洞提示词</summary>
-          <label class="field" for="inpaintPrompt">
-            <span data-i18n="inpaintPrompt">GPT补洞提示词</span>
-            <textarea id="inpaintPrompt" rows="4">只移除选区蒙版内的元素，以及它关联的阴影或反光。根据原图的线条、纹理、光照和透视自然补全被遮挡区域。保持所有未选中的区域完全不变，不要添加新的物体。</textarea>
-          </label>
-
-          <div class="settings-grid">
-            <label class="field" for="imageModel">
-              <span data-i18n="imageModel">图像模型</span>
-              <select id="imageModel">
-                <option value="gpt-image-2" selected>gpt-image-2</option>
-                <option value="chatgpt-image-latest">chatgpt-image-latest</option>
-                <option value="gpt-image-1.5">gpt-image-1.5</option>
-                <option value="gpt-image-1">gpt-image-1</option>
-              </select>
-            </label>
-
-            <label class="field" for="imageQuality">
-              <span data-i18n="quality">质量</span>
-              <select id="imageQuality">
-                <option value="auto">auto</option>
-                <option value="low">low</option>
-                <option value="medium" selected>medium</option>
-                <option value="high">high</option>
-              </select>
-            </label>
-          </div>
-        </details>
 
         <section class="tool-section panel-section" aria-label="导出">
           <div class="section-title" data-i18n="export">导出</div>
@@ -203,15 +171,6 @@
         </div>
 
         <p id="message" class="message" role="status" aria-live="polite"></p>
-        <div id="aiProgress" class="ai-progress" hidden>
-          <div class="progress-meta">
-            <span id="aiProgressLabel" data-i18n="aiProgressPreparing">准备 GPT 补洞...</span>
-            <output id="aiProgressValue">0%</output>
-          </div>
-          <div class="progress-track">
-            <span id="aiProgressBar"></span>
-          </div>
-        </div>
       </aside>
 
       <section id="workbench" class="workbench" aria-label="分层工作台">

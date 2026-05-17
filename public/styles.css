@@ -127,7 +127,6 @@ h2 {
   letter-spacing: 0;
 }
 
-.status-pill,
 .layer-header > span,
 .canvas-toolbar > span {
   flex: 0 0 auto;
@@ -141,18 +140,6 @@ h2 {
   font-weight: 800;
   text-align: center;
   white-space: nowrap;
-}
-
-.status-pill.ready {
-  border-color: rgba(38, 115, 86, 0.24);
-  color: var(--green);
-  background: rgba(38, 115, 86, 0.1);
-}
-
-.status-pill.missing {
-  border-color: rgba(185, 67, 85, 0.26);
-  color: var(--rose);
-  background: rgba(185, 67, 85, 0.1);
 }
 
 .field {
@@ -365,17 +352,6 @@ input[type="file"] {
   grid-template-columns: 1fr;
 }
 
-.settings-details summary {
-  cursor: pointer;
-  color: #30343a;
-  font-size: 13px;
-  font-weight: 850;
-}
-
-.settings-details[open] summary {
-  margin-bottom: 12px;
-}
-
 .segmented,
 .command-grid {
   display: grid;
@@ -484,15 +460,6 @@ input[type="file"] {
   box-shadow: 0 16px 32px rgba(23, 107, 135, 0.27);
 }
 
-.primary-button.alt {
-  background: #7256a6;
-  box-shadow: 0 12px 26px rgba(80, 64, 125, 0.2);
-}
-
-.primary-button.alt:hover {
-  background: #5b4388;
-}
-
 .secondary-button {
   border: 1px solid var(--line);
   color: #26313a;
@@ -506,68 +473,6 @@ input[type="file"] {
 
 .secondary-button.danger {
   color: var(--rose);
-}
-
-.ai-progress {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid rgba(23, 107, 135, 0.22);
-  border-radius: 8px;
-  background: rgba(220, 239, 245, 0.58);
-}
-
-.ai-progress[hidden] {
-  display: none;
-}
-
-.progress-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--accent-strong);
-  font-size: 13px;
-  font-weight: 850;
-}
-
-.progress-meta output {
-  min-width: 42px;
-  text-align: right;
-}
-
-.progress-track {
-  overflow: hidden;
-  height: 9px;
-  border-radius: 999px;
-  background: rgba(23, 107, 135, 0.16);
-}
-
-.progress-track span {
-  display: block;
-  width: 0%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), #7b5db1);
-  transition: width 220ms ease;
-}
-
-.ai-progress.indeterminate .progress-track span {
-  animation: progressPulse 1.1s ease-in-out infinite;
-}
-
-@keyframes progressPulse {
-  0% {
-    opacity: 0.6;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.6;
-  }
 }
 
 .range-pair {
