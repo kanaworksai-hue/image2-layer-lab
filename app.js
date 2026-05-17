@@ -42,13 +42,6 @@ const elements = {
   applySolidBgButton: document.querySelector("#applySolidBgButton"),
   resetSolidBgButton: document.querySelector("#resetSolidBgButton"),
   downloadTransparentButton: document.querySelector("#downloadTransparentButton"),
-  sliceMode: document.querySelector("#sliceMode"),
-  sliceRows: document.querySelector("#sliceRows"),
-  sliceColumns: document.querySelector("#sliceColumns"),
-  createSliceLayersButton: document.querySelector("#createSliceLayersButton"),
-  clearSliceLayersButton: document.querySelector("#clearSliceLayersButton"),
-  sliceExportPsdButton: document.querySelector("#sliceExportPsdButton"),
-  sliceExportPngButton: document.querySelector("#sliceExportPngButton"),
   imageModel: document.querySelector("#imageModel"),
   imageQuality: document.querySelector("#imageQuality"),
   inpaintPrompt: document.querySelector("#inpaintPrompt"),
@@ -99,7 +92,6 @@ const I18N = {
     promo: "Want more? Follow me",
     layerWorkspace: "图层剥离",
     backgroundWorkspace: "背景移除",
-    sliceWorkspace: "切分图层",
     layerName: "图层名",
     semanticLevel: "语义层级",
     catDistractor: "干扰元素",
@@ -122,6 +114,7 @@ const I18N = {
     cleanup: "填洞/平滑",
     brushSize: "画笔大小",
     roundRadius: "倒角半径",
+    shapeEditable: "选区形状可继续拖动边框或控制点调整。",
     magicTolerance: "魔术棒容差",
     magicGrow: "魔术棒扩边",
     magicSelectionMode: "魔术棒模式",
@@ -204,20 +197,6 @@ const I18N = {
     bgPreviewCleared: "已恢复到上传原图，可以重新调整后预览。",
     bgPreviewMissing: "请先生成背景移除预览。",
     transparentDownloaded: "透明 PNG 已下载。",
-    sliceMode: "切分方式",
-    sliceGrid: "网格",
-    sliceRowsMode: "横向条带",
-    sliceColumnsMode: "纵向条带",
-    sliceRows: "行数",
-    sliceColumns: "列数",
-    createSliceLayers: "生成切分图层",
-    clearSliceLayers: "清空切分图层",
-    sliceLayerName: "切分图层",
-    sliceNeedImage: "请先加载图片再切分图层。",
-    sliceGenerated: "已生成 {count} 个切分图层。",
-    sliceCleared: "已清空 {count} 个切分图层。",
-    sliceNoLayers: "当前没有切分图层。",
-    sliceTooMany: "切分图层最多支持 64 个，请减少行数或列数。",
     aiProgressPreparing: "准备 GPT 补洞...",
     aiProgressUploading: "上传图片和蒙版...",
     aiProgressWaiting: "等待 GPT 生成补洞...",
@@ -234,7 +213,6 @@ const I18N = {
     promo: "Want more? Follow me",
     layerWorkspace: "Layer peel",
     backgroundWorkspace: "Background removal",
-    sliceWorkspace: "Slice layers",
     layerName: "Layer name",
     semanticLevel: "Semantic level",
     catDistractor: "Distractor",
@@ -257,6 +235,7 @@ const I18N = {
     cleanup: "Fill holes / smooth",
     brushSize: "Brush size",
     roundRadius: "Corner radius",
+    shapeEditable: "Shape selections can still be adjusted by dragging the box or handles.",
     magicTolerance: "Magic tolerance",
     magicGrow: "Magic grow",
     magicSelectionMode: "Magic wand mode",
@@ -339,20 +318,6 @@ const I18N = {
     bgPreviewCleared: "Restored the uploaded image. Adjust settings and preview again.",
     bgPreviewMissing: "Generate a background removal preview first.",
     transparentDownloaded: "Transparent PNG downloaded.",
-    sliceMode: "Slice mode",
-    sliceGrid: "Grid",
-    sliceRowsMode: "Rows",
-    sliceColumnsMode: "Columns",
-    sliceRows: "Rows",
-    sliceColumns: "Columns",
-    createSliceLayers: "Create slice layers",
-    clearSliceLayers: "Clear slice layers",
-    sliceLayerName: "Slice layer",
-    sliceNeedImage: "Load an image before slicing layers.",
-    sliceGenerated: "Created {count} slice layers.",
-    sliceCleared: "Cleared {count} slice layers.",
-    sliceNoLayers: "There are no slice layers yet.",
-    sliceTooMany: "Slice layers are limited to 64. Reduce rows or columns.",
     aiProgressPreparing: "Preparing GPT fill...",
     aiProgressUploading: "Uploading image and mask...",
     aiProgressWaiting: "Waiting for GPT fill...",
@@ -369,7 +334,6 @@ const I18N = {
     promo: "Want more? Follow me",
     layerWorkspace: "レイヤー切り出し",
     backgroundWorkspace: "背景削除",
-    sliceWorkspace: "レイヤー分割",
     layerName: "レイヤー名",
     semanticLevel: "意味レベル",
     catDistractor: "不要要素",
@@ -392,6 +356,7 @@ const I18N = {
     cleanup: "穴埋め / 平滑化",
     brushSize: "ブラシサイズ",
     roundRadius: "角丸半径",
+    shapeEditable: "選択した形状は枠やハンドルをドラッグして調整できます。",
     magicTolerance: "自動選択の許容差",
     magicGrow: "選択範囲を拡張",
     magicSelectionMode: "自動選択モード",
@@ -474,20 +439,6 @@ const I18N = {
     bgPreviewCleared: "アップロード時の画像に戻しました。調整して再プレビューできます。",
     bgPreviewMissing: "先に背景削除プレビューを生成してください。",
     transparentDownloaded: "透明PNGを書き出しました。",
-    sliceMode: "分割方法",
-    sliceGrid: "グリッド",
-    sliceRowsMode: "横方向",
-    sliceColumnsMode: "縦方向",
-    sliceRows: "行数",
-    sliceColumns: "列数",
-    createSliceLayers: "分割レイヤーを生成",
-    clearSliceLayers: "分割レイヤーをクリア",
-    sliceLayerName: "分割レイヤー",
-    sliceNeedImage: "レイヤー分割の前に画像を読み込んでください。",
-    sliceGenerated: "{count} 個の分割レイヤーを生成しました。",
-    sliceCleared: "{count} 個の分割レイヤーをクリアしました。",
-    sliceNoLayers: "分割レイヤーはまだありません。",
-    sliceTooMany: "分割レイヤーは最大 64 個です。行数または列数を減らしてください。",
     aiProgressPreparing: "GPT補完を準備中...",
     aiProgressUploading: "画像とマスクをアップロード中...",
     aiProgressWaiting: "GPT補完の生成待ち...",
@@ -506,6 +457,8 @@ const state = {
   startPoint: null,
   lastPoint: null,
   selectionSnapshot: null,
+  shapeEdit: null,
+  shapeDrag: null,
   pointerPoint: null,
   penPoints: [],
   zoom: 1,
@@ -531,6 +484,8 @@ const HISTORY_LIMIT = 24;
 const ZOOM_MIN = 0.25;
 const ZOOM_MAX = 8;
 const ZOOM_STEP = 1.25;
+const SHAPE_MIN_SIZE = 2;
+const SHAPE_HANDLES = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
 const SUPPORTED_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 const backgroundCtx = elements.backgroundCanvas.getContext("2d", { willReadFrequently: true });
@@ -548,7 +503,6 @@ syncBackgroundColorControls();
 syncWorkspaceView();
 syncToolButtons();
 syncSelectionModeButtons();
-syncSliceControls();
 renderBackgroundPreview();
 applyLanguage(getInitialLanguage());
 setMessage(t("readImage"));
@@ -604,6 +558,9 @@ elements.workspaceButtons.forEach((button) => {
 
 elements.toolButtons.forEach((button) => {
   button.addEventListener("click", () => {
+    if (state.tool !== button.dataset.tool) {
+      clearShapeEdit();
+    }
     state.tool = button.dataset.tool || "brush";
     syncToolButtons();
     renderOverlay();
@@ -621,7 +578,16 @@ elements.brushSize.addEventListener("input", () => {
   syncRangeLabels();
   renderOverlay();
 });
-elements.roundRadius.addEventListener("input", syncRangeLabels);
+elements.roundRadius.addEventListener("input", () => {
+  syncRangeLabels();
+  if (state.shapeEdit?.tool === "roundRect") {
+    state.shapeEdit.radius = Number(elements.roundRadius.value || 0);
+    renderEditableShapeSelection();
+    updateSelectionStats();
+    rebuildSelectionEdgeOverlay();
+    renderOverlay();
+  }
+});
 elements.magicTolerance.addEventListener("input", syncRangeLabels);
 elements.magicGrow.addEventListener("input", syncRangeLabels);
 elements.bgTolerance.addEventListener("input", () => {
@@ -642,16 +608,6 @@ elements.bgCustomColor.addEventListener("input", () => {
 });
 elements.bgOutputRatio.addEventListener("change", renderBackgroundPreview);
 elements.bgPadding.addEventListener("change", renderBackgroundPreview);
-elements.sliceMode.addEventListener("change", () => {
-  syncSliceControls();
-  renderOverlay();
-});
-elements.sliceRows.addEventListener("input", renderOverlay);
-elements.sliceColumns.addEventListener("input", renderOverlay);
-elements.createSliceLayersButton.addEventListener("click", createSliceLayers);
-elements.clearSliceLayersButton.addEventListener("click", clearSliceLayers);
-elements.sliceExportPsdButton.addEventListener("click", exportPsd);
-elements.sliceExportPngButton.addEventListener("click", exportCompositePng);
 elements.zoomOutButton.addEventListener("click", () => {
   setCanvasZoom(state.zoom / ZOOM_STEP, { announce: true });
 });
@@ -787,7 +743,10 @@ function applyLanguage(language) {
 }
 
 function switchWorkspace(view) {
-  state.view = ["layers", "background", "slice"].includes(view) ? view : "layers";
+  state.view = ["layers", "background"].includes(view) ? view : "layers";
+  if (state.view !== "layers") {
+    clearShapeEdit();
+  }
   syncWorkspaceView();
 }
 
@@ -805,7 +764,6 @@ function syncWorkspaceView() {
   elements.layerPanel.hidden = state.view === "background";
   elements.selectionStats.hidden = state.view !== "layers";
   elements.workbench.classList.toggle("background-mode", state.view === "background");
-  elements.workbench.classList.toggle("slice-mode", state.view === "slice");
   updateCanvasVisibility();
 }
 
@@ -832,13 +790,6 @@ function syncSelectionModeButtons() {
   elements.selectionModeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.selectionMode === state.selectionMode);
   });
-}
-
-function syncSliceControls() {
-  const mode = elements.sliceMode.value;
-  elements.sliceRows.disabled = mode === "columns";
-  elements.sliceColumns.disabled = mode === "rows";
-  elements.clearSliceLayersButton.disabled = countSliceLayers() === 0;
 }
 
 function computeFitScale() {
@@ -1098,6 +1049,7 @@ function onPointerDown(event) {
   renderOverlay();
 
   if (state.tool === "magic") {
+    clearShapeEdit();
     const snapshot = captureSnapshot("魔术棒选择");
     const mode = event.altKey ? "subtract" : event.shiftKey ? "add" : state.selectionMode;
     const result = magicSelect(point.x, point.y, { mode });
@@ -1111,8 +1063,26 @@ function onPointerDown(event) {
   }
 
   if (state.tool === "pen") {
+    clearShapeEdit();
     addPenPoint(point, event);
     return;
+  }
+
+  if (isShapeTool(state.tool)) {
+    const hit = getShapeEditHit(point);
+    if (hit) {
+      state.isDrawing = true;
+      state.shapeDrag = {
+        ...hit,
+        startPoint: point,
+        startShape: copyShapeGeometry(state.shapeEdit)
+      };
+      elements.selectionCanvas.setPointerCapture(event.pointerId);
+      renderOverlay();
+      return;
+    }
+  } else {
+    clearShapeEdit();
   }
 
   pushHistory(`${toolLabel(state.tool)}选择`);
@@ -1128,6 +1098,15 @@ function onPointerDown(event) {
       elements.selectionCanvas.width,
       elements.selectionCanvas.height
     );
+    state.shapeEdit = {
+      tool: state.tool,
+      base: cloneImageData(state.selectionSnapshot),
+      left: point.x,
+      top: point.y,
+      width: 0,
+      height: 0,
+      radius: Number(elements.roundRadius.value || 0)
+    };
     drawShapeSelection(point);
     return;
   }
@@ -1157,7 +1136,13 @@ function onPointerMove(event) {
   const point = getCanvasPoint(event);
   state.pointerPoint = point;
   if (!state.isDrawing) {
+    updateSelectionCursor(point);
     renderOverlay();
+    return;
+  }
+
+  if (state.shapeDrag) {
+    updateShapeEditFromDrag(point);
     return;
   }
 
@@ -1186,12 +1171,23 @@ function onPointerUp(event) {
   }
 
   state.isDrawing = false;
+  state.shapeDrag = null;
   state.selectionSnapshot = null;
   state.startPoint = null;
   state.lastPoint = null;
   updateSelectionStats();
   rebuildSelectionEdgeOverlay();
+  if (state.shapeEdit && isShapeTool(state.tool)) {
+    const bounds = normalizedShapeBounds(state.shapeEdit);
+    if (bounds.width < SHAPE_MIN_SIZE || bounds.height < SHAPE_MIN_SIZE) {
+      renderEditableShapeSelection();
+      clearShapeEdit();
+    }
+  }
   renderOverlay();
+  if (state.shapeEdit && isShapeTool(state.tool)) {
+    setMessage(t("shapeEditable"), false, true);
+  }
 }
 
 function onPointerLeave(event) {
@@ -1204,6 +1200,7 @@ function onPointerLeave(event) {
     onPointerUp(event);
   }
   state.pointerPoint = null;
+  elements.selectionCanvas.style.cursor = "";
   renderOverlay();
 }
 
@@ -1238,31 +1235,245 @@ function drawShapeSelection(currentPoint) {
   const width = Math.abs(currentPoint.x - state.startPoint.x);
   const height = Math.abs(currentPoint.y - state.startPoint.y);
 
-  selectionCtx.putImageData(state.selectionSnapshot, 0, 0);
-  selectionCtx.save();
-  selectionCtx.fillStyle = MASK_COLOR;
-  if (state.tool === "circle") {
-    selectionCtx.beginPath();
-    selectionCtx.ellipse(
-      left + width / 2,
-      top + height / 2,
-      width / 2,
-      height / 2,
+  if (!state.shapeEdit) {
+    state.shapeEdit = {
+      tool: state.tool,
+      base: cloneImageData(state.selectionSnapshot),
+      left,
+      top,
+      width,
+      height,
+      radius: Number(elements.roundRadius.value || 0)
+    };
+  } else {
+    Object.assign(state.shapeEdit, {
+      tool: state.tool,
+      left,
+      top,
+      width,
+      height,
+      radius: state.tool === "roundRect" ? Number(elements.roundRadius.value || 0) : state.shapeEdit.radius
+    });
+  }
+
+  renderEditableShapeSelection();
+  renderOverlay();
+}
+
+function renderEditableShapeSelection() {
+  const shape = state.shapeEdit;
+  if (!shape?.base) {
+    return;
+  }
+
+  selectionCtx.putImageData(shape.base, 0, 0);
+  fillEditableShape(selectionCtx, shape);
+  state.edgeDirty = true;
+}
+
+function fillEditableShape(ctx, shape) {
+  const bounds = normalizedShapeBounds(shape);
+  if (bounds.width <= 0 || bounds.height <= 0) {
+    return;
+  }
+
+  ctx.save();
+  ctx.fillStyle = MASK_COLOR;
+  if (shape.tool === "circle") {
+    ctx.beginPath();
+    ctx.ellipse(
+      bounds.left + bounds.width / 2,
+      bounds.top + bounds.height / 2,
+      bounds.width / 2,
+      bounds.height / 2,
       0,
       0,
       Math.PI * 2
     );
-    selectionCtx.fill();
-  } else if (state.tool === "roundRect") {
-    const radius = Math.min(Number(elements.roundRadius.value || 0), width / 2, height / 2);
-    roundedRectPath(selectionCtx, left, top, width, height, radius);
-    selectionCtx.fill();
+    ctx.fill();
+  } else if (shape.tool === "roundRect") {
+    roundedRectPath(ctx, bounds.left, bounds.top, bounds.width, bounds.height, shape.radius || 0);
+    ctx.fill();
   } else {
-    selectionCtx.fillRect(left, top, width, height);
+    ctx.fillRect(bounds.left, bounds.top, bounds.width, bounds.height);
   }
-  selectionCtx.restore();
-  state.edgeDirty = true;
+  ctx.restore();
+}
+
+function clearShapeEdit() {
+  state.shapeEdit = null;
+  state.shapeDrag = null;
+  elements.selectionCanvas.style.cursor = "";
+}
+
+function copyShapeGeometry(shape) {
+  if (!shape) {
+    return null;
+  }
+
+  return {
+    tool: shape.tool,
+    left: shape.left,
+    top: shape.top,
+    width: shape.width,
+    height: shape.height,
+    radius: shape.radius || 0
+  };
+}
+
+function cloneImageData(imageData) {
+  return new ImageData(new Uint8ClampedArray(imageData.data), imageData.width, imageData.height);
+}
+
+function normalizedShapeBounds(shape) {
+  const left = Math.min(shape.left, shape.left + shape.width);
+  const top = Math.min(shape.top, shape.top + shape.height);
+  return {
+    left,
+    top,
+    width: Math.abs(shape.width),
+    height: Math.abs(shape.height)
+  };
+}
+
+function getShapeHandles(shape) {
+  const bounds = normalizedShapeBounds(shape);
+  const right = bounds.left + bounds.width;
+  const bottom = bounds.top + bounds.height;
+  const centerX = bounds.left + bounds.width / 2;
+  const centerY = bounds.top + bounds.height / 2;
+  return [
+    { name: "nw", x: bounds.left, y: bounds.top },
+    { name: "n", x: centerX, y: bounds.top },
+    { name: "ne", x: right, y: bounds.top },
+    { name: "e", x: right, y: centerY },
+    { name: "se", x: right, y: bottom },
+    { name: "s", x: centerX, y: bottom },
+    { name: "sw", x: bounds.left, y: bottom },
+    { name: "w", x: bounds.left, y: centerY }
+  ];
+}
+
+function getShapeEditHit(point) {
+  if (!state.shapeEdit || state.shapeEdit.tool !== state.tool) {
+    return null;
+  }
+
+  const handleSize = Math.max(8, canvasLineWidth(12));
+  for (const handle of getShapeHandles(state.shapeEdit)) {
+    if (Math.abs(point.x - handle.x) <= handleSize && Math.abs(point.y - handle.y) <= handleSize) {
+      return { mode: "resize", handle: handle.name };
+    }
+  }
+
+  if (pointInShapeEdit(point)) {
+    return { mode: "move", handle: null };
+  }
+  return null;
+}
+
+function pointInShapeEdit(point) {
+  const shape = state.shapeEdit;
+  if (!shape) {
+    return false;
+  }
+
+  const bounds = normalizedShapeBounds(shape);
+  if (
+    point.x < bounds.left ||
+    point.x > bounds.left + bounds.width ||
+    point.y < bounds.top ||
+    point.y > bounds.top + bounds.height
+  ) {
+    return false;
+  }
+
+  if (shape.tool !== "circle") {
+    return true;
+  }
+
+  const radiusX = bounds.width / 2;
+  const radiusY = bounds.height / 2;
+  if (radiusX <= 0 || radiusY <= 0) {
+    return false;
+  }
+  const normalizedX = (point.x - (bounds.left + radiusX)) / radiusX;
+  const normalizedY = (point.y - (bounds.top + radiusY)) / radiusY;
+  return normalizedX * normalizedX + normalizedY * normalizedY <= 1;
+}
+
+function updateShapeEditFromDrag(point) {
+  const drag = state.shapeDrag;
+  const shape = state.shapeEdit;
+  if (!drag?.startShape || !shape) {
+    return;
+  }
+
+  const dx = point.x - drag.startPoint.x;
+  const dy = point.y - drag.startPoint.y;
+  const canvasWidth = elements.selectionCanvas.width;
+  const canvasHeight = elements.selectionCanvas.height;
+  const start = normalizedShapeBounds(drag.startShape);
+  let left = start.left;
+  let top = start.top;
+  let right = start.left + start.width;
+  let bottom = start.top + start.height;
+
+  if (drag.mode === "move") {
+    const moveX = clamp(dx, -left, canvasWidth - right);
+    const moveY = clamp(dy, -top, canvasHeight - bottom);
+    left += moveX;
+    right += moveX;
+    top += moveY;
+    bottom += moveY;
+  } else {
+    if (drag.handle.includes("w")) {
+      left = clamp(left + dx, 0, right - SHAPE_MIN_SIZE);
+    }
+    if (drag.handle.includes("e")) {
+      right = clamp(right + dx, left + SHAPE_MIN_SIZE, canvasWidth);
+    }
+    if (drag.handle.includes("n")) {
+      top = clamp(top + dy, 0, bottom - SHAPE_MIN_SIZE);
+    }
+    if (drag.handle.includes("s")) {
+      bottom = clamp(bottom + dy, top + SHAPE_MIN_SIZE, canvasHeight);
+    }
+  }
+
+  Object.assign(shape, {
+    left,
+    top,
+    width: right - left,
+    height: bottom - top
+  });
+  renderEditableShapeSelection();
   renderOverlay();
+}
+
+function updateSelectionCursor(point) {
+  if (!state.shapeEdit || !isShapeTool(state.tool)) {
+    elements.selectionCanvas.style.cursor = "";
+    return;
+  }
+
+  const hit = getShapeEditHit(point);
+  if (!hit) {
+    elements.selectionCanvas.style.cursor = "";
+    return;
+  }
+
+  const resizeCursors = {
+    n: "ns-resize",
+    s: "ns-resize",
+    e: "ew-resize",
+    w: "ew-resize",
+    nw: "nwse-resize",
+    se: "nwse-resize",
+    ne: "nesw-resize",
+    sw: "nesw-resize"
+  };
+  elements.selectionCanvas.style.cursor = hit.mode === "move" ? "move" : resizeCursors[hit.handle] || "";
 }
 
 function roundedRectPath(ctx, x, y, width, height, radius) {
@@ -1404,11 +1615,6 @@ function renderOverlay() {
     return;
   }
 
-  if (state.view === "slice") {
-    drawSliceGuides();
-    return;
-  }
-
   if (state.edgeDirty && !state.isDrawing) {
     rebuildSelectionEdgeOverlay();
   }
@@ -1426,64 +1632,44 @@ function renderOverlay() {
     overlayCtx.restore();
   }
 
+  drawShapeEditOverlay();
   drawBrushCursor();
   drawPenPathOverlay();
 }
 
-function drawSliceGuides() {
-  const { rows, columns } = currentSliceGrid();
-  const width = elements.overlayCanvas.width;
-  const height = elements.overlayCanvas.height;
+function drawShapeEditOverlay() {
+  const shape = state.shapeEdit;
+  if (!shape || state.view !== "layers") {
+    return;
+  }
 
+  const bounds = normalizedShapeBounds(shape);
+  if (bounds.width < SHAPE_MIN_SIZE || bounds.height < SHAPE_MIN_SIZE) {
+    return;
+  }
+
+  const handleSize = Math.max(8, canvasLineWidth(9));
   overlayCtx.save();
-  overlayCtx.lineWidth = canvasLineWidth(2);
-  overlayCtx.strokeStyle = "rgba(255, 255, 255, 0.95)";
-  overlayCtx.setLineDash([canvasLineWidth(10), canvasLineWidth(5)]);
-  drawGridLines(width, height, rows, columns);
-  overlayCtx.stroke();
-
-  overlayCtx.lineWidth = canvasLineWidth(1.2);
-  overlayCtx.strokeStyle = "rgba(23, 107, 135, 0.95)";
+  overlayCtx.lineWidth = canvasLineWidth(1.4);
+  overlayCtx.strokeStyle = "rgba(255, 255, 255, 0.96)";
+  overlayCtx.setLineDash([canvasLineWidth(7), canvasLineWidth(4)]);
+  overlayCtx.strokeRect(bounds.left, bounds.top, bounds.width, bounds.height);
+  overlayCtx.strokeStyle = "rgba(37, 99, 235, 0.98)";
   overlayCtx.setLineDash([]);
-  drawGridLines(width, height, rows, columns);
-  overlayCtx.stroke();
+  overlayCtx.strokeRect(bounds.left, bounds.top, bounds.width, bounds.height);
 
-  overlayCtx.font = `${canvasLineWidth(13)}px ui-sans-serif, system-ui, sans-serif`;
-  overlayCtx.textAlign = "center";
-  overlayCtx.textBaseline = "middle";
-  let index = 1;
-  for (let row = 0; row < rows; row += 1) {
-    const top = (row * height) / rows;
-    const bottom = ((row + 1) * height) / rows;
-    for (let column = 0; column < columns; column += 1) {
-      const left = (column * width) / columns;
-      const right = ((column + 1) * width) / columns;
-      const x = (left + right) / 2;
-      const y = (top + bottom) / 2;
-      overlayCtx.fillStyle = "rgba(255, 255, 255, 0.86)";
-      overlayCtx.beginPath();
-      overlayCtx.arc(x, y, canvasLineWidth(14), 0, Math.PI * 2);
-      overlayCtx.fill();
-      overlayCtx.fillStyle = "rgba(14, 80, 103, 0.95)";
-      overlayCtx.fillText(String(index), x, y);
-      index += 1;
-    }
+  for (const handle of getShapeHandles(shape)) {
+    overlayCtx.fillStyle = SHAPE_HANDLES.includes(handle.name)
+      ? "rgba(255, 255, 255, 0.96)"
+      : "rgba(255, 255, 255, 0.78)";
+    overlayCtx.strokeStyle = "rgba(37, 99, 235, 0.98)";
+    overlayCtx.lineWidth = canvasLineWidth(1.3);
+    overlayCtx.beginPath();
+    overlayCtx.rect(handle.x - handleSize / 2, handle.y - handleSize / 2, handleSize, handleSize);
+    overlayCtx.fill();
+    overlayCtx.stroke();
   }
   overlayCtx.restore();
-
-  function drawGridLines(width, height, rows, columns) {
-    overlayCtx.beginPath();
-    for (let column = 1; column < columns; column += 1) {
-      const x = (column * width) / columns;
-      overlayCtx.moveTo(x, 0);
-      overlayCtx.lineTo(x, height);
-    }
-    for (let row = 1; row < rows; row += 1) {
-      const y = (row * height) / rows;
-      overlayCtx.moveTo(0, y);
-      overlayCtx.lineTo(width, y);
-    }
-  }
 }
 
 function rebuildSelectionEdgeOverlay() {
@@ -1825,6 +2011,7 @@ function getSelectionMaskArray() {
 }
 
 function applySelectionMaskArray(mask) {
+  clearShapeEdit();
   const width = elements.selectionCanvas.width;
   const height = elements.selectionCanvas.height;
   const image = selectionCtx.createImageData(width, height);
@@ -2089,6 +2276,7 @@ function peelSelection({ clearAfter, recordHistory = false }) {
   state.layers.unshift(layer);
   elements.layerName.value = nextLayerName();
   renderLayers();
+  clearShapeEdit();
 
   if (clearAfter) {
     clearSelection({ recordHistory: false });
@@ -2355,6 +2543,7 @@ function clearSelection({ recordHistory = false } = {}) {
     pushHistory("清空选择");
   }
 
+  clearShapeEdit();
   selectionCtx.clearRect(0, 0, elements.selectionCanvas.width, elements.selectionCanvas.height);
   updateSelectionStats(0);
   state.edgeDirty = true;
@@ -2371,6 +2560,7 @@ function resetCanvas() {
   backgroundCtx.drawImage(state.originalCanvas, 0, 0);
   clearSelection({ recordHistory: false });
   clearPenPath();
+  clearShapeEdit();
   state.layers = [];
   state.backgroundPreview = null;
   state.transparentCanvas = null;
@@ -2464,100 +2654,6 @@ function downloadTransparentPng() {
     downloadBlob(blob, `${safeBaseName(state.imageName)}-transparent-${safeRatioName(elements.bgOutputRatio.value)}.png`);
     setMessage(t("transparentDownloaded"), false, true);
   }, "image/png");
-}
-
-function createSliceLayers() {
-  if (!state.imageLoaded) {
-    setMessage(t("sliceNeedImage"), true);
-    return;
-  }
-
-  const grid = currentSliceGrid();
-  const total = grid.rows * grid.columns;
-  if (total > 64) {
-    setMessage(t("sliceTooMany"), true);
-    return;
-  }
-
-  pushHistory("切分图层");
-  state.backgroundPreview = null;
-  state.transparentCanvas = null;
-  renderBackgroundPreview();
-  state.layers = state.layers.filter((layer) => layer.source !== "slice");
-
-  const source = cloneCanvas(elements.backgroundCanvas);
-  const createdLayers = [];
-  let layerIndex = 1;
-
-  for (let row = 0; row < grid.rows; row += 1) {
-    const top = Math.floor((row * source.height) / grid.rows);
-    const bottom = Math.floor(((row + 1) * source.height) / grid.rows);
-    const sliceHeight = bottom - top;
-
-    for (let column = 0; column < grid.columns; column += 1) {
-      const left = Math.floor((column * source.width) / grid.columns);
-      const right = Math.floor(((column + 1) * source.width) / grid.columns);
-      const sliceWidth = right - left;
-      const layerCanvas = document.createElement("canvas");
-      layerCanvas.width = source.width;
-      layerCanvas.height = source.height;
-      layerCanvas
-        .getContext("2d")
-        .drawImage(source, left, top, sliceWidth, sliceHeight, left, top, sliceWidth, sliceHeight);
-
-      createdLayers.push({
-        id: crypto.randomUUID(),
-        name: uniqueLayerName(`${t("sliceLayerName")} ${layerIndex}`),
-        category: "Scene",
-        canvas: layerCanvas,
-        visible: true,
-        pixels: sliceWidth * sliceHeight,
-        source: "slice",
-        createdAt: new Date().toISOString()
-      });
-      layerIndex += 1;
-    }
-  }
-
-  state.layers.unshift(...createdLayers);
-  renderLayers();
-  syncSliceControls();
-  renderOverlay();
-  setMessage(t("sliceGenerated", { count: createdLayers.length }), false, true);
-}
-
-function clearSliceLayers() {
-  const count = countSliceLayers();
-  if (!count) {
-    setMessage(t("sliceNoLayers"), true);
-    return;
-  }
-
-  pushHistory("清空切分图层");
-  state.layers = state.layers.filter((layer) => layer.source !== "slice");
-  renderLayers();
-  syncSliceControls();
-  setMessage(t("sliceCleared", { count }), false, true);
-}
-
-function countSliceLayers() {
-  return state.layers.filter((layer) => layer.source === "slice").length;
-}
-
-function currentSliceGrid() {
-  const mode = elements.sliceMode.value;
-  const rows = clamp(Math.round(Number(elements.sliceRows.value || 1)), 1, 12);
-  const columns = clamp(Math.round(Number(elements.sliceColumns.value || 1)), 1, 12);
-  elements.sliceRows.value = String(rows);
-  elements.sliceColumns.value = String(columns);
-
-  if (mode === "rows") {
-    return { rows, columns: 1 };
-  }
-  if (mode === "columns") {
-    return { rows: 1, columns };
-  }
-  return { rows, columns };
 }
 
 function createSolidBackgroundRemovedCanvas(sourceCanvas) {
@@ -2924,7 +3020,6 @@ function renderLayers() {
   elements.layerList.replaceChildren();
   elements.layerCount.textContent = String(state.layers.length);
   updatePsdPreview();
-  syncSliceControls();
 
   if (state.layers.length === 0) {
     const empty = document.createElement("p");
@@ -3160,6 +3255,7 @@ function restoreSnapshot(snapshot) {
     : null;
   state.transparentCanvas = snapshot.transparentCanvas ? cloneCanvas(snapshot.transparentCanvas) : null;
   clearPenPath();
+  clearShapeEdit();
   updateCanvasVisibility();
   renderBackgroundPreview();
   renderLayers();
@@ -3295,11 +3391,7 @@ function setBusy(isBusy) {
     elements.removeSolidBgButton,
     elements.applySolidBgButton,
     elements.resetSolidBgButton,
-    elements.downloadTransparentButton,
-    elements.createSliceLayersButton,
-    elements.clearSliceLayersButton,
-    elements.sliceExportPsdButton,
-    elements.sliceExportPngButton
+    elements.downloadTransparentButton
   ].forEach((button) => {
     button.disabled = isBusy;
   });
@@ -3307,7 +3399,6 @@ function setBusy(isBusy) {
   if (!isBusy) {
     syncHistoryButtons();
     syncPenButtons();
-    syncSliceControls();
     renderBackgroundPreview();
     elements.peelAiButton.disabled = !state.apiAvailable;
   }
