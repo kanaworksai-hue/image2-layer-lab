@@ -312,13 +312,15 @@
           </section>
 
           <div id="canvasStage" class="canvas-stage">
-            <div id="dropHint" class="drop-hint">
-              <strong data-i18n="dropStart">拖入图片开始</strong>
-              <span data-i18n="dropHint">用选择工具圈出人物、物品、文字或场景区域</span>
+            <div id="canvasScrollContent" class="canvas-scroll-content">
+              <div id="dropHint" class="drop-hint">
+                <strong data-i18n="dropStart">拖入图片开始</strong>
+                <span data-i18n="dropHint">用选择工具圈出人物、物品、文字或场景区域</span>
+              </div>
+              <canvas id="backgroundCanvas" class="image-canvas"></canvas>
+              <canvas id="selectionCanvas" class="selection-canvas"></canvas>
+              <canvas id="overlayCanvas" class="overlay-canvas" aria-hidden="true"></canvas>
             </div>
-            <canvas id="backgroundCanvas" class="image-canvas"></canvas>
-            <canvas id="selectionCanvas" class="selection-canvas"></canvas>
-            <canvas id="overlayCanvas" class="overlay-canvas" aria-hidden="true"></canvas>
           </div>
         </div>
 
