@@ -87,142 +87,6 @@ const elements = {
 };
 
 const I18N = {
-  zh: {
-    htmlLang: "zh-CN",
-    appName: "KANA Layer Lab",
-    eyebrow: "KANA Layer Lab",
-    language: "语言",
-    sourceImage: "上传",
-    chooseImage: "支持类型：PNG / JPG / WebP / MP4 / WebM / MOV",
-    imageHint: "支持方式：点击 / 拖入",
-    promo: "Want more? Follow me",
-    helpOpenLabel: "使用教程",
-    helpClose: "关闭",
-    helpTitle: "使用教程",
-    helpStepUpload: "上传图片或视频，也可以直接拖入文件。",
-    helpStepPeel: "剥离页：用画笔、魔棒、形状或钢笔选中区域，再导出 PNG 或 PSD。",
-    helpStepBackground: "背景页：选择白、黑、绿或自选颜色，点预览后拖动容差和柔化实时查看。",
-    helpStepVideo: "视频背景：预览后可导出透明 WebM 或 MOV。",
-    layerWorkspace: "剥离",
-    backgroundWorkspace: "背景",
-    layerName: "名称",
-    semanticLevel: "类型",
-    catDistractor: "干扰",
-    catSecondary: "物品",
-    catPrimary: "主体",
-    catText: "文字",
-    catScene: "场景",
-    catBackground: "背景",
-    selection: "选择",
-    brush: "画笔",
-    erase: "擦除",
-    rect: "矩形",
-    circle: "圆形",
-    roundRect: "倒角",
-    pen: "钢笔",
-    magic: "魔棒",
-    undo: "撤销",
-    redo: "重做",
-    restorePeelStart: "回退",
-    invert: "反选",
-    cleanup: "清理",
-    brushSize: "大小",
-    roundRadius: "圆角",
-    shapeEditable: "选区形状可继续拖动边框或控制点调整。",
-    magicTolerance: "容差",
-    magicGrow: "扩边",
-    magicSelectionMode: "模式",
-    modeReplace: "替换",
-    modeAdd: "添加",
-    modeSubtract: "减少",
-    finishPen: "闭合",
-    undoPenPoint: "撤点",
-    clearPenPath: "清空",
-    penPointCount: "{count} 点",
-    penNeedThree: "至少需要 3 个点才能闭合路径。",
-    penPointAdded: "已添加 {count} 个点。靠近第一个点或点闭合成选区。",
-    penPointRemoved: "已撤销一个路径点。",
-    penPathCleared: "钢笔路径已清空。",
-    penClosed: "钢笔路径已变成选区。",
-    restorePeelStartMissing: "还没有可恢复的剥离前状态。",
-    peelStartRestored: "已回到上次剥离前，选区也恢复了。",
-    peelRecoveryHint: "已补洞。可点“回退”。",
-    peel: "剥离",
-    peelQuick: "剥离+补洞",
-    peelOnly: "剥离",
-    quickHeal: "补洞",
-    solidBgRemove: "纯色",
-    bgColor: "颜色",
-    bgWhite: "白",
-    bgBlack: "黑",
-    bgGreen: "绿",
-    bgCustom: "自选",
-    customColor: "自选",
-    outputRatio: "比例",
-    ratioAuto: "自适应",
-    ratioOriginal: "原图",
-    outputPadding: "边距",
-    bgTolerance: "容差",
-    edgeFeather: "柔化",
-    sourcePreview: "源",
-    bgSourceEmpty: "待上传",
-    sampleBg: "吸色+",
-    clearSamples: "清色",
-    bgPreview: "预览",
-    removeSolidBg: "预览",
-    applyPreview: "应用",
-    retrySolidBg: "重来",
-    downloadTransparent: "下载 PNG",
-    pausePreview: "暂停预览",
-    resumePreview: "继续预览",
-    downloadVideo: "下载 WebM",
-    downloadMov: "下载 MOV",
-    export: "导出",
-    exportPsd: "PSD",
-    exportPng: "PNG",
-    clearSelection: "清空",
-    resetCanvas: "重置",
-    waitingImage: "待上传",
-    notLoaded: "未加载",
-    dropStart: "拖入图片",
-    dropHint: "选择区域",
-    layers: "图层",
-    psdPreview: "PSD",
-    psdExportPlan: "PSD {count} 层",
-    psdExportEmpty: "背景 + 原图",
-    psdExportDetails: "{layers} + 背景 + 原图",
-    emptyLayer: "图层在这里。",
-    readImage: "上传图片开始。",
-    zoomFit: "适应",
-    panMode: "移动",
-    zoomedTo: "画布缩放 {zoom}%。",
-    fitZoomed: "画布已适应窗口。",
-    panModeOn: "移动模式已开启，拖动画布查看细节。",
-    panModeOff: "移动模式已关闭。",
-    selectionStats: "{count} px",
-    topLayer: "顶部",
-    layerOrder: "第 {index} 层",
-    show: "显示",
-    hide: "隐藏",
-    moveUp: "上移",
-    moveDown: "下移",
-    delete: "删除",
-    bgRemoved: "已移除 {count} px 背景。",
-    bgPreviewReady: "预览已生成，移除 {count} px 背景。满意后可下载或应用。",
-    bgPreviewApplied: "已应用预览，移除 {count} px 背景。",
-    bgPreviewCleared: "已恢复到上传原图，可以重新调整后预览。",
-    bgPreviewMissing: "请先生成背景移除预览。",
-    transparentDownloaded: "透明 PNG 已下载。",
-    videoDownloaded: "透明 WebM 已下载。",
-    movDownloaded: "透明 MOV 已下载。",
-    videoPreviewPaused: "视频预览已暂停。",
-    videoPreviewResumed: "视频预览已继续。",
-    sampleAdded: "已加 {count} 色。",
-    sampleModeOn: "点预览或源图吸色。",
-    samplesCleared: "已清色。",
-    videoProcessing: "正在处理视频 {time}s / {duration}s...",
-    movProcessing: "正在生成 MOV {frame} / {total} 帧..."
-  },
   en: {
     htmlLang: "en",
     appName: "KANA Layer Lab",
@@ -796,15 +660,12 @@ function getInitialLanguage() {
   if (language.startsWith("ja")) {
     return "ja";
   }
-  if (language.startsWith("zh")) {
-    return "zh";
-  }
   return "en";
 }
 
 function t(key, replacements = {}) {
-  const lang = elements.languageSelect?.value || "zh";
-  let text = I18N[lang]?.[key] || I18N.zh[key] || key;
+  const lang = elements.languageSelect?.value || "en";
+  let text = I18N[lang]?.[key] || I18N.en[key] || key;
   for (const [name, value] of Object.entries(replacements)) {
     text = text.replace(`{${name}}`, String(value));
   }
@@ -812,7 +673,7 @@ function t(key, replacements = {}) {
 }
 
 function applyLanguage(language) {
-  const nextLanguage = I18N[language] ? language : "zh";
+  const nextLanguage = I18N[language] ? language : "en";
   elements.languageSelect.value = nextLanguage;
   document.documentElement.lang = I18N[nextLanguage].htmlLang;
   document.title = t("appName");
@@ -1083,7 +944,7 @@ function syncPenButtons() {
 async function loadFirstImageFromDrop(files) {
   const source = Array.from(files).find((file) => isSupportedSourceFile(file));
   if (!source) {
-    setMessage("请拖入图片或视频。", true);
+    setMessage("Drop an image or video.", true);
     return;
   }
   await loadSourceFile(source);
@@ -1100,12 +961,12 @@ async function loadSourceFile(file) {
     return;
   }
 
-  setMessage("只支持图片或视频。", true);
+  setMessage("Only images or videos are supported.", true);
 }
 
 async function loadSourceImage(file) {
   if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
-    setMessage("只支持 PNG、JPG 或 WebP 图片。", true);
+    setMessage("Only PNG, JPG, or WebP images are supported.", true);
     return;
   }
 
@@ -1145,7 +1006,7 @@ async function loadSourceImage(file) {
     elements.canvasMeta.textContent = `${width} x ${height}`;
     resetCanvasZoom();
     updateCanvasVisibility();
-    elements.layerName.value = "剥离图层 1";
+    elements.layerName.value = "Layer 1";
     renderBackgroundPreview();
     renderBackgroundSourcePreview();
     renderLayers();
@@ -1153,15 +1014,15 @@ async function loadSourceImage(file) {
     syncHistoryButtons();
     syncRecoveryButton();
     syncBackgroundSampleUi();
-    setMessage("图片已加载。", false, true);
+    setMessage("Image loaded.", false, true);
   } catch (error) {
-    setMessage(error.message || "图片加载失败。", true);
+    setMessage(error.message || "Image failed to load.", true);
   }
 }
 
 async function loadSourceVideo(file) {
   if (!SUPPORTED_VIDEO_TYPES.has(file.type)) {
-    setMessage("只支持 MP4、WebM 或 MOV 视频。", true);
+    setMessage("Only MP4, WebM, or MOV videos are supported.", true);
     return;
   }
 
@@ -1210,7 +1071,7 @@ async function loadSourceVideo(file) {
     elements.bgSourceVideo.currentTime = 0;
     resetCanvasZoom();
     switchWorkspace("background");
-    elements.layerName.value = "剥离图层 1";
+    elements.layerName.value = "Layer 1";
     renderBackgroundPreview();
     renderBackgroundSourcePreview();
     renderLayers();
@@ -1218,10 +1079,10 @@ async function loadSourceVideo(file) {
     syncHistoryButtons();
     syncRecoveryButton();
     syncBackgroundSampleUi();
-    setMessage("视频已加载。", false, true);
+    setMessage("Video loaded.", false, true);
   } catch (error) {
     cleanupSourceMedia();
-    setMessage(error.message || "视频加载失败。", true);
+    setMessage(error.message || "Video failed to load.", true);
   }
 }
 
@@ -1256,13 +1117,13 @@ function onPointerDown(event) {
 
   if (state.tool === "magic") {
     clearShapeEdit();
-    const snapshot = captureSnapshot("魔棒");
+    const snapshot = captureSnapshot("Wand");
     const mode = event.altKey ? "subtract" : event.shiftKey ? "add" : state.selectionMode;
     const result = magicSelect(point.x, point.y, { mode });
     if (result.changed) {
       pushSnapshot(snapshot);
-      const action = mode === "add" ? "加选" : mode === "subtract" ? "减选" : "选择";
-      const hint = result.transparent && result.ratio > 0.2 ? "已选透明背景；可反选。" : `魔棒${action} ${formatPixels(result.pixels)} px。`;
+      const action = mode === "add" ? "add" : mode === "subtract" ? "subtract" : "select";
+      const hint = result.transparent && result.ratio > 0.2 ? "Transparent background selected. You can invert it." : `Wand ${action}: ${formatPixels(result.pixels)} px.`;
       setMessage(hint, false, true);
     }
     return;
@@ -1291,7 +1152,7 @@ function onPointerDown(event) {
     clearShapeEdit();
   }
 
-  pushHistory(`${toolLabel(state.tool)}选择`);
+  pushHistory(`${toolLabel(state.tool)} selection`);
   state.isDrawing = true;
   state.startPoint = point;
   state.lastPoint = point;
@@ -1750,7 +1611,7 @@ function addPenPoint(point, event) {
 
 function finishPenSelection() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("Load an image first.", true);
     return;
   }
 
@@ -1759,7 +1620,7 @@ function finishPenSelection() {
     return;
   }
 
-  pushHistory(`${t("pen")}选择`);
+  pushHistory(`${t("pen")} selection`);
   selectionCtx.save();
   selectionCtx.fillStyle = MASK_COLOR;
   selectionCtx.beginPath();
@@ -2065,12 +1926,12 @@ function magicSelect(x, y, { mode = "replace" } = {}) {
   }
 
   if (selectedPixels === 0) {
-    setMessage("无区域，请调高容差。", true);
+    setMessage("No area found. Increase tolerance.", true);
     return { changed: false, pixels: 0 };
   }
 
   if (!seedTransparent && selectedPixels > width * height * 0.62) {
-    setMessage("范围过大，已取消。", true);
+    setMessage("Selection was too large and was canceled.", true);
     return { changed: false, pixels: 0 };
   }
 
@@ -2366,38 +2227,38 @@ function fillMaskHoles(mask, width, height) {
 
 function invertSelection() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("Load an image first.", true);
     return;
   }
 
-  pushHistory("反选");
+  pushHistory("Invert selection");
   const mask = getSelectionMaskArray();
   for (let index = 0; index < mask.length; index += 1) {
     mask[index] = mask[index] ? 0 : 1;
   }
   applySelectionMaskArray(mask);
-  setMessage("已反选当前选区。", false, true);
+  setMessage("Selection inverted.", false, true);
 }
 
 function cleanupSelection() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("Load an image first.", true);
     return;
   }
 
   if (!hasSelection()) {
-    setMessage("当前没有可清理的选区。", true);
+    setMessage("No selection to clean.", true);
     return;
   }
 
-  pushHistory("填洞/平滑");
+  pushHistory("Fill/smooth");
   const width = elements.selectionCanvas.width;
   const height = elements.selectionCanvas.height;
   let mask = getSelectionMaskArray();
   mask = fillMaskHoles(mask, width, height);
   mask = erodeMask(dilateMask(mask, width, height, 1), width, height, 1);
   applySelectionMaskArray(mask);
-  setMessage("已填洞并平滑选区边缘。", false, true);
+  setMessage("Filled holes and smoothed the selection edge.", false, true);
 }
 
 async function peelAndQuickHeal() {
@@ -2406,7 +2267,7 @@ async function peelAndQuickHeal() {
   }
 
   rememberPeelStart();
-  pushHistory("剥离+补洞");
+  pushHistory("Peel+Fill");
   const layer = peelSelection({ clearAfter: false, recordHistory: false });
   if (!layer) {
     return;
@@ -2420,7 +2281,7 @@ function peelSelection({ clearAfter, recordHistory = false }) {
   }
 
   if (recordHistory) {
-    pushHistory("剥离成图层");
+    pushHistory("Peel to layer");
   }
 
   const width = elements.backgroundCanvas.width;
@@ -2449,12 +2310,12 @@ function peelSelection({ clearAfter, recordHistory = false }) {
   }
 
   if (selectedPixels === 0) {
-    setMessage("当前选择为空。", true);
+    setMessage("Current selection is empty.", true);
     return null;
   }
 
   layerCtx.putImageData(output, 0, 0);
-  const name = uniqueLayerName(elements.layerName.value.trim() || "剥离图层");
+  const name = uniqueLayerName(elements.layerName.value.trim() || "Layer");
   const layer = {
     id: crypto.randomUUID(),
     name,
@@ -2479,7 +2340,7 @@ function peelSelection({ clearAfter, recordHistory = false }) {
     updateSelectionStats(selectedPixels);
   }
 
-  setMessage(`已创建图层：${name}。`, false, true);
+  setMessage(`Layer created: ${name}.`, false, true);
   return layer;
 }
 
@@ -2489,7 +2350,7 @@ function quickHealSelection({ clearAfter, recordHistory = false }) {
   }
 
   if (recordHistory) {
-    pushHistory("补洞");
+    pushHistory("Fill");
   }
 
   const width = elements.backgroundCanvas.width;
@@ -2526,7 +2387,7 @@ function quickHealSelection({ clearAfter, recordHistory = false }) {
     clearSelection({ recordHistory: false });
   }
 
-  setMessage(clearAfter ? t("peelRecoveryHint") : "已补洞。", false, true);
+  setMessage(clearAfter ? t("peelRecoveryHint") : "Filled.", false, true);
   return true;
 }
 
@@ -2629,7 +2490,7 @@ function createBinaryMaskCanvas() {
 
 function clearSelection({ recordHistory = false } = {}) {
   if (recordHistory && state.imageLoaded && hasSelection()) {
-    pushHistory("清空");
+    pushHistory("Clear");
   }
 
   clearShapeEdit();
@@ -2644,7 +2505,7 @@ function resetCanvas() {
     return;
   }
 
-  pushHistory("重置");
+  pushHistory("Reset");
   backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
   backgroundCtx.drawImage(state.originalCanvas, 0, 0);
   clearSelection({ recordHistory: false });
@@ -2657,13 +2518,13 @@ function resetCanvas() {
   renderBackgroundPreview();
   renderLayers();
   syncRecoveryButton();
-  elements.layerName.value = "剥离图层 1";
-  setMessage("画布已重置到原图。");
+  elements.layerName.value = "Layer 1";
+  setMessage("Canvas reset to the original image.");
 }
 
 function removeSolidBackground() {
   if (!state.imageLoaded) {
-    setMessage("请先加载文件。", true);
+    setMessage("Load a file first.", true);
     return;
   }
 
@@ -2680,7 +2541,7 @@ function previewImageBackgroundRemoval({ announce = true, allowEmpty = false } =
   const source = cloneCanvas(state.originalCanvas);
   const result = createSolidBackgroundRemovedCanvas(source);
   if (!result.removedPixels && !allowEmpty) {
-    setMessage("没有检测到匹配的连通纯色背景，请调高颜色容差或选择自定义颜色。", true);
+    setMessage("No matching connected solid-color background detected. Increase color tolerance or choose a custom color.", true);
     return false;
   }
 
@@ -2698,7 +2559,7 @@ function previewImageBackgroundRemoval({ announce = true, allowEmpty = false } =
 
 function previewVideoBackgroundRemoval({ announce = true } = {}) {
   if (!state.videoElement) {
-    setMessage("请先加载视频。", true);
+    setMessage("Load a video first.", true);
     return;
   }
 
@@ -2714,7 +2575,7 @@ function previewVideoBackgroundRemoval({ announce = true } = {}) {
   video.muted = true;
   video.loop = true;
   video.play().catch(() => {
-    setMessage("视频预览播放失败，可以重新点预览。", true);
+    setMessage("Video preview failed to play. Try Preview again.", true);
   });
   renderVideoPreviewFrame();
   if (announce) {
@@ -2758,7 +2619,7 @@ function toggleVideoPreviewPlayback() {
   if (state.videoPreviewPaused) {
     state.videoPreviewPaused = false;
     state.videoElement.play().catch(() => {
-      setMessage("视频预览播放失败，可以重新点预览。", true);
+      setMessage("Video preview failed to play. Try Preview again.", true);
     });
     renderVideoPreviewFrame();
     syncVideoPreviewControls();
@@ -2778,12 +2639,12 @@ function toggleVideoPreviewPlayback() {
 
 function applySolidBackgroundPreview() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("Load an image first.", true);
     return;
   }
 
   if (state.mediaType === "video") {
-    setMessage("视频可直接下载 WebM 或 MOV。", true);
+    setMessage("Videos can be downloaded directly as WebM or MOV.", true);
     return;
   }
 
@@ -2792,7 +2653,7 @@ function applySolidBackgroundPreview() {
     return;
   }
 
-  pushHistory("应用背景移除预览");
+  pushHistory("Apply background removal preview");
   backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
   backgroundCtx.drawImage(state.backgroundPreview.canvas, 0, 0);
   state.layers = [];
@@ -2807,7 +2668,7 @@ function applySolidBackgroundPreview() {
 
 function resetSolidBackgroundWorkflow() {
   if (!state.imageLoaded) {
-    setMessage("请先加载文件。", true);
+    setMessage("Load a file first.", true);
     return;
   }
 
@@ -2832,7 +2693,7 @@ function resetSolidBackgroundWorkflow() {
 
 function downloadTransparentPng() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("Load an image first.", true);
     return;
   }
 
@@ -2845,7 +2706,7 @@ function downloadTransparentPng() {
   const output = buildRatioOutputCanvas(source, elements.bgOutputRatio.value, Number(elements.bgPadding.value || 0.06));
   output.toBlob((blob) => {
     if (!blob) {
-      setMessage("透明 PNG 下载失败。", true);
+      setMessage("Transparent PNG download failed.", true);
       return;
     }
     downloadBlob(blob, `${safeBaseName(state.imageName)}-transparent-${safeRatioName(elements.bgOutputRatio.value)}.png`);
@@ -2855,18 +2716,18 @@ function downloadTransparentPng() {
 
 async function downloadTransparentVideo() {
   if (!state.imageLoaded || state.mediaType !== "video" || !state.sourceObjectUrl) {
-    setMessage("请先加载视频。", true);
+    setMessage("Load a video first.", true);
     return;
   }
 
   if (!("MediaRecorder" in window) || typeof HTMLCanvasElement.prototype.captureStream !== "function") {
-    setMessage("当前浏览器不支持透明视频导出。", true);
+    setMessage("This browser does not support transparent video export.", true);
     return;
   }
 
   const mimeType = preferredVideoMimeType();
   if (!mimeType) {
-    setMessage("当前浏览器不支持透明 WebM 导出。请用 Chrome 或 Edge 下载。", true);
+    setMessage("This browser does not support transparent WebM export. Use Chrome or Edge.", true);
     return;
   }
 
@@ -2901,7 +2762,7 @@ async function downloadTransparentVideo() {
           chunks.push(event.data);
         }
       });
-      recorder.addEventListener("error", () => reject(new Error("视频录制失败。")), { once: true });
+      recorder.addEventListener("error", () => reject(new Error("Video recording failed.")), { once: true });
       recorder.addEventListener("stop", resolve, { once: true });
     });
 
@@ -2937,7 +2798,7 @@ async function downloadTransparentVideo() {
 
     const blob = new Blob(chunks, { type: mimeType || "video/webm" });
     if (!blob.size) {
-      throw new Error("透明 WebM 生成失败。");
+      throw new Error("Transparent WebM generation failed.");
     }
     downloadBlob(blob, `${safeBaseName(state.imageName)}-transparent.webm`);
     setMessage(t("videoDownloaded"), false, true);
@@ -2945,7 +2806,7 @@ async function downloadTransparentVideo() {
     if (recorder && recorder.state !== "inactive") {
       recorder.stop();
     }
-    setMessage(error.message || "透明 WebM 导出失败。", true);
+    setMessage(error.message || "Transparent WebM export failed.", true);
   } finally {
     if (frameId) {
       cancelAnimationFrame(frameId);
@@ -2962,7 +2823,7 @@ async function downloadTransparentVideo() {
 
 async function downloadTransparentMov() {
   if (!state.imageLoaded || state.mediaType !== "video" || !state.sourceObjectUrl) {
-    setMessage("请先加载视频。", true);
+    setMessage("Load a video first.", true);
     return;
   }
 
@@ -3002,7 +2863,7 @@ async function downloadTransparentMov() {
     downloadBlob(blob, `${safeBaseName(state.imageName)}-transparent.mov`);
     setMessage(t("movDownloaded"), false, true);
   } catch (error) {
-    setMessage(error.message || "透明 MOV 导出失败。", true);
+    setMessage(error.message || "Transparent MOV export failed.", true);
   } finally {
     exportVideo.pause();
     exportVideo.removeAttribute("src");
@@ -3040,7 +2901,7 @@ function preferredVideoMimeType() {
 
 function buildPngMovBlob(frames, width, height, fps) {
   if (!frames.length) {
-    throw new Error("没有可写入 MOV 的视频帧。");
+    throw new Error("No video frames were available for MOV output.");
   }
 
   const timescale = fps;
@@ -3048,7 +2909,7 @@ function buildPngMovBlob(frames, width, height, fps) {
   const ftyp = movAtom("ftyp", movAscii("qt  "), movUint32(0), movAscii("qt  "));
   const mdatPayloadLength = frames.reduce((sum, frame) => sum + frame.length, 0);
   if (mdatPayloadLength + ftyp.length + 8 > 0xffffffff) {
-    throw new Error("MOV 文件过大，请改用 WebM。");
+    throw new Error("MOV file is too large. Use WebM instead.");
   }
 
   const chunkOffsets = [];
@@ -3486,7 +3347,7 @@ function syncBackgroundSampleUi() {
 
 function toggleBackgroundSampleMode() {
   if (!state.imageLoaded) {
-    setMessage("请先加载文件。", true);
+    setMessage("Load a file first.", true);
     return;
   }
 
@@ -3806,29 +3667,29 @@ function parseRatio(value) {
 
 function exportCompositePng() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("Load an image first.", true);
     return;
   }
 
   const composite = renderCompositeCanvas();
   composite.toBlob((blob) => {
     if (!blob) {
-      setMessage("合成 PNG 导出失败。", true);
+      setMessage("Composite PNG export failed.", true);
       return;
     }
     downloadBlob(blob, `${safeBaseName(state.imageName)}-composite.png`);
-    setMessage("合成 PNG 已导出。", false, true);
+    setMessage("Composite PNG exported.", false, true);
   }, "image/png");
 }
 
 function exportPsd() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("Load an image first.", true);
     return;
   }
 
   if (!window.agPsd?.writePsd) {
-    setMessage("PSD 写入库未加载。", true);
+    setMessage("PSD writer is not loaded.", true);
     return;
   }
 
@@ -3866,9 +3727,9 @@ function exportPsd() {
     });
     const blob = new Blob([buffer], { type: "image/vnd.adobe.photoshop" });
     downloadBlob(blob, `${safeBaseName(state.imageName)}-layers.psd`);
-    setMessage(`PSD 已导出，包含 ${state.layers.length + 2} 个图层。`, false, true);
+    setMessage(`PSD exported with ${state.layers.length + 2} layers.`, false, true);
   } catch (error) {
-    setMessage(error.message || "PSD 导出失败。", true);
+    setMessage(error.message || "PSD export failed.", true);
   }
 }
 
@@ -3927,7 +3788,7 @@ function renderLayers() {
     actions.className = "layer-actions";
 
     const toggle = createMiniButton(layer.visible ? t("hide") : t("show"), () => {
-      pushHistory(layer.visible ? "隐藏图层" : "显示图层");
+      pushHistory(layer.visible ? "Hide layer" : "Show layer");
       state.backgroundPreview = null;
       state.transparentCanvas = null;
       renderBackgroundPreview();
@@ -4005,7 +3866,7 @@ function moveLayer(index, direction) {
     return;
   }
 
-  pushHistory("移动图层");
+  pushHistory("Move layer");
   state.backgroundPreview = null;
   state.transparentCanvas = null;
   renderBackgroundPreview();
@@ -4015,7 +3876,7 @@ function moveLayer(index, direction) {
 }
 
 function removeLayer(id) {
-  pushHistory("删除图层");
+  pushHistory("Delete layer");
   state.backgroundPreview = null;
   state.transparentCanvas = null;
   renderBackgroundPreview();
@@ -4026,7 +3887,7 @@ function removeLayer(id) {
 function downloadLayerPng(layer) {
   layer.canvas.toBlob((blob) => {
     if (!blob) {
-      setMessage("图层 PNG 导出失败。", true);
+      setMessage("Layer PNG export failed.", true);
       return;
     }
     downloadBlob(blob, `${safeBaseName(layer.name)}.png`);
@@ -4056,28 +3917,28 @@ function pushSnapshot(snapshot) {
 
 function undoStep() {
   if (!state.history.length) {
-    setMessage("没有可撤销的步骤。");
+    setMessage("No steps to undo.");
     return;
   }
 
-  state.redo.push(captureSnapshot("重做点"));
+  state.redo.push(captureSnapshot("Redo point"));
   const snapshot = state.history.pop();
   restoreSnapshot(snapshot);
   syncHistoryButtons();
-  setMessage(`已撤销：${snapshot.label || "上一步"}。`, false, true);
+  setMessage(`Undone: ${snapshot.label || "previous step"}.`, false, true);
 }
 
 function redoStep() {
   if (!state.redo.length) {
-    setMessage("没有可重做的步骤。");
+    setMessage("No steps to redo.");
     return;
   }
 
-  state.history.push(captureSnapshot("撤销点"));
+  state.history.push(captureSnapshot("Undo point"));
   const snapshot = state.redo.pop();
   restoreSnapshot(snapshot);
   syncHistoryButtons();
-  setMessage("已重做。", false, true);
+  setMessage("Redone.", false, true);
 }
 
 function captureSnapshot(label) {
@@ -4159,7 +4020,7 @@ function rememberPeelStart() {
     return;
   }
 
-  state.recoverySnapshot = captureSnapshot("剥离前状态");
+  state.recoverySnapshot = captureSnapshot("Pre-peel state");
   syncRecoveryButton();
 }
 
@@ -4172,7 +4033,7 @@ function restorePeelStart({ recordHistory = false, showMessage = true } = {}) {
   }
 
   if (recordHistory && state.imageLoaded) {
-    pushHistory("恢复剥离前状态");
+    pushHistory("Restore pre-peel state");
   }
 
   restoreSnapshot(state.recoverySnapshot);
@@ -4203,12 +4064,12 @@ function canvasHasSelection(canvas) {
 
 function ensureReadyWithSelection() {
   if (!state.imageLoaded) {
-    setMessage("请先加载图片。", true);
+    setMessage("Load an image first.", true);
     return false;
   }
 
   if (!hasSelection()) {
-    setMessage("请先选中需要剥离或补洞的区域。", true);
+    setMessage("Select the area to peel or fill first.", true);
     return false;
   }
 
@@ -4287,12 +4148,12 @@ function uniqueLayerName(base) {
 
 function nextLayerName() {
   let index = state.layers.length + 1;
-  let candidate = `剥离图层 ${index}`;
+  let candidate = `Layer ${index}`;
   const names = new Set(state.layers.map((layer) => layer.name.toLowerCase()));
 
   while (names.has(candidate.toLowerCase())) {
     index += 1;
-    candidate = `剥离图层 ${index}`;
+    candidate = `Layer ${index}`;
   }
 
   return candidate;
@@ -4359,7 +4220,7 @@ function toolLabel(tool) {
     pen: t("pen"),
     magic: t("magic")
   };
-  return labels[tool] || "选区";
+  return labels[tool] || "Selection";
 }
 
 function categoryLabel(category) {
@@ -4378,7 +4239,7 @@ function loadImage(url) {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("图片无法读取。"));
+    image.onerror = () => reject(new Error("Image could not be read."));
     image.src = url;
   });
 }
@@ -4418,7 +4279,7 @@ function waitForVideoMetadata(video) {
     };
     const onError = () => {
       clean();
-      reject(new Error("视频无法读取。"));
+      reject(new Error("Video could not be read."));
     };
     video.addEventListener("loadedmetadata", onLoaded, { once: true });
     video.addEventListener("error", onError, { once: true });
@@ -4444,7 +4305,7 @@ function waitForVideoFrame(video) {
     };
     const onError = () => {
       clean();
-      reject(new Error("视频帧无法读取。"));
+      reject(new Error("Video frame could not be read."));
     };
     video.addEventListener("loadeddata", onReady, { once: true });
     video.addEventListener("canplay", onReady, { once: true });
@@ -4473,7 +4334,7 @@ async function seekVideo(video, time) {
     };
     const onError = () => {
       clean();
-      reject(new Error("视频定位失败。"));
+      reject(new Error("Video seek failed."));
     };
     video.addEventListener("seeked", onSeeked, { once: true });
     video.addEventListener("loadeddata", onSeeked, { once: true });
@@ -4516,7 +4377,7 @@ function canvasToBlob(canvas) {
       if (blob) {
         resolve(blob);
       } else {
-        reject(new Error("画布转换失败。"));
+        reject(new Error("Canvas conversion failed."));
       }
     }, "image/png");
   });
@@ -4583,7 +4444,7 @@ function hexToRgb(hex) {
 }
 
 function formatPixels(value) {
-  return new Intl.NumberFormat("zh-CN").format(value || 0);
+  return new Intl.NumberFormat("en-US").format(value || 0);
 }
 
 function clamp(value, min, max) {
