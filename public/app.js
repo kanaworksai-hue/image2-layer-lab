@@ -134,8 +134,8 @@ const I18N = {
     penClosed: "钢笔路径已变成选区。",
     restorePeelStartMissing: "还没有可恢复的剥离前状态。",
     peelStartRestored: "已回到上次剥离前，选区也恢复了。",
-    peelAutoRestored: "已恢复上次框选，继续执行 {mode}。",
-    peelRecoveryHint: "已用本地快速补洞更新背景。若不满意，可点“回到剥离前”再改用 GPT 补洞。",
+    peelAutoRestored: "已复用上次框选，保留当前结果并继续执行 {mode}。",
+    peelRecoveryHint: "已用本地快速补洞更新背景。若不满意，可直接点“剥离 + GPT补洞”复用这次框选，或点“回到剥离前”。",
     peel: "剥离",
     peelQuick: "剥离 + 快速补洞",
     peelAi: "剥离 + GPT补洞",
@@ -161,6 +161,7 @@ const I18N = {
     retrySolidBg: "重新来做",
     downloadTransparent: "下载透明 PNG",
     inpaintPrompt: "GPT补洞提示词",
+    inpaintPromptDefault: "只移除选区蒙版内的元素，以及它关联的阴影或反光。根据原图的线条、纹理、光照和透视自然补全被遮挡区域。保持所有未选中的区域完全不变，不要添加新的物体。",
     imageModel: "图像模型",
     quality: "质量",
     export: "导出",
@@ -260,8 +261,8 @@ const I18N = {
     penClosed: "Pen path converted to a selection.",
     restorePeelStartMissing: "There is no saved peel-start state yet.",
     peelStartRestored: "Restored the last peel-start state and its selection.",
-    peelAutoRestored: "Restored the last selection and continued with {mode}.",
-    peelRecoveryHint: "Quick fill updated the background. If it is not right, restore the peel start and switch to GPT fill.",
+    peelAutoRestored: "Reused the last selection, kept the current result, and continued with {mode}.",
+    peelRecoveryHint: "Quick fill updated the background. If it is not right, click GPT fill directly to reuse this selection, or restore the peel start.",
     peel: "Peel",
     peelQuick: "Peel + quick fill",
     peelAi: "Peel + GPT fill",
@@ -287,6 +288,7 @@ const I18N = {
     retrySolidBg: "Start over",
     downloadTransparent: "Download transparent PNG",
     inpaintPrompt: "GPT fill prompt",
+    inpaintPromptDefault: "Remove only the selected masked element and its associated shadows or reflections. Reconstruct the covered area seamlessly by continuing the original lines, textures, lighting, and perspective. Keep every unmasked part of the image unchanged and do not add new objects.",
     imageModel: "Image model",
     quality: "Quality",
     export: "Export",
@@ -386,8 +388,8 @@ const I18N = {
     penClosed: "ペンパスを選択範囲に変換しました。",
     restorePeelStartMissing: "復元できる切り出し前の状態はまだありません。",
     peelStartRestored: "前回の切り出し前に戻し、選択範囲も復元しました。",
-    peelAutoRestored: "前回の選択範囲を復元し、{mode} を続行します。",
-    peelRecoveryHint: "簡易補完で背景を更新しました。気に入らない場合は切り出し前へ戻して GPT 補完に切り替えられます。",
+    peelAutoRestored: "前回の選択範囲を再利用し、現在の結果を残したまま {mode} を続行します。",
+    peelRecoveryHint: "簡易補完で背景を更新しました。気に入らない場合は、そのまま GPT補完を押してこの選択範囲を再利用するか、切り出し前へ戻せます。",
     peel: "切り出し",
     peelQuick: "切り出し + 簡易補完",
     peelAi: "切り出し + GPT補完",
@@ -413,6 +415,7 @@ const I18N = {
     retrySolidBg: "やり直す",
     downloadTransparent: "透明PNGを保存",
     inpaintPrompt: "GPT補完プロンプト",
+    inpaintPromptDefault: "選択マスク内の要素と、それに伴う影や反射だけを削除してください。元画像の線、質感、光、遠近感を自然につなげて、隠れていた部分を補完してください。選択されていない部分は完全に変更せず、新しい物体は追加しないでください。",
     imageModel: "画像モデル",
     quality: "品質",
     export: "書き出し",
@@ -490,6 +493,7 @@ const state = {
   history: [],
   redo: [],
   recoverySnapshot: null,
+  promptCustomized: false,
   apiAvailable: false,
   backgroundPreview: null,
   transparentCanvas: null
@@ -651,6 +655,9 @@ elements.removeSolidBgButton.addEventListener("click", removeSolidBackground);
 elements.applySolidBgButton.addEventListener("click", applySolidBackgroundPreview);
 elements.resetSolidBgButton.addEventListener("click", resetSolidBackgroundWorkflow);
 elements.downloadTransparentButton.addEventListener("click", downloadTransparentPng);
+elements.inpaintPrompt.addEventListener("input", () => {
+  state.promptCustomized = !isKnownDefaultPrompt(elements.inpaintPrompt.value);
+});
 elements.peelQuickButton.addEventListener("click", () => void peelAndQuickHeal());
 elements.peelAiButton.addEventListener("click", () => void peelAndAiHeal());
 elements.peelOnlyButton.addEventListener("click", () => peelSelection({ clearAfter: false, recordHistory: true }));
@@ -749,6 +756,7 @@ function applyLanguage(language) {
     node.textContent = t(key);
   });
 
+  syncInpaintPromptLanguage(nextLanguage);
   syncPenButtons();
 
   if (!state.imageLoaded) {
@@ -808,6 +816,28 @@ function syncSelectionModeButtons() {
   elements.selectionModeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.selectionMode === state.selectionMode);
   });
+}
+
+function syncInpaintPromptLanguage(language) {
+  if (state.promptCustomized && !isKnownDefaultPrompt(elements.inpaintPrompt.value)) {
+    return;
+  }
+
+  elements.inpaintPrompt.value = getDefaultInpaintPrompt(language);
+  state.promptCustomized = false;
+}
+
+function getDefaultInpaintPrompt(language = elements.languageSelect.value || "zh") {
+  return I18N[language]?.inpaintPromptDefault || I18N.zh.inpaintPromptDefault;
+}
+
+function isKnownDefaultPrompt(value) {
+  const normalizedValue = normalizePrompt(value);
+  return Object.keys(I18N).some((language) => normalizePrompt(I18N[language].inpaintPromptDefault) === normalizedValue);
+}
+
+function normalizePrompt(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
 }
 
 function computeFitScale() {
@@ -3308,15 +3338,21 @@ function syncRecoveryButton() {
 }
 
 function ensureReadyForPeelWorkflow(modeLabel) {
-  if (ensureReadyWithSelection()) {
-    return true;
-  }
-
-  if (!state.imageLoaded || !hasRecoverySelection()) {
+  if (!state.imageLoaded) {
+    setMessage("请先加载图片。", true);
     return false;
   }
 
-  restorePeelStart({ recordHistory: true, showMessage: false });
+  if (hasSelection()) {
+    return true;
+  }
+
+  if (!hasRecoverySelection()) {
+    setMessage("请先选中需要剥离或补洞的区域。", true);
+    return false;
+  }
+
+  restoreRecoverySelection({ showMessage: false });
   setMessage(t("peelAutoRestored", { mode: modeLabel }), false, true);
   return true;
 }
@@ -3346,6 +3382,29 @@ function restorePeelStart({ recordHistory = false, showMessage = true } = {}) {
   syncRecoveryButton();
   if (showMessage) {
     setMessage(t("peelStartRestored"), false, true);
+  }
+  return true;
+}
+
+function restoreRecoverySelection({ showMessage = true } = {}) {
+  if (!hasRecoverySelection()) {
+    if (showMessage) {
+      setMessage(t("restorePeelStartMissing"), true);
+    }
+    return false;
+  }
+
+  clearShapeEdit();
+  clearPenPath();
+  selectionCtx.clearRect(0, 0, elements.selectionCanvas.width, elements.selectionCanvas.height);
+  selectionCtx.drawImage(state.recoverySnapshot.selection, 0, 0);
+  updateSelectionStats();
+  state.edgeDirty = true;
+  rebuildSelectionEdgeOverlay();
+  renderOverlay();
+  syncRecoveryButton();
+  if (showMessage) {
+    setMessage(t("peelAutoRestored", { mode: t("peelAi") }), false, true);
   }
   return true;
 }
