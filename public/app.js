@@ -48,6 +48,7 @@ const elements = {
   resetSolidBgButton: document.querySelector("#resetSolidBgButton"),
   downloadTransparentButton: document.querySelector("#downloadTransparentButton"),
   downloadVideoButton: document.querySelector("#downloadVideoButton"),
+  downloadMovButton: document.querySelector("#downloadMovButton"),
   peelQuickButton: document.querySelector("#peelQuickButton"),
   peelOnlyButton: document.querySelector("#peelOnlyButton"),
   healButton: document.querySelector("#healButton"),
@@ -160,6 +161,7 @@ const I18N = {
     retrySolidBg: "重来",
     downloadTransparent: "下载 PNG",
     downloadVideo: "下载 WebM",
+    downloadMov: "下载 MOV",
     export: "导出",
     exportPsd: "PSD",
     exportPng: "PNG",
@@ -197,10 +199,12 @@ const I18N = {
     bgPreviewMissing: "请先生成背景移除预览。",
     transparentDownloaded: "透明 PNG 已下载。",
     videoDownloaded: "透明 WebM 已下载。",
+    movDownloaded: "透明 MOV 已下载。",
     sampleAdded: "已加 {count} 色。",
     sampleModeOn: "点预览或源图吸色。",
     samplesCleared: "已清色。",
-    videoProcessing: "正在处理视频 {time}s / {duration}s..."
+    videoProcessing: "正在处理视频 {time}s / {duration}s...",
+    movProcessing: "正在生成 MOV {frame} / {total} 帧..."
   },
   en: {
     htmlLang: "en",
@@ -281,6 +285,7 @@ const I18N = {
     retrySolidBg: "Redo",
     downloadTransparent: "Download PNG",
     downloadVideo: "Download WebM",
+    downloadMov: "Download MOV",
     export: "Export",
     exportPsd: "PSD",
     exportPng: "PNG",
@@ -318,10 +323,12 @@ const I18N = {
     bgPreviewMissing: "Generate a background removal preview first.",
     transparentDownloaded: "Transparent PNG downloaded.",
     videoDownloaded: "Transparent WebM downloaded.",
+    movDownloaded: "Transparent MOV downloaded.",
     sampleAdded: "{count} colors added.",
     sampleModeOn: "Tap preview/source to pick.",
     samplesCleared: "Colors cleared.",
-    videoProcessing: "Processing video {time}s / {duration}s..."
+    videoProcessing: "Processing video {time}s / {duration}s...",
+    movProcessing: "Building MOV {frame} / {total} frames..."
   },
   ja: {
     htmlLang: "ja",
@@ -402,6 +409,7 @@ const I18N = {
     retrySolidBg: "やり直す",
     downloadTransparent: "PNG保存",
     downloadVideo: "WebM保存",
+    downloadMov: "MOV保存",
     export: "出力",
     exportPsd: "PSD",
     exportPng: "PNG",
@@ -439,10 +447,12 @@ const I18N = {
     bgPreviewMissing: "先に背景削除プレビューを生成してください。",
     transparentDownloaded: "透明PNGを書き出しました。",
     videoDownloaded: "透明WebMを書き出しました。",
+    movDownloaded: "透明MOVを書き出しました。",
     sampleAdded: "{count} 色を追加しました。",
     sampleModeOn: "プレビューか元画像をタップ。",
     samplesCleared: "色をクリアしました。",
-    videoProcessing: "動画処理中 {time}s / {duration}s..."
+    videoProcessing: "動画処理中 {time}s / {duration}s...",
+    movProcessing: "MOV生成中 {frame} / {total} フレーム..."
   }
 };
 
@@ -647,6 +657,7 @@ elements.applySolidBgButton.addEventListener("click", applySolidBackgroundPrevie
 elements.resetSolidBgButton.addEventListener("click", resetSolidBackgroundWorkflow);
 elements.downloadTransparentButton.addEventListener("click", downloadTransparentPng);
 elements.downloadVideoButton.addEventListener("click", () => void downloadTransparentVideo());
+elements.downloadMovButton.addEventListener("click", () => void downloadTransparentMov());
 elements.peelQuickButton.addEventListener("click", () => void peelAndQuickHeal());
 elements.peelOnlyButton.addEventListener("click", () => peelSelection({ clearAfter: false, recordHistory: true }));
 elements.healButton.addEventListener("click", () => quickHealSelection({ clearAfter: false, recordHistory: true }));
@@ -2623,6 +2634,7 @@ function previewVideoBackgroundRemoval({ announce = true } = {}) {
   state.transparentCanvas = null;
   state.videoPreviewActive = true;
   elements.downloadVideoButton.disabled = false;
+  elements.downloadMovButton.disabled = false;
   updateCanvasVisibility();
 
   const video = state.videoElement;
@@ -2669,7 +2681,7 @@ function applySolidBackgroundPreview() {
   }
 
   if (state.mediaType === "video") {
-    setMessage("视频可直接下载 WebM。", true);
+    setMessage("视频可直接下载 WebM 或 MOV。", true);
     return;
   }
 
@@ -2846,6 +2858,60 @@ async function downloadTransparentVideo() {
   }
 }
 
+async function downloadTransparentMov() {
+  if (!state.imageLoaded || state.mediaType !== "video" || !state.sourceObjectUrl) {
+    setMessage("请先加载视频。", true);
+    return;
+  }
+
+  const exportVideo = document.createElement("video");
+  exportVideo.muted = true;
+  exportVideo.playsInline = true;
+  exportVideo.preload = "auto";
+  exportVideo.src = state.sourceObjectUrl;
+
+  const frameCanvas = document.createElement("canvas");
+  const outputCanvas = document.createElement("canvas");
+  const outputCtx = outputCanvas.getContext("2d");
+  const frames = [];
+  const fps = 12;
+
+  try {
+    setBusy(true);
+    stopVideoPreviewLoop({ pause: true });
+    await waitForVideoMetadata(exportVideo);
+
+    const duration = Number.isFinite(exportVideo.duration) && exportVideo.duration > 0
+      ? exportVideo.duration
+      : 1 / fps;
+    const frameCount = Math.max(1, Math.ceil(duration * fps));
+
+    for (let index = 0; index < frameCount; index += 1) {
+      const time = Math.min(duration, index / fps);
+      await seekVideo(exportVideo, time);
+      drawTransparentVideoFrame(exportVideo, frameCanvas, outputCanvas, outputCtx);
+      const blob = await canvasToBlob(outputCanvas);
+      frames.push(new Uint8Array(await blob.arrayBuffer()));
+      setMessage(t("movProcessing", { frame: index + 1, total: frameCount }), false, true);
+      await nextPaint();
+    }
+
+    const blob = buildPngMovBlob(frames, outputCanvas.width, outputCanvas.height, fps);
+    downloadBlob(blob, `${safeBaseName(state.imageName)}-transparent.mov`);
+    setMessage(t("movDownloaded"), false, true);
+  } catch (error) {
+    setMessage(error.message || "透明 MOV 导出失败。", true);
+  } finally {
+    exportVideo.pause();
+    exportVideo.removeAttribute("src");
+    exportVideo.load();
+    setBusy(false);
+    if (state.mediaType === "video" && state.imageLoaded) {
+      previewVideoBackgroundRemoval({ announce: false });
+    }
+  }
+}
+
 function drawTransparentVideoFrame(video, frameCanvas, outputCanvas, outputCtx) {
   drawVideoFrame(video, frameCanvas);
   const result = createSolidBackgroundRemovedCanvas(frameCanvas);
@@ -2868,6 +2934,239 @@ function preferredVideoMimeType() {
     "video/webm;codecs=vp8",
     "video/webm"
   ].find((type) => MediaRecorder.isTypeSupported(type)) || "";
+}
+
+function buildPngMovBlob(frames, width, height, fps) {
+  if (!frames.length) {
+    throw new Error("没有可写入 MOV 的视频帧。");
+  }
+
+  const timescale = fps;
+  const duration = frames.length;
+  const ftyp = movAtom("ftyp", movAscii("qt  "), movUint32(0), movAscii("qt  "));
+  const mdatPayloadLength = frames.reduce((sum, frame) => sum + frame.length, 0);
+  if (mdatPayloadLength + ftyp.length + 8 > 0xffffffff) {
+    throw new Error("MOV 文件过大，请改用 WebM。");
+  }
+
+  const chunkOffsets = [];
+  let offset = ftyp.length + 8;
+  for (const frame of frames) {
+    chunkOffsets.push(offset);
+    offset += frame.length;
+  }
+
+  const mdat = movAtom("mdat", ...frames);
+  const moov = movAtom(
+    "moov",
+    buildMovMovieHeader(timescale, duration),
+    movAtom(
+      "trak",
+      buildMovTrackHeader(width, height, duration),
+      movAtom(
+        "mdia",
+        buildMovMediaHeader(timescale, duration),
+        buildMovHandler("vide", "VideoHandler"),
+        movAtom(
+          "minf",
+          movFullAtom("vmhd", 0, 0x000001, movUint16(0), movUint16(0), movUint16(0), movUint16(0)),
+          movAtom(
+            "dinf",
+            movFullAtom("dref", 0, 0, movUint32(1), movFullAtom("url ", 0, 0x000001))
+          ),
+          buildMovSampleTable(frames.map((frame) => frame.length), chunkOffsets, width, height)
+        )
+      )
+    )
+  );
+
+  return new Blob([ftyp, mdat, moov], { type: "video/quicktime" });
+}
+
+function buildMovMovieHeader(timescale, duration) {
+  return movFullAtom(
+    "mvhd",
+    0,
+    0,
+    movUint32(0),
+    movUint32(0),
+    movUint32(timescale),
+    movUint32(duration),
+    movFixed16_16(1),
+    movUint16(0x0100),
+    movZeros(10),
+    movMatrix(),
+    movUint32(0),
+    movUint32(0),
+    movUint32(0),
+    movUint32(0),
+    movUint32(0),
+    movUint32(0),
+    movUint32(2)
+  );
+}
+
+function buildMovTrackHeader(width, height, duration) {
+  return movFullAtom(
+    "tkhd",
+    0,
+    0x000003,
+    movUint32(0),
+    movUint32(0),
+    movUint32(1),
+    movUint32(0),
+    movUint32(duration),
+    movZeros(8),
+    movUint16(0),
+    movUint16(0),
+    movUint16(0),
+    movUint16(0),
+    movMatrix(),
+    movFixed16_16(width),
+    movFixed16_16(height)
+  );
+}
+
+function buildMovMediaHeader(timescale, duration) {
+  return movFullAtom(
+    "mdhd",
+    0,
+    0,
+    movUint32(0),
+    movUint32(0),
+    movUint32(timescale),
+    movUint32(duration),
+    movUint16(0),
+    movUint16(0)
+  );
+}
+
+function buildMovHandler(type, name) {
+  return movFullAtom(
+    "hdlr",
+    0,
+    0,
+    movUint32(0),
+    movAscii(type),
+    movUint32(0),
+    movUint32(0),
+    movUint32(0),
+    movAscii(`${name}\0`)
+  );
+}
+
+function buildMovSampleTable(sampleSizes, chunkOffsets, width, height) {
+  return movAtom(
+    "stbl",
+    movFullAtom("stsd", 0, 0, movUint32(1), buildMovPngSampleEntry(width, height)),
+    movFullAtom("stts", 0, 0, movUint32(1), movUint32(sampleSizes.length), movUint32(1)),
+    movFullAtom("stsc", 0, 0, movUint32(1), movUint32(1), movUint32(1), movUint32(1)),
+    movFullAtom("stsz", 0, 0, movUint32(0), movUint32(sampleSizes.length), ...sampleSizes.map(movUint32)),
+    movFullAtom("stco", 0, 0, movUint32(chunkOffsets.length), ...chunkOffsets.map(movUint32))
+  );
+}
+
+function buildMovPngSampleEntry(width, height) {
+  return movAtom(
+    "png ",
+    movZeros(6),
+    movUint16(1),
+    movUint16(0),
+    movUint16(0),
+    movAscii("appl"),
+    movUint32(0),
+    movUint32(512),
+    movUint16(width),
+    movUint16(height),
+    movFixed16_16(72),
+    movFixed16_16(72),
+    movUint32(0),
+    movUint16(1),
+    movCompressorName("PNG"),
+    movUint16(32),
+    movUint16(0xffff)
+  );
+}
+
+function movAtom(type, ...parts) {
+  const size = 8 + parts.reduce((sum, part) => sum + part.length, 0);
+  return movConcat(movUint32(size), movAscii(type), ...parts);
+}
+
+function movFullAtom(type, version, flags, ...parts) {
+  return movAtom(type, movUint8(version), movUint24(flags), ...parts);
+}
+
+function movAscii(value) {
+  const bytes = new Uint8Array(value.length);
+  for (let index = 0; index < value.length; index += 1) {
+    bytes[index] = value.charCodeAt(index) & 0xff;
+  }
+  return bytes;
+}
+
+function movCompressorName(name) {
+  const bytes = new Uint8Array(32);
+  const length = Math.min(31, name.length);
+  bytes[0] = length;
+  for (let index = 0; index < length; index += 1) {
+    bytes[index + 1] = name.charCodeAt(index) & 0xff;
+  }
+  return bytes;
+}
+
+function movConcat(...parts) {
+  const length = parts.reduce((sum, part) => sum + part.length, 0);
+  const output = new Uint8Array(length);
+  let offset = 0;
+  for (const part of parts) {
+    output.set(part, offset);
+    offset += part.length;
+  }
+  return output;
+}
+
+function movZeros(length) {
+  return new Uint8Array(length);
+}
+
+function movUint8(value) {
+  return Uint8Array.of(value & 0xff);
+}
+
+function movUint16(value) {
+  return Uint8Array.of((value >>> 8) & 0xff, value & 0xff);
+}
+
+function movUint24(value) {
+  return Uint8Array.of((value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff);
+}
+
+function movUint32(value) {
+  return Uint8Array.of(
+    (value >>> 24) & 0xff,
+    (value >>> 16) & 0xff,
+    (value >>> 8) & 0xff,
+    value & 0xff
+  );
+}
+
+function movFixed16_16(value) {
+  return movUint32(Math.round(value * 65536));
+}
+
+function movMatrix() {
+  return movConcat(
+    movFixed16_16(1),
+    movUint32(0),
+    movUint32(0),
+    movUint32(0),
+    movFixed16_16(1),
+    movUint32(0),
+    movUint32(0),
+    movUint32(0),
+    movUint32(0x40000000)
+  );
 }
 
 function createSolidBackgroundRemovedCanvas(sourceCanvas) {
@@ -2961,6 +3260,7 @@ function scheduleBackgroundLivePreview() {
   if (state.mediaType === "video") {
     if (state.videoPreviewActive) {
       elements.downloadVideoButton.disabled = false;
+      elements.downloadMovButton.disabled = false;
       updateCanvasVisibility();
     }
     return;
@@ -2995,6 +3295,8 @@ function renderBackgroundPreview() {
   elements.downloadTransparentButton.hidden = state.mediaType === "video";
   elements.downloadVideoButton.hidden = state.mediaType !== "video";
   elements.downloadVideoButton.disabled = state.mediaType !== "video" || !state.videoPreviewActive;
+  elements.downloadMovButton.hidden = state.mediaType !== "video";
+  elements.downloadMovButton.disabled = state.mediaType !== "video" || !state.videoPreviewActive;
   syncBackgroundSampleUi();
 
   if (!source) {
@@ -3898,6 +4200,7 @@ function setBusy(isBusy) {
     elements.resetSolidBgButton,
     elements.downloadTransparentButton,
     elements.downloadVideoButton,
+    elements.downloadMovButton,
     elements.sampleBgButton,
     elements.clearBgSamplesButton
   ].forEach((button) => {
