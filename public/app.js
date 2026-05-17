@@ -26,6 +26,7 @@ const elements = {
   selectionModeButtons: document.querySelectorAll("[data-selection-mode]"),
   undoSelectionButton: document.querySelector("#undoSelectionButton"),
   redoSelectionButton: document.querySelector("#redoSelectionButton"),
+  restorePeelStartButton: document.querySelector("#restorePeelStartButton"),
   invertSelectionButton: document.querySelector("#invertSelectionButton"),
   cleanupSelectionButton: document.querySelector("#cleanupSelectionButton"),
   bgPreset: document.querySelector("#bgPreset"),
@@ -110,6 +111,7 @@ const I18N = {
     magic: "魔术棒",
     undo: "撤销上一步",
     redo: "重做",
+    restorePeelStart: "回到剥离前",
     invert: "反选",
     cleanup: "填洞/平滑",
     brushSize: "画笔大小",
@@ -130,6 +132,10 @@ const I18N = {
     penPointRemoved: "已撤销一个路径点。",
     penPathCleared: "钢笔路径已清空。",
     penClosed: "钢笔路径已变成选区。",
+    restorePeelStartMissing: "还没有可恢复的剥离前状态。",
+    peelStartRestored: "已回到上次剥离前，选区也恢复了。",
+    peelAutoRestored: "已恢复上次框选，继续执行 {mode}。",
+    peelRecoveryHint: "已用本地快速补洞更新背景。若不满意，可点“回到剥离前”再改用 GPT 补洞。",
     peel: "剥离",
     peelQuick: "剥离 + 快速补洞",
     peelAi: "剥离 + GPT补洞",
@@ -231,6 +237,7 @@ const I18N = {
     magic: "Magic wand",
     undo: "Undo",
     redo: "Redo",
+    restorePeelStart: "Restore peel start",
     invert: "Invert",
     cleanup: "Fill holes / smooth",
     brushSize: "Brush size",
@@ -251,6 +258,10 @@ const I18N = {
     penPointRemoved: "Removed one path point.",
     penPathCleared: "Pen path cleared.",
     penClosed: "Pen path converted to a selection.",
+    restorePeelStartMissing: "There is no saved peel-start state yet.",
+    peelStartRestored: "Restored the last peel-start state and its selection.",
+    peelAutoRestored: "Restored the last selection and continued with {mode}.",
+    peelRecoveryHint: "Quick fill updated the background. If it is not right, restore the peel start and switch to GPT fill.",
     peel: "Peel",
     peelQuick: "Peel + quick fill",
     peelAi: "Peel + GPT fill",
@@ -352,6 +363,7 @@ const I18N = {
     magic: "自動選択",
     undo: "元に戻す",
     redo: "やり直す",
+    restorePeelStart: "切り出し前へ",
     invert: "反転",
     cleanup: "穴埋め / 平滑化",
     brushSize: "ブラシサイズ",
@@ -372,6 +384,10 @@ const I18N = {
     penPointRemoved: "パス点を 1 つ戻しました。",
     penPathCleared: "ペンパスをクリアしました。",
     penClosed: "ペンパスを選択範囲に変換しました。",
+    restorePeelStartMissing: "復元できる切り出し前の状態はまだありません。",
+    peelStartRestored: "前回の切り出し前に戻し、選択範囲も復元しました。",
+    peelAutoRestored: "前回の選択範囲を復元し、{mode} を続行します。",
+    peelRecoveryHint: "簡易補完で背景を更新しました。気に入らない場合は切り出し前へ戻して GPT 補完に切り替えられます。",
     peel: "切り出し",
     peelQuick: "切り出し + 簡易補完",
     peelAi: "切り出し + GPT補完",
@@ -473,6 +489,7 @@ const state = {
   layers: [],
   history: [],
   redo: [],
+  recoverySnapshot: null,
   apiAvailable: false,
   backgroundPreview: null,
   transparentCanvas: null
@@ -624,6 +641,7 @@ elements.zoomSlider.addEventListener("change", () => {
 elements.panModeButton.addEventListener("click", togglePanMode);
 elements.undoSelectionButton.addEventListener("click", undoStep);
 elements.redoSelectionButton.addEventListener("click", redoStep);
+elements.restorePeelStartButton.addEventListener("click", () => restorePeelStart({ recordHistory: true }));
 elements.invertSelectionButton.addEventListener("click", invertSelection);
 elements.cleanupSelectionButton.addEventListener("click", cleanupSelection);
 elements.finishPenButton.addEventListener("click", finishPenSelection);
@@ -1004,6 +1022,7 @@ async function loadSourceImage(file) {
     state.layers = [];
     state.history = [];
     state.redo = [];
+    state.recoverySnapshot = null;
     state.backgroundPreview = null;
     state.transparentCanvas = null;
     state.imageLoaded = true;
@@ -1017,6 +1036,7 @@ async function loadSourceImage(file) {
     renderLayers();
     updatePsdPreview();
     syncHistoryButtons();
+    syncRecoveryButton();
     setMessage("图片已加载。", false, true);
   } catch (error) {
     setMessage(error.message || "图片加载失败。", true);
@@ -2031,6 +2051,7 @@ function applySelectionMaskArray(mask) {
   updateSelectionStats();
   state.edgeDirty = true;
   renderOverlay();
+  syncRecoveryButton();
 }
 
 function dilateMask(mask, width, height, iterations = 1) {
@@ -2194,10 +2215,11 @@ function cleanupSelection() {
 }
 
 async function peelAndQuickHeal() {
-  if (!ensureReadyWithSelection()) {
+  if (!ensureReadyForPeelWorkflow(t("peelQuick"))) {
     return;
   }
 
+  rememberPeelStart();
   pushHistory("剥离 + 快速补洞");
   const layer = peelSelection({ clearAfter: false, recordHistory: false });
   if (!layer) {
@@ -2207,10 +2229,11 @@ async function peelAndQuickHeal() {
 }
 
 async function peelAndAiHeal() {
-  if (!ensureReadyWithSelection()) {
+  if (!ensureReadyForPeelWorkflow(t("peelAi"))) {
     return;
   }
 
+  rememberPeelStart();
   pushHistory("剥离 + GPT补洞");
   const layer = peelSelection({ clearAfter: false, recordHistory: false });
   if (!layer) {
@@ -2331,7 +2354,7 @@ function quickHealSelection({ clearAfter, recordHistory = false }) {
     clearSelection({ recordHistory: false });
   }
 
-  setMessage("已用本地快速补洞更新背景。", false, true);
+  setMessage(clearAfter ? t("peelRecoveryHint") : "已用本地快速补洞更新背景。", false, true);
   return true;
 }
 
@@ -2562,10 +2585,12 @@ function resetCanvas() {
   clearPenPath();
   clearShapeEdit();
   state.layers = [];
+  state.recoverySnapshot = null;
   state.backgroundPreview = null;
   state.transparentCanvas = null;
   renderBackgroundPreview();
   renderLayers();
+  syncRecoveryButton();
   elements.layerName.value = "剥离图层 1";
   setMessage("画布已重置到原图。");
 }
@@ -3262,6 +3287,7 @@ function restoreSnapshot(snapshot) {
   updateSelectionStats();
   state.edgeDirty = true;
   renderOverlay();
+  syncRecoveryButton();
 }
 
 function cloneLayers(layers) {
@@ -3274,6 +3300,72 @@ function cloneLayers(layers) {
 function syncHistoryButtons() {
   elements.undoSelectionButton.disabled = !state.history.length;
   elements.redoSelectionButton.disabled = !state.redo.length;
+  syncRecoveryButton();
+}
+
+function syncRecoveryButton() {
+  elements.restorePeelStartButton.disabled = !hasRecoverySelection();
+}
+
+function ensureReadyForPeelWorkflow(modeLabel) {
+  if (ensureReadyWithSelection()) {
+    return true;
+  }
+
+  if (!state.imageLoaded || !hasRecoverySelection()) {
+    return false;
+  }
+
+  restorePeelStart({ recordHistory: true, showMessage: false });
+  setMessage(t("peelAutoRestored", { mode: modeLabel }), false, true);
+  return true;
+}
+
+function rememberPeelStart() {
+  if (!state.imageLoaded || !hasSelection()) {
+    return;
+  }
+
+  state.recoverySnapshot = captureSnapshot("剥离前状态");
+  syncRecoveryButton();
+}
+
+function restorePeelStart({ recordHistory = false, showMessage = true } = {}) {
+  if (!hasRecoverySelection()) {
+    if (showMessage) {
+      setMessage(t("restorePeelStartMissing"), true);
+    }
+    return false;
+  }
+
+  if (recordHistory && state.imageLoaded) {
+    pushHistory("恢复剥离前状态");
+  }
+
+  restoreSnapshot(state.recoverySnapshot);
+  syncRecoveryButton();
+  if (showMessage) {
+    setMessage(t("peelStartRestored"), false, true);
+  }
+  return true;
+}
+
+function hasRecoverySelection() {
+  return Boolean(state.recoverySnapshot?.selection && canvasHasSelection(state.recoverySnapshot.selection));
+}
+
+function canvasHasSelection(canvas) {
+  if (!canvas?.width || !canvas?.height) {
+    return false;
+  }
+
+  const data = canvas.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, canvas.width, canvas.height).data;
+  for (let index = 3; index < data.length; index += 4) {
+    if (data[index] > MASK_THRESHOLD) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function ensureReadyWithSelection() {
@@ -3385,6 +3477,7 @@ function setBusy(isBusy) {
     elements.resetButton,
     elements.invertSelectionButton,
     elements.cleanupSelectionButton,
+    elements.restorePeelStartButton,
     elements.finishPenButton,
     elements.undoPenPointButton,
     elements.clearPenButton,
@@ -3399,6 +3492,7 @@ function setBusy(isBusy) {
   if (!isBusy) {
     syncHistoryButtons();
     syncPenButtons();
+    syncRecoveryButton();
     renderBackgroundPreview();
     elements.peelAiButton.disabled = !state.apiAvailable;
   }
