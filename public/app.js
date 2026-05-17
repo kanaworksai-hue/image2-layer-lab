@@ -51,6 +51,7 @@ const elements = {
   applySolidBgButton: document.querySelector("#applySolidBgButton"),
   resetSolidBgButton: document.querySelector("#resetSolidBgButton"),
   downloadTransparentButton: document.querySelector("#downloadTransparentButton"),
+  pauseVideoPreviewButton: document.querySelector("#pauseVideoPreviewButton"),
   downloadVideoButton: document.querySelector("#downloadVideoButton"),
   downloadMovButton: document.querySelector("#downloadMovButton"),
   peelQuickButton: document.querySelector("#peelQuickButton"),
@@ -172,6 +173,8 @@ const I18N = {
     applyPreview: "应用",
     retrySolidBg: "重来",
     downloadTransparent: "下载 PNG",
+    pausePreview: "暂停预览",
+    resumePreview: "继续预览",
     downloadVideo: "下载 WebM",
     downloadMov: "下载 MOV",
     export: "导出",
@@ -212,6 +215,8 @@ const I18N = {
     transparentDownloaded: "透明 PNG 已下载。",
     videoDownloaded: "透明 WebM 已下载。",
     movDownloaded: "透明 MOV 已下载。",
+    videoPreviewPaused: "视频预览已暂停。",
+    videoPreviewResumed: "视频预览已继续。",
     sampleAdded: "已加 {count} 色。",
     sampleModeOn: "点预览或源图吸色。",
     samplesCleared: "已清色。",
@@ -304,6 +309,8 @@ const I18N = {
     applyPreview: "Apply",
     retrySolidBg: "Redo",
     downloadTransparent: "Download PNG",
+    pausePreview: "Pause preview",
+    resumePreview: "Resume preview",
     downloadVideo: "Download WebM",
     downloadMov: "Download MOV",
     export: "Export",
@@ -344,6 +351,8 @@ const I18N = {
     transparentDownloaded: "Transparent PNG downloaded.",
     videoDownloaded: "Transparent WebM downloaded.",
     movDownloaded: "Transparent MOV downloaded.",
+    videoPreviewPaused: "Video preview paused.",
+    videoPreviewResumed: "Video preview resumed.",
     sampleAdded: "{count} colors added.",
     sampleModeOn: "Tap preview/source to pick.",
     samplesCleared: "Colors cleared.",
@@ -436,6 +445,8 @@ const I18N = {
     applyPreview: "適用",
     retrySolidBg: "やり直す",
     downloadTransparent: "PNG保存",
+    pausePreview: "一時停止",
+    resumePreview: "再開",
     downloadVideo: "WebM保存",
     downloadMov: "MOV保存",
     export: "出力",
@@ -476,6 +487,8 @@ const I18N = {
     transparentDownloaded: "透明PNGを書き出しました。",
     videoDownloaded: "透明WebMを書き出しました。",
     movDownloaded: "透明MOVを書き出しました。",
+    videoPreviewPaused: "動画プレビューを一時停止しました。",
+    videoPreviewResumed: "動画プレビューを再開しました。",
     sampleAdded: "{count} 色を追加しました。",
     sampleModeOn: "プレビューか元画像をタップ。",
     samplesCleared: "色をクリアしました。",
@@ -491,6 +504,7 @@ const state = {
   sourceObjectUrl: null,
   videoElement: null,
   videoPreviewActive: false,
+  videoPreviewPaused: false,
   videoPreviewFrame: 0,
   view: "layers",
   tool: "brush",
@@ -688,6 +702,7 @@ elements.removeSolidBgButton.addEventListener("click", removeSolidBackground);
 elements.applySolidBgButton.addEventListener("click", applySolidBackgroundPreview);
 elements.resetSolidBgButton.addEventListener("click", resetSolidBackgroundWorkflow);
 elements.downloadTransparentButton.addEventListener("click", downloadTransparentPng);
+elements.pauseVideoPreviewButton.addEventListener("click", toggleVideoPreviewPlayback);
 elements.downloadVideoButton.addEventListener("click", () => void downloadTransparentVideo());
 elements.downloadMovButton.addEventListener("click", () => void downloadTransparentMov());
 elements.peelQuickButton.addEventListener("click", () => void peelAndQuickHeal());
@@ -810,6 +825,7 @@ function applyLanguage(language) {
   elements.helpButton.setAttribute("aria-label", t("helpOpenLabel"));
   elements.helpCloseButton.setAttribute("aria-label", t("helpClose"));
   syncPenButtons();
+  syncVideoPreviewControls();
 
   if (!state.imageLoaded) {
     elements.imageTitle.textContent = t("waitingImage");
@@ -1122,6 +1138,7 @@ async function loadSourceImage(file) {
     state.bgExtraColors = [];
     state.bgPickMode = false;
     state.videoPreviewActive = false;
+    state.videoPreviewPaused = false;
     state.imageLoaded = true;
     state.imageName = file.name.replace(/\.[^.]+$/, "") || "image";
     elements.imageTitle.textContent = file.name;
@@ -1176,6 +1193,7 @@ async function loadSourceVideo(file) {
     state.sourceObjectUrl = url;
     state.videoElement = video;
     state.videoPreviewActive = false;
+    state.videoPreviewPaused = false;
     state.layers = [];
     state.history = [];
     state.redo = [];
@@ -2688,8 +2706,8 @@ function previewVideoBackgroundRemoval({ announce = true } = {}) {
   state.backgroundPreview = null;
   state.transparentCanvas = null;
   state.videoPreviewActive = true;
-  elements.downloadVideoButton.disabled = false;
-  elements.downloadMovButton.disabled = false;
+  state.videoPreviewPaused = false;
+  syncVideoPreviewControls();
   updateCanvasVisibility();
 
   const video = state.videoElement;
@@ -2705,7 +2723,7 @@ function previewVideoBackgroundRemoval({ announce = true } = {}) {
 }
 
 function renderVideoPreviewFrame() {
-  if (!state.videoPreviewActive || state.mediaType !== "video" || !state.videoElement) {
+  if (!state.videoPreviewActive || state.videoPreviewPaused || state.mediaType !== "video" || !state.videoElement) {
     return;
   }
 
@@ -2720,6 +2738,7 @@ function renderVideoPreviewFrame() {
 
 function stopVideoPreviewLoop({ pause = false } = {}) {
   state.videoPreviewActive = false;
+  state.videoPreviewPaused = false;
   if (state.videoPreviewFrame) {
     cancelAnimationFrame(state.videoPreviewFrame);
     state.videoPreviewFrame = 0;
@@ -2727,6 +2746,34 @@ function stopVideoPreviewLoop({ pause = false } = {}) {
   if (pause && state.videoElement) {
     state.videoElement.pause();
   }
+  syncVideoPreviewControls();
+}
+
+function toggleVideoPreviewPlayback() {
+  if (state.mediaType !== "video" || !state.videoPreviewActive || !state.videoElement) {
+    setMessage(t("bgPreviewMissing"), true);
+    return;
+  }
+
+  if (state.videoPreviewPaused) {
+    state.videoPreviewPaused = false;
+    state.videoElement.play().catch(() => {
+      setMessage("视频预览播放失败，可以重新点预览。", true);
+    });
+    renderVideoPreviewFrame();
+    syncVideoPreviewControls();
+    setMessage(t("videoPreviewResumed"), false, true);
+    return;
+  }
+
+  state.videoPreviewPaused = true;
+  state.videoElement.pause();
+  if (state.videoPreviewFrame) {
+    cancelAnimationFrame(state.videoPreviewFrame);
+    state.videoPreviewFrame = 0;
+  }
+  syncVideoPreviewControls();
+  setMessage(t("videoPreviewPaused"), false, true);
 }
 
 function applySolidBackgroundPreview() {
@@ -3314,8 +3361,12 @@ function scheduleBackgroundLivePreview() {
 
   if (state.mediaType === "video") {
     if (state.videoPreviewActive) {
-      elements.downloadVideoButton.disabled = false;
-      elements.downloadMovButton.disabled = false;
+      if (state.videoPreviewPaused && state.videoElement?.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        const frame = videoFrameCanvas(state.videoElement);
+        const result = createSolidBackgroundRemovedCanvas(frame);
+        drawBackgroundPreviewCanvas(result.canvas);
+      }
+      syncVideoPreviewControls();
       updateCanvasVisibility();
     }
     return;
@@ -3348,10 +3399,7 @@ function renderBackgroundPreview() {
   elements.applySolidBgButton.disabled = !state.backgroundPreview || state.mediaType === "video";
   elements.downloadTransparentButton.disabled = !source || state.mediaType === "video";
   elements.downloadTransparentButton.hidden = state.mediaType === "video";
-  elements.downloadVideoButton.hidden = state.mediaType !== "video";
-  elements.downloadVideoButton.disabled = state.mediaType !== "video" || !state.videoPreviewActive;
-  elements.downloadMovButton.hidden = state.mediaType !== "video";
-  elements.downloadMovButton.disabled = state.mediaType !== "video" || !state.videoPreviewActive;
+  syncVideoPreviewControls();
   syncBackgroundSampleUi();
 
   if (!source) {
@@ -3368,6 +3416,21 @@ function renderBackgroundPreview() {
   const preview = buildRatioOutput(source, elements.bgOutputRatio.value, Number(elements.bgPadding.value || 0.06));
   drawBackgroundPreviewCanvas(preview.canvas, { syncZoom: true, map: preview.map });
   updateCanvasVisibility();
+}
+
+function syncVideoPreviewControls() {
+  const isVideo = state.mediaType === "video";
+  const canUsePreview = isVideo && state.videoPreviewActive;
+
+  elements.pauseVideoPreviewButton.hidden = !isVideo;
+  elements.pauseVideoPreviewButton.disabled = !canUsePreview;
+  elements.pauseVideoPreviewButton.textContent = t(state.videoPreviewPaused ? "resumePreview" : "pausePreview");
+  elements.pauseVideoPreviewButton.setAttribute("aria-pressed", String(canUsePreview && state.videoPreviewPaused));
+
+  elements.downloadVideoButton.hidden = !isVideo;
+  elements.downloadVideoButton.disabled = !canUsePreview;
+  elements.downloadMovButton.hidden = !isVideo;
+  elements.downloadMovButton.disabled = !canUsePreview;
 }
 
 function drawBackgroundPreviewCanvas(source, { syncZoom = false, map = null } = {}) {
@@ -4254,6 +4317,7 @@ function setBusy(isBusy) {
     elements.applySolidBgButton,
     elements.resetSolidBgButton,
     elements.downloadTransparentButton,
+    elements.pauseVideoPreviewButton,
     elements.downloadVideoButton,
     elements.downloadMovButton,
     elements.sampleBgButton,
