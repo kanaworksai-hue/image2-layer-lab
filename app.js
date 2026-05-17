@@ -481,6 +481,7 @@ const state = {
   backgroundPreview: null,
   transparentCanvas: null,
   bgPreviewMap: null,
+  bgLiveUpdateTimer: 0,
   bgExtraColors: [],
   bgPickMode: false
 };
@@ -598,11 +599,11 @@ elements.magicTolerance.addEventListener("input", syncRangeLabels);
 elements.magicGrow.addEventListener("input", syncRangeLabels);
 elements.bgTolerance.addEventListener("input", () => {
   syncRangeLabels();
-  invalidateBackgroundPreview();
+  scheduleBackgroundLivePreview();
 });
 elements.bgFeather.addEventListener("input", () => {
   syncRangeLabels();
-  invalidateBackgroundPreview();
+  scheduleBackgroundLivePreview();
 });
 elements.bgPreset.addEventListener("change", () => {
   syncBackgroundColorControls();
@@ -700,6 +701,7 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("pagehide", () => {
   state.isDrawing = false;
   state.isPanning = false;
+  clearBackgroundLivePreviewTimer();
   stopVideoPreviewLoop({ pause: true });
 });
 
@@ -2581,6 +2583,7 @@ function removeSolidBackground() {
     return;
   }
 
+  clearBackgroundLivePreviewTimer();
   if (state.mediaType === "video") {
     previewVideoBackgroundRemoval();
     return;
@@ -2589,12 +2592,12 @@ function removeSolidBackground() {
   previewImageBackgroundRemoval();
 }
 
-function previewImageBackgroundRemoval() {
+function previewImageBackgroundRemoval({ announce = true, allowEmpty = false } = {}) {
   const source = cloneCanvas(state.originalCanvas);
   const result = createSolidBackgroundRemovedCanvas(source);
-  if (!result.removedPixels) {
+  if (!result.removedPixels && !allowEmpty) {
     setMessage("没有检测到匹配的连通纯色背景，请调高颜色容差或选择自定义颜色。", true);
-    return;
+    return false;
   }
 
   state.backgroundPreview = {
@@ -2603,7 +2606,10 @@ function previewImageBackgroundRemoval() {
   };
   state.transparentCanvas = cloneCanvas(result.canvas);
   renderBackgroundPreview();
-  setMessage(t("bgPreviewReady", { count: formatPixels(result.removedPixels) }), false, true);
+  if (announce) {
+    setMessage(t("bgPreviewReady", { count: formatPixels(result.removedPixels) }), false, true);
+  }
+  return true;
 }
 
 function previewVideoBackgroundRemoval({ announce = true } = {}) {
@@ -2691,6 +2697,7 @@ function resetSolidBackgroundWorkflow() {
     return;
   }
 
+  clearBackgroundLivePreviewTimer();
   stopVideoPreviewLoop({ pause: true });
   if (state.mediaType === "image") {
     backgroundCtx.clearRect(0, 0, elements.backgroundCanvas.width, elements.backgroundCanvas.height);
@@ -2932,6 +2939,7 @@ function syncBackgroundColorControls() {
 }
 
 function invalidateBackgroundPreview() {
+  clearBackgroundLivePreviewTimer();
   const hadVideoPreview = state.videoPreviewActive;
   stopVideoPreviewLoop({ pause: false });
 
@@ -2943,6 +2951,40 @@ function invalidateBackgroundPreview() {
   state.backgroundPreview = null;
   state.transparentCanvas = null;
   renderBackgroundPreview();
+}
+
+function scheduleBackgroundLivePreview() {
+  if (!state.imageLoaded) {
+    return;
+  }
+
+  if (state.mediaType === "video") {
+    if (state.videoPreviewActive) {
+      elements.downloadVideoButton.disabled = false;
+      updateCanvasVisibility();
+    }
+    return;
+  }
+
+  if (!state.backgroundPreview && !state.transparentCanvas) {
+    renderBackgroundPreview();
+    return;
+  }
+
+  clearBackgroundLivePreviewTimer();
+  state.bgLiveUpdateTimer = window.setTimeout(() => {
+    state.bgLiveUpdateTimer = 0;
+    previewImageBackgroundRemoval({ announce: false, allowEmpty: true });
+  }, 80);
+}
+
+function clearBackgroundLivePreviewTimer() {
+  if (!state.bgLiveUpdateTimer) {
+    return;
+  }
+
+  window.clearTimeout(state.bgLiveUpdateTimer);
+  state.bgLiveUpdateTimer = 0;
 }
 
 function renderBackgroundPreview() {
@@ -3920,6 +3962,7 @@ function loadImage(url) {
 }
 
 function cleanupSourceMedia() {
+  clearBackgroundLivePreviewTimer();
   stopVideoPreviewLoop({ pause: true });
   if (state.videoElement) {
     state.videoElement.pause();
